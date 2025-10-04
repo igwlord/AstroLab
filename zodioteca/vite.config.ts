@@ -115,4 +115,60 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // React vendor
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') || 
+              id.includes('node_modules/react-router-dom')) {
+            return 'react-vendor';
+          }
+          
+          // Astronomy calculations
+          if (id.includes('node_modules/astronomy-engine')) {
+            return 'astronomy';
+          }
+          
+          // PDF generation
+          if (id.includes('node_modules/jspdf') || 
+              id.includes('node_modules/html2canvas')) {
+            return 'pdf-vendor';
+          }
+          
+          // i18n
+          if (id.includes('node_modules/i18next') || 
+              id.includes('node_modules/react-i18next')) {
+            return 'i18n';
+          }
+          
+          // Glossary modals - group 1
+          if (id.includes('PlanetModal') || 
+              id.includes('HouseModal') || 
+              id.includes('AspectModal') || 
+              id.includes('ZodiacModal')) {
+            return 'glossary-modals';
+          }
+          
+          // Glossary modals - group 2
+          if (id.includes('CelestialBodyModal') || 
+              id.includes('AsteroidModal') || 
+              id.includes('MoonSignModal') || 
+              id.includes('AscendantModal')) {
+            return 'glossary-modals-2';
+          }
+          
+          // Glossary modals - group 3
+          if (id.includes('ConfigurationModal') || 
+              id.includes('RelationalModal') || 
+              id.includes('DignityModal') || 
+              id.includes('PolarizationModal')) {
+            return 'glossary-modals-3';
+          }
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  }
 })

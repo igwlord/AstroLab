@@ -89,12 +89,11 @@ const AsteroidsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedAsteroid && (
-        <AsteroidModal
-          asteroid={selectedAsteroid}
-          onClose={() => setSelectedAsteroid(null)}
-        />
-      )}
+      <AsteroidModal
+        asteroid={selectedAsteroid!}
+        isOpen={selectedAsteroid !== null}
+        onClose={() => setSelectedAsteroid(null)}
+      />
     </div>
   );
 };

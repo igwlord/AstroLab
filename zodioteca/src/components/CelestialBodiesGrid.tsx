@@ -162,12 +162,11 @@ const CelestialBodiesGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedBody && (
-        <CelestialBodyModal
-          celestialBody={selectedBody}
-          onClose={() => setSelectedBody(null)}
-        />
-      )}
+      <CelestialBodyModal
+        celestialBody={selectedBody!}
+        isOpen={selectedBody !== null}
+        onClose={() => setSelectedBody(null)}
+      />
     </div>
   );
 };

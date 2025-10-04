@@ -67,7 +67,9 @@ function AppRoutes() {
       
       <Route path="/natal-chart" element={
         <ProtectedRoute>
-          <NatalChartPage />
+          <Layout>
+            <NatalChartPage />
+          </Layout>
         </ProtectedRoute>
       } />
       

@@ -131,12 +131,11 @@ const AspectsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedAspect && (
-        <AspectModal
-          aspect={selectedAspect}
-          onClose={() => setSelectedAspect(null)}
-        />
-      )}
+      <AspectModal
+        aspect={selectedAspect}
+        isOpen={selectedAspect !== null}
+        onClose={() => setSelectedAspect(null)}
+      />
     </div>
   );
 };

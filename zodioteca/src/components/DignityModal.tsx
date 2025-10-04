@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Dignity } from '../types/dignity';
+import StandardModal from './StandardModal';
 
 interface DignityModalProps {
-  dignity: Dignity;
+  dignity: Dignity | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const DignityModal: React.FC<DignityModalProps> = ({ dignity, onClose }) => {
+const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !dignity) return null;
 
   const getDignityGradient = (name: string) => {
     const gradients: { [key: string]: string } = {
@@ -42,33 +38,15 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, onClose }) => {
   const frequencyNumber = typeof dignity.frequency === 'number' ? dignity.frequency : 528;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={dignity.name}
+      subtitle="Dignidad Planetaria"
+      icon={dignity.symbol}
+      gradientColors={gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">{dignity.symbol}</span>
-              <div>
-                <h2 className="text-3xl font-bold">{dignity.name}</h2>
-                <p className="text-xl opacity-90">
-                  {dignity.category === 'essential' ? 'Dignidad Esencial' : 'Dignidad Accidental'}
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
+      <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-6 space-y-6">
         </div>
 
         {/* Content */}
@@ -144,8 +122,7 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, onClose }) => {
             </p>
           </div>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 

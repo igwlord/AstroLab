@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Aspect } from '../types/aspect';
+import StandardModal from './StandardModal';
 
 interface AspectModalProps {
-  aspect: Aspect;
+  aspect: Aspect | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const AspectModal: React.FC<AspectModalProps> = ({ aspect, onClose }) => {
+const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !aspect) return null;
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
@@ -55,43 +51,24 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, onClose }) => {
   const styles = getCategoryStyles(aspect.category);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={aspect.name}
+      subtitle={aspect.angle}
+      icon={aspect.symbol}
+      gradientColors={styles.gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${styles.gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">{aspect.symbol}</span>
-              <div>
-                <h2 className="text-3xl font-bold">{aspect.name}</h2>
-                <p className="text-xl opacity-90">{aspect.angle}</p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
-              {aspect.polarity}
-            </span>
-            <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
-              Orbe: {aspect.orb}
-            </span>
-          </div>
+      <div className={`${styles.bg} p-6 space-y-6`}>
+        {/* Badges */}
+        <div className="flex gap-2 flex-wrap">
+          <span className="px-3 py-1 bg-white/20 dark:bg-gray-800/50 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {aspect.polarity}
+          </span>
+          <span className="px-3 py-1 bg-white/20 dark:bg-gray-800/50 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Orbe: {aspect.orb}
+          </span>
         </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
           {/* Descripción */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
@@ -153,8 +130,7 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, onClose }) => {
             </p>
           </div>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 

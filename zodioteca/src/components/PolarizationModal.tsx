@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Polarization } from '../types/polarization';
+import StandardModal from './StandardModal';
 
 interface PolarizationModalProps {
-  polarization: Polarization;
+  polarization: Polarization | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, onClose }) => {
+const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !polarization) return null;
 
   const getPolarizationGradient = (name: string) => {
     const gradients: { [key: string]: string } = {
@@ -41,37 +37,15 @@ const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, onC
   const frequencyNumber = typeof polarization.frequency === 'number' ? polarization.frequency : 528;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={polarization.name}
+      subtitle="Polarización Astrológica"
+      icon={polarization.symbol}
+      gradientColors={gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">{polarization.symbol}</span>
-              <div>
-                <h2 className="text-3xl font-bold">{polarization.name}</h2>
-                <p className="text-xl opacity-90">
-                  {polarization.category === 'type' ? 'Tipo de Polarización' : 'Ejemplo Planetario'}
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 space-y-6">
           {/* Descripción */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
@@ -147,8 +121,7 @@ const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, onC
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 

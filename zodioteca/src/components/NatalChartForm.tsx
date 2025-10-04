@@ -374,6 +374,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
               max="31"
               value={formData.birth.day}
               onChange={(e) => updateField('birth', { ...formData.birth, day: parseInt(e.target.value) || 1 })}
+              onFocus={(e) => e.target.select()}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
                 errors['birth.day'] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -408,6 +409,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
               max="2100"
               value={formData.birth.year}
               onChange={(e) => updateField('birth', { ...formData.birth, year: parseInt(e.target.value) || 2000 })}
+              onFocus={(e) => e.target.select()}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
                 errors['birth.year'] ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -670,6 +672,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                     ...formData.location,
                     lat: e.target.value ? parseFloat(e.target.value) : undefined
                   })}
+                  onFocus={(e) => e.target.select()}
                   placeholder="-34.6037"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
                     errors['location.lat'] ? 'border-red-500' : 'border-gray-300'
@@ -695,6 +698,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                     ...formData.location,
                     lon: e.target.value ? parseFloat(e.target.value) : undefined
                   })}
+                  onFocus={(e) => e.target.select()}
                   placeholder="-58.3816"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
                     errors['location.lon'] ? 'border-red-500' : 'border-gray-300'

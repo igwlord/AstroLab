@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Asteroid } from '../types/asteroid';
+import StandardModal from './StandardModal';
 
 interface AsteroidModalProps {
-  asteroid: Asteroid;
+  asteroid: Asteroid | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, onClose }) => {
+const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !asteroid) return null;
 
   const getAsteroidGradient = (name: string) => {
     const gradients: { [key: string]: string } = {
@@ -39,35 +35,15 @@ const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, onClose }) => {
   const gradient = getAsteroidGradient(asteroid.name);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={asteroid.name}
+      subtitle="Asteroide"
+      icon={asteroid.symbol}
+      gradientColors={gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">{asteroid.symbol}</span>
-              <div>
-                <h2 className="text-3xl font-bold">{asteroid.name}</h2>
-                <p className="text-xl opacity-90">Asteroide</p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
+      <div className="p-8 space-y-6">
           {/* Mitología */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
@@ -153,18 +129,17 @@ const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, onClose }) => {
             </div>
           </div>
 
-          {/* Ejercicio Holístico */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2 text-purple-800 dark:text-purple-300">
-              🌟 Ejercicio Holístico
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300">
-              {asteroid.exercise}
-            </p>
-          </div>
+        {/* Ejercicio Holístico */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold mb-2 text-purple-800 dark:text-purple-300">
+            🌟 Ejercicio Holístico
+          </h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            {asteroid.exercise}
+          </p>
         </div>
       </div>
-    </div>
+    </StandardModal>
   );
 };
 

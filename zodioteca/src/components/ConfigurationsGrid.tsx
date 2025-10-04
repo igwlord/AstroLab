@@ -111,12 +111,11 @@ const ConfigurationsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedConfig && (
-        <ConfigurationModal
-          configuration={selectedConfig}
-          onClose={() => setSelectedConfig(null)}
-        />
-      )}
+      <ConfigurationModal
+        configuration={selectedConfig}
+        isOpen={selectedConfig !== null}
+        onClose={() => setSelectedConfig(null)}
+      />
     </div>
   );
 };

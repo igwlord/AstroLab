@@ -91,29 +91,43 @@ function calculateHouses(date: Date, latitude: number, longitude: number): {
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
 } {
-  // Calcular RAMC (Right Ascension of Midheaven)
+  // Calcular tiempo sideral local (LST)
   const siderealTime = Astronomy.SiderealTime(date);
-  const ramc = (siderealTime + longitude / 15) * 15; // Convertir a grados
+  const lst = (siderealTime + longitude / 15) % 24; // Horas (0-24)
+  const ramc = lst * 15; // Convertir a grados (0-360)
 
-  // Calcular MC (Midheaven) - Longitud eclíptica del meridiano
-  const mc = ramc % 360;
+  // Calcular oblicuidad de la eclíptica para la fecha exacta
+  const T = (date.getTime() - Date.UTC(2000, 0, 1, 12, 0, 0)) / (86400000 * 36525);
+  const obliquity = 23.4392911 - 0.0130042 * T - 0.00000016 * T * T + 0.000000504 * T * T * T;
+
+  // Convertir a radianes
+  const oblRad = (obliquity * Math.PI) / 180;
+  const latRad = (latitude * Math.PI) / 180;
+  const ramcRad = (ramc * Math.PI) / 180;
+
+  // Calcular MC (Midheaven) - punto más alto de la eclíptica
+  // MC es la longitud eclíptica del meridiano
+  const tanMC = Math.sin(ramcRad) / (Math.cos(ramcRad) * Math.cos(oblRad));
+  let mc = Math.atan(tanMC) * (180 / Math.PI);
+  
+  // Ajustar cuadrante del MC
+  if (Math.cos(ramcRad) < 0) {
+    mc += 180;
+  }
+  mc = ((mc % 360) + 360) % 360;
   const mcZodiac = eclipticToZodiac(mc);
 
-  // Calcular ASC (Ascendant) usando fórmula simplificada
-  // ASC = arctan(sin(RAMC) / (cos(RAMC) * sin(obliquity) - tan(latitude) * cos(obliquity)))
-  const obliquity = 23.4397; // Oblicuidad de la eclíptica en grados
-  const ramcRad = (ramc * Math.PI) / 180;
-  const latRad = (latitude * Math.PI) / 180;
-  const oblRad = (obliquity * Math.PI) / 180;
-
-  const ascLon =
-    Math.atan2(
-      Math.sin(ramcRad),
-      Math.cos(ramcRad) * Math.sin(oblRad) - Math.tan(latRad) * Math.cos(oblRad)
-    ) *
-    (180 / Math.PI);
-
-  const asc = ((ascLon % 360) + 360) % 360;
+  // Calcular Ascendente (ASC) - punto que asciende en el horizonte este
+  // Fórmula de Jean Meeus (Astronomical Algorithms):
+  // tan(ASC) = cos(RAMC) / (-sin(obliquity) * tan(latitude) - cos(obliquity) * sin(RAMC))
+  // Usando atan2 para manejar cuadrantes correctamente:
+  const y = Math.cos(ramcRad);
+  const x = -Math.sin(oblRad) * Math.tan(latRad) - Math.cos(oblRad) * Math.sin(ramcRad);
+  
+  let asc = Math.atan2(y, x) * (180 / Math.PI);
+  
+  // Normalizar a 0-360
+  asc = ((asc % 360) + 360) % 360;
   const ascZodiac = eclipticToZodiac(asc);
 
   // Sistema de casas Placidus simplificado

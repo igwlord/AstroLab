@@ -214,12 +214,11 @@ const DignitiesGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedDignity && (
-        <DignityModal
-          dignity={selectedDignity}
-          onClose={() => setSelectedDignity(null)}
-        />
-      )}
+      <DignityModal
+        dignity={selectedDignity}
+        isOpen={selectedDignity !== null}
+        onClose={() => setSelectedDignity(null)}
+      />
     </div>
   );
 };

@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { MoonSign } from '../types/moonSign';
+import StandardModal from './StandardModal';
 
 interface MoonSignModalProps {
-  moonSign: MoonSign;
+  moonSign: MoonSign | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const MoonSignModal: React.FC<MoonSignModalProps> = ({ moonSign, onClose }) => {
+const MoonSignModal: React.FC<MoonSignModalProps> = ({ moonSign, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !moonSign) return null;
 
   const getElementStyles = (element: string) => {
     switch (element.toLowerCase()) {
@@ -61,35 +57,15 @@ const MoonSignModal: React.FC<MoonSignModalProps> = ({ moonSign, onClose }) => {
   const styles = getElementStyles(moonSign.element);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Luna en ${moonSign.sign}`}
+      subtitle={moonSign.element}
+      icon="🌙"
+      gradientColors={styles.gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${styles.gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">🌙</span>
-              <div>
-                <h2 className="text-3xl font-bold">Luna en {moonSign.sign}</h2>
-                <p className="text-xl opacity-90">{moonSign.element}</p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
+      <div className={`${styles.bg} p-6 space-y-6`}>
           {/* Descripción */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
@@ -161,8 +137,7 @@ const MoonSignModal: React.FC<MoonSignModalProps> = ({ moonSign, onClose }) => {
             </p>
           </div>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 

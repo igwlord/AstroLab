@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Planet } from '../types/planet';
+import StandardModal from './StandardModal';
 
 interface PlanetModalProps {
   planet: Planet | null;
@@ -8,41 +9,7 @@ interface PlanetModalProps {
 }
 
 const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  };
 
   const playFrequency = () => {
     if (!planet) return;
@@ -93,59 +60,24 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
   const categoryStyle = getCategoryStyles(planet.category);
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={planet.name}
+      subtitle={`Planeta ${planet.rhythm}`}
+      icon={planet.symbol}
+      gradientColors={categoryStyle.gradient}
     >
-      <div 
-        ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl animate-scaleIn"
-      >
-        {/* Header con gradiente de la categoría */}
-        <div className={`relative bg-gradient-to-r ${categoryStyle.gradient} text-white p-8 overflow-hidden`}>
-          {/* Patrón de fondo */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
-              backgroundSize: '20px 20px'
-            }}></div>
-          </div>
-
-          {/* Botón cerrar */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10"
-            aria-label="Cerrar"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Contenido del header */}
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="text-7xl font-light animate-pulse">{planet.symbol}</div>
-              <div>
-                <h2 className="text-4xl font-bold">{planet.name}</h2>
-                <p className="text-white/90 text-lg capitalize">Planeta {planet.rhythm}</p>
-              </div>
-            </div>
-
-            {/* Badges de características */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold">
-                {categoryStyle.icon} {planet.category === 'personal' ? 'Personal' : planet.category === 'social' ? 'Social' : 'Transpersonal'}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold">
-                ♛ Rige: {planet.rulership}
-              </span>
-            </div>
-          </div>
+      <div className={`${categoryStyle.bg} p-6 space-y-6`}>
+        {/* Badges de características */}
+        <div className="flex flex-wrap gap-2">
+          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+            {categoryStyle.icon} {planet.category === 'personal' ? 'Personal' : planet.category === 'social' ? 'Social' : 'Transpersonal'}
+          </span>
+          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+            ♛ Rige: {planet.rulership}
+          </span>
         </div>
-
-        {/* Contenido scrolleable */}
-        <div className={`${categoryStyle.bg} overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6`}>
           {/* Descripción extensa */}
           <section>
             <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
@@ -241,8 +173,7 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
             </p>
           </section>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 

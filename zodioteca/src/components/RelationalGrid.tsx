@@ -168,12 +168,11 @@ const RelationalGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedTechnique && (
-        <RelationalModal
-          technique={selectedTechnique}
-          onClose={() => setSelectedTechnique(null)}
-        />
-      )}
+      <RelationalModal
+        technique={selectedTechnique}
+        isOpen={selectedTechnique !== null}
+        onClose={() => setSelectedTechnique(null)}
+      />
     </div>
   );
 };

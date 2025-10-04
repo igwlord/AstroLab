@@ -198,12 +198,11 @@ const PolarizationsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedPolarization && (
-        <PolarizationModal
-          polarization={selectedPolarization}
-          onClose={() => setSelectedPolarization(null)}
-        />
-      )}
+      <PolarizationModal
+        polarization={selectedPolarization}
+        isOpen={selectedPolarization !== null}
+        onClose={() => setSelectedPolarization(null)}
+      />
     </div>
   );
 };

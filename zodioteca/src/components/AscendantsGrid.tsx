@@ -64,12 +64,11 @@ const AscendantsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedAscendant && (
-        <AscendantModal
-          ascendant={selectedAscendant}
-          onClose={() => setSelectedAscendant(null)}
-        />
-      )}
+      <AscendantModal
+        ascendant={selectedAscendant}
+        isOpen={selectedAscendant !== null}
+        onClose={() => setSelectedAscendant(null)}
+      />
     </div>
   );
 };

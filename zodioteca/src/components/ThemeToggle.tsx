@@ -9,10 +9,18 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-white/80 backdrop-blur-sm border border-purple-200 text-purple-900 hover:bg-white transition-all duration-200"
+      className={`
+        p-2 rounded-lg backdrop-blur-sm border transition-all duration-300
+        ${isDark 
+          ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-yellow-500/50 text-yellow-300 hover:border-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20' 
+          : 'bg-white/80 border-purple-200 text-purple-900 hover:bg-white'
+        }
+      `}
       title={isDark ? t('settings.appearance.light') : t('settings.appearance.dark')}
     >
-      {isDark ? '☀️' : '🌙'}
+      <span className="text-xl">
+        {isDark ? '☀️' : '🌙'}
+      </span>
     </button>
   );
 };

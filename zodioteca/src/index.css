@@ -6,6 +6,32 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  
+  /* Light theme colors */
+  --bg-primary: 249 250 251;
+  --bg-secondary: 255 255 255;
+  --bg-tertiary: 243 244 246;
+  --text-primary: 17 24 39;
+  --text-secondary: 75 85 99;
+  --text-tertiary: 107 114 128;
+  --border-primary: 229 231 235;
+  --accent-primary: 124 58 237;
+  --accent-secondary: 168 85 247;
+}
+
+.dark {
+  /* Dark theme colors - Dramatic purples, golds, dark blues */
+  --bg-primary: 15 13 35; /* Very dark blue-purple #0f0d23 */
+  --bg-secondary: 25 20 50; /* Dark purple #191432 */
+  --bg-tertiary: 35 28 65; /* Medium dark purple #231c41 */
+  --text-primary: 250 250 255; /* Almost white with blue tint */
+  --text-secondary: 203 213 225; /* Light slate */
+  --text-tertiary: 148 163 184; /* Medium slate */
+  --border-primary: 71 55 115; /* Purple border */
+  --accent-primary: 196 181 253; /* Light purple */
+  --accent-secondary: 251 191 36; /* Gold */
+  --accent-gold: 251 191 36; /* Gold accent */
+  --accent-violet: 139 92 246; /* Violet */
 }
 
 /* Estilos básicos para AstroLab */
@@ -20,12 +46,15 @@ html, body {
 body {
   margin: 0;
   min-height: 100vh;
+  background: white;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
 }
+
+
 
 /* Componentes básicos */
 .btn-primary {
@@ -123,7 +152,7 @@ button:focus-visible {
   scrollbar-color: #c084fc #f3e8ff;
 }
 
-/* Animaciones para modales */
+/* Animaciones para modales - Optimizadas con GPU acceleration */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -136,18 +165,291 @@ button:focus-visible {
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
   }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.3s ease-out;
+  animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* ============================================
+   DARK THEME - Dramatic Purples, Blues & Gold
+   ============================================ */
+
+/* Base dark theme - applies gradient background */
+html.dark {
+  background: linear-gradient(135deg, #0f0d23 0%, #191432 50%, #231c41 100%) fixed;
+  min-height: 100vh;
+}
+
+html.dark body {
+  background: transparent !important;
+  color: #fafaff;
+}
+
+html.dark #root {
+  background: transparent !important;
+}
+
+/* Override all gradient backgrounds in dark mode */
+html.dark .bg-gradient-to-br,
+html.dark .bg-gradient-to-r,
+html.dark .bg-gradient-to-bl {
+  background: linear-gradient(135deg, rgba(15, 13, 35, 0.95) 0%, rgba(25, 20, 50, 0.95) 50%, rgba(35, 28, 65, 0.90) 100%) !important;
+}
+
+/* Text colors */
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: #fafaff !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-purple-900,
+.dark .text-purple-700 {
+  color: #c4b5fd !important;
+}
+
+.dark .text-purple-600 {
+  color: #fbbf24 !important;
+}
+
+/* Background colors */
+.dark .bg-white {
+  background-color: rgba(25, 20, 50, 0.9) !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-purple-50,
+.dark .bg-indigo-50 {
+  background: linear-gradient(135deg, rgba(15, 13, 35, 0.8), rgba(25, 20, 50, 0.8)) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: rgba(35, 28, 65, 0.7) !important;
+}
+
+.dark .bg-purple-100 {
+  background-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+.dark .bg-purple-200 {
+  background-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Purple buttons keep their color */
+.dark .bg-purple-600 {
+  background-color: #8b5cf6 !important;
+}
+
+.dark .bg-purple-600:hover,
+.dark .hover\:bg-purple-700:hover {
+  background-color: #fbbf24 !important;
+}
+
+/* Green button becomes gold */
+.dark .bg-green-600 {
+  background-color: #fbbf24 !important;
+}
+
+.dark .bg-green-600:hover {
+  background-color: #f59e0b !important;
+}
+
+/* Borders */
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-purple-100,
+.dark .border-purple-200 {
+  border-color: #473773 !important;
+}
+
+/* Cards */
+.dark .card {
+  background-color: rgba(25, 20, 50, 0.8);
+  border-color: #473773;
+  backdrop-filter: blur(10px);
+}
+
+/* Shadows */
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Form inputs */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: rgba(35, 28, 65, 0.9) !important;
+  border-color: #473773 !important;
+  color: #fafaff !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #fbbf24 !important;
+  outline-color: #fbbf24 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Select dropdowns */
+.dark select option {
+  background-color: #191432 !important;
+  color: #fafaff !important;
+}
+
+/* Scrollbars */
+.dark .scrollbar-thin::-webkit-scrollbar-track,
+.dark .overflow-x-auto::-webkit-scrollbar-track,
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(35, 28, 65, 0.5);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+.dark .overflow-x-auto::-webkit-scrollbar-thumb,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #fbbf24;
+}
+
+/* Ensure ALL pages have dark background */
+html.dark .min-h-screen {
+  background: transparent !important;
+}
+
+/* Navbar and headers */
+html.dark nav,
+html.dark header {
+  background: rgba(25, 20, 50, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #473773 !important;
+}
+
+/* Fix for chips/badges in glossary */
+html.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+}
+
+html.dark .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+html.dark .text-purple-800 {
+  color: #c4b5fd !important;
+}
+
+html.dark .text-green-800 {
+  color: #fbbf24 !important;
+}
+
+/* ===========================================
+   OPTIMIZACIONES DE PERFORMANCE
+   =========================================== */
+
+/* Smooth card transitions with GPU acceleration */
+.card-transition {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.card-transition:hover {
+  transform: translateY(-4px) translateZ(0) scale(1.02);
+}
+
+/* Optimize hover effects */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) translateZ(0);
+}
+
+/* Smooth opacity transitions */
+.smooth-opacity {
+  transition: opacity 0.15s ease-in-out;
+  will-change: opacity;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Buttons that should stay visible */
+html.dark button {
+  color: #fafaff !important;
+}
+
+html.dark .bg-blue-600 {
+  background-color: #6366f1 !important;
+}
+
+html.dark .bg-blue-600:hover {
+  background-color: #8b5cf6 !important;
+}
+
+/* Cards with specific colors keep good contrast */
+html.dark .bg-red-500,
+html.dark .bg-orange-500,
+html.dark .bg-green-500,
+html.dark .bg-blue-500,
+html.dark .bg-cyan-500 {
+  /* These are colorful cards like zodiac signs - keep them vibrant */
+  opacity: 0.95;
 }

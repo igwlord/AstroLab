@@ -55,20 +55,6 @@ const Dashboard: React.FC = () => {
               </Link>
             </div>
 
-            {/* Frecuencias */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
-              <div className="flex items-center mb-4">
-                <span className="text-3xl mr-3">🎵</span>
-                <h3 className="text-xl font-semibold text-purple-900">Frecuencias</h3>
-              </div>
-              <p className="text-purple-700 mb-4">
-                Medita con sonidos holísticos y ejercicios de integración
-              </p>
-              <button className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors duration-200">
-                Escuchar
-              </button>
-            </div>
-
             {/* Cartas Guardadas */}
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
               <div className="flex items-center mb-4">
@@ -78,9 +64,12 @@ const Dashboard: React.FC = () => {
               <p className="text-purple-700 mb-4">
                 Gestiona tus cartas natales guardadas y exporta datos
               </p>
-              <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
+              <Link 
+                to="/saved-charts"
+                className="block w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 text-center"
+              >
                 Ver cartas
-              </button>
+              </Link>
             </div>
 
             {/* Configuración */}
@@ -92,9 +81,12 @@ const Dashboard: React.FC = () => {
               <p className="text-purple-700 mb-4">
                 Personaliza tema, orbes, métodos de casas y más
               </p>
-              <button className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+              <Link 
+                to="/settings"
+                className="block w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200 text-center"
+              >
                 Configurar
-              </button>
+              </Link>
             </div>
 
             {/* Próximamente */}
@@ -115,7 +107,7 @@ const Dashboard: React.FC = () => {
           {/* Stats rápidas */}
           <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg border border-purple-100 max-w-4xl mx-auto">
             <h3 className="text-xl font-semibold text-purple-900 mb-4 text-center">Estado de tu laboratorio</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">0</div>
                 <div className="text-purple-700 text-sm">Cartas creadas</div>
@@ -123,10 +115,6 @@ const Dashboard: React.FC = () => {
               <div className="text-center">
                 <div className="text-2xl font-bold text-indigo-600">2,193</div>
                 <div className="text-purple-700 text-sm">Términos en glosario</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">10</div>
-                <div className="text-purple-700 text-sm">Frecuencias disponibles</div>
               </div>
             </div>
           </div>

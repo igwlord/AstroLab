@@ -133,12 +133,11 @@ const MoonSignsGrid: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {selectedMoonSign && (
-        <MoonSignModal
-          moonSign={selectedMoonSign}
-          onClose={() => setSelectedMoonSign(null)}
-        />
-      )}
+      <MoonSignModal
+        moonSign={selectedMoonSign}
+        isOpen={selectedMoonSign !== null}
+        onClose={() => setSelectedMoonSign(null)}
+      />
     </div>
   );
 };

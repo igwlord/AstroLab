@@ -1,27 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Ascendant } from '../types/ascendant';
+import StandardModal from './StandardModal';
 
 interface AscendantModalProps {
-  ascendant: Ascendant;
+  ascendant: Ascendant | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const AscendantModal: React.FC<AscendantModalProps> = ({ ascendant, onClose }) => {
+const AscendantModal: React.FC<AscendantModalProps> = ({ ascendant, isOpen, onClose }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
 
   const playFrequency = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  if (!isOpen || !ascendant) return null;
 
   const getSignColor = (sign: string) => {
     const colors: { [key: string]: string } = {
@@ -44,35 +40,15 @@ const AscendantModal: React.FC<AscendantModalProps> = ({ ascendant, onClose }) =
   const gradient = getSignColor(ascendant.sign);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-      onClick={onClose}
+    <StandardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Ascendente en ${ascendant.sign}`}
+      subtitle="🌅 Primera impresión"
+      icon={ascendant.symbol}
+      gradientColors={gradient}
     >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${gradient} text-white p-8 rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-7xl">{ascendant.symbol}</span>
-              <div>
-                <h2 className="text-3xl font-bold">Ascendente en {ascendant.sign}</h2>
-                <p className="text-xl opacity-90">🌅 Primera impresión</p>
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-3xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 space-y-6">
           {/* Descripción */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
@@ -154,8 +130,7 @@ const AscendantModal: React.FC<AscendantModalProps> = ({ ascendant, onClose }) =
             </p>
           </div>
         </div>
-      </div>
-    </div>
+    </StandardModal>
   );
 };
 
