@@ -41,23 +41,6 @@ export interface NatalChart {
   aspects: Aspect[];
 }
 
-const ZODIAC_SIGNS = [
-  'Aries', 'Tauro', 'Géminis', 'Cáncer', 
-  'Leo', 'Virgo', 'Libra', 'Escorpio',
-  'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
-];
-
-function eclipticToZodiac(longitude: number): { sign: string; degree: number } {
-  const normalizedLon = ((longitude % 360) + 360) % 360;
-  const signIndex = Math.floor(normalizedLon / 30);
-  const degree = normalizedLon % 30;
-  
-  return {
-    sign: ZODIAC_SIGNS[signIndex],
-    degree: Math.round(degree * 100) / 100
-  };
-}
-
 /**
  * Calcula la carta natal usando la API de astro-seek
  * Esta es una API gratuita y precisa para cálculos astrológicos
@@ -67,8 +50,7 @@ export async function calculateNatalChart(
   latitude: number,
   longitude: number,
   location: string,
-  timezone: string,
-  houseSystem: 'Placidus' | 'WholeSign' | 'Koch' | 'Equal' = 'Placidus'
+  timezone: string
 ): Promise<NatalChart> {
   
   console.log('=== CÁLCULO DE CARTA NATAL ===');

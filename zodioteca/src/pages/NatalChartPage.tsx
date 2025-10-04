@@ -7,12 +7,17 @@ import html2canvas from 'html2canvas';
 
 export default function NatalChartPage() {
   const [result, setResult] = useState<NatalChart | null>(null);
+  const [personName, setPersonName] = useState<string>('');
   const [showForm, setShowForm] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (formData: FormValue) => {
     console.log('📋 Form data received:', formData);
+    
+    // Guardar nombre completo de la persona
+    const fullName = [formData.name, formData.surname].filter(Boolean).join(' ').trim();
+    setPersonName(fullName || 'Persona sin nombre');
 
     // Adaptar datos del nuevo formulario al formato esperado por calculateNatalChart
     const { birth, location } = formData;
@@ -124,7 +129,8 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
 
       // Generar nombre del archivo
       const date = new Date(result.date);
-      const fileName = `Carta_Natal_${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}.pdf`;
+      const personNameForFile = personName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+      const fileName = `Carta_Natal_${personNameForFile}_${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}.pdf`;
 
       // Descargar
       pdf.save(fileName);
@@ -149,8 +155,11 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-3xl font-bold text-purple-900 mb-2">
-                  Carta Natal Calculada
+                  {personName}
                 </h2>
+                <h3 className="text-xl font-semibold text-purple-700 mb-3">
+                  Carta Natal
+                </h3>
                 <p className="text-gray-600">
                   📅 {new Date(result.date).toLocaleDateString('es-ES', {
                     weekday: 'long',

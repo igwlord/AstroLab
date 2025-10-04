@@ -1,0 +1,79 @@
+{
+  "name": "AstroLab - Laboratorio Astrológico",
+  "short_name": "AstroLab",
+  "description": "Tu laboratorio astrológico personal. Calcula cartas natales precisas, explora el glosario y medita con frecuencias holísticas.",
+  "theme_color": "#7c3aed",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "education", "health"],
+  "screenshots": [
+    {
+      "src": "/screenshot-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva Carta Natal",
+      "short_name": "Carta Natal",
+      "description": "Calcula una nueva carta natal",
+      "url": "/natal-chart",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Glosario",
+      "short_name": "Glosario",
+      "description": "Explora el glosario astrológico",
+      "url": "/glossary",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Frecuencias",
+      "short_name": "Frecuencias",
+      "description": "Medita con frecuencias holísticas",
+      "url": "/frequencies",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

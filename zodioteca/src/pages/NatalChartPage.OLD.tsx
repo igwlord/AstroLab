@@ -180,8 +180,7 @@ const NatalChartPage: React.FC = () => {
         chartData.latitude,
         chartData.longitude,
         locationName,
-        chartData.timezone,
-        chartData.houseSystem
+        chartData.timezone
       );
       
       console.log('Carta calculada:', chart);

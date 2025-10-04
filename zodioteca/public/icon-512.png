@@ -1,0 +1,52 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular -->
+  <circle cx="256" cy="256" r="256" fill="#7c3aed"/>
+  
+  <!-- Luna creciente -->
+  <g transform="translate(150, 120)">
+    <!-- Luna base -->
+    <circle cx="70" cy="80" r="65" fill="#fbbf24"/>
+    <!-- Sombra para crear efecto creciente -->
+    <circle cx="85" cy="80" r="65" fill="#7c3aed"/>
+    <!-- Cráteres -->
+    <circle cx="55" cy="60" r="8" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="75" cy="90" r="6" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="45" cy="85" r="5" fill="#f59e0b" opacity="0.6"/>
+  </g>
+  
+  <!-- Microscopio -->
+  <g transform="translate(280, 250)">
+    <!-- Base del microscopio -->
+    <ellipse cx="35" cy="90" rx="40" ry="8" fill="#e0e7ff"/>
+    <rect x="20" y="80" width="30" height="10" fill="#c7d2fe" rx="2"/>
+    
+    <!-- Brazo vertical -->
+    <rect x="32" y="20" width="6" height="60" fill="#c7d2fe" rx="2"/>
+    
+    <!-- Lentes objetivos -->
+    <circle cx="35" cy="25" r="12" fill="#93c5fd"/>
+    <circle cx="35" cy="25" r="8" fill="#60a5fa"/>
+    <circle cx="35" cy="25" r="4" fill="#dbeafe"/>
+    
+    <!-- Ocular -->
+    <rect x="38" y="8" width="25" height="8" fill="#c7d2fe" rx="3"/>
+    <circle cx="63" cy="12" r="6" fill="#93c5fd"/>
+    
+    <!-- Platina (donde se coloca la muestra) -->
+    <rect x="15" y="48" width="40" height="4" fill="#e0e7ff" rx="1"/>
+    
+    <!-- Tornillos de enfoque -->
+    <circle cx="42" cy="55" r="3" fill="#a5b4fc"/>
+    <circle cx="42" cy="62" r="3" fill="#a5b4fc"/>
+    
+    <!-- Detalles de brillo -->
+    <circle cx="35" cy="23" r="2" fill="#ffffff" opacity="0.8"/>
+  </g>
+  
+  <!-- Estrellas decorativas -->
+  <circle cx="100" cy="350" r="3" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="420" cy="150" r="2.5" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="380" cy="400" r="2" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="150" cy="420" r="2.5" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="450" cy="350" r="2" fill="#fbbf24" opacity="0.8"/>
+</svg>
