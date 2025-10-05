@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { NatalChart } from '../services/astroCalculator';
+import type { NatalChart } from '../services/realAstroCalculator';
 
 export interface SavedChart {
   id: string;
