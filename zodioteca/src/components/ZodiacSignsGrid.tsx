@@ -31,7 +31,7 @@ const ZodiacSignsGrid: React.FC = () => {
     const icons = {
       fuego: '🔥',
       tierra: '🌱',
-      aire: '💨',
+      aire: '🌀',
       agua: '💧'
     };
     return icons[element as keyof typeof icons];
@@ -115,7 +115,7 @@ const ZodiacSignsGrid: React.FC = () => {
             </span>
           </div>
           <div className="flex flex-col items-center space-y-2 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl">
-            <span className="text-3xl">💨</span>
+            <span className="text-3xl">🌀</span>
             <span className="font-bold text-blue-700 dark:text-blue-300">Aire</span>
             <span className="text-xs text-center text-gray-600 dark:text-gray-400">
               Ideas, comunicación, perspectiva

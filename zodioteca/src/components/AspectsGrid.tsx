@@ -6,10 +6,16 @@ import AspectModal from './AspectModal';
 const AspectsGrid: React.FC = () => {
   const [selectedAspect, setSelectedAspect] = useState<Aspect | null>(null);
   const [filter, setFilter] = useState<'all' | 'major' | 'minor' | 'creative'>('all');
+  const [specificAspect, setSpecificAspect] = useState<string | null>(null);
 
-  const filteredAspects = filter === 'all' 
+  // Filtrar por categoría y luego por aspecto específico si está seleccionado
+  let filteredAspects = filter === 'all' 
     ? ASPECTS 
     : ASPECTS.filter(aspect => aspect.category === filter);
+  
+  if (specificAspect) {
+    filteredAspects = filteredAspects.filter(aspect => aspect.name === specificAspect);
+  }
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -81,6 +87,47 @@ const AspectsGrid: React.FC = () => {
         >
           Creativos ({ASPECTS.filter(a => a.category === 'creative').length})
         </button>
+      </div>
+
+      {/* Filtros específicos por aspecto (colores) */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 p-4 rounded-xl">
+        <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center">
+          🎨 Filtrar por Aspecto Específico
+        </h4>
+        <div className="flex flex-wrap gap-2 justify-center">
+          <button
+            onClick={() => setSpecificAspect(null)}
+            className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+              specificAspect === null
+                ? 'bg-gray-700 text-white shadow-lg scale-105'
+                : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500'
+            }`}
+          >
+            Todos
+          </button>
+          {ASPECTS.map((aspect) => (
+            <button
+              key={aspect.name}
+              onClick={() => setSpecificAspect(specificAspect === aspect.name ? null : aspect.name)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
+                specificAspect === aspect.name
+                  ? 'shadow-lg scale-105 ring-2 ring-offset-2 ring-purple-500'
+                  : 'hover:scale-105'
+              }`}
+              style={{
+                backgroundColor: specificAspect === aspect.name ? aspect.color : `${aspect.color}40`,
+                color: specificAspect === aspect.name ? '#ffffff' : aspect.color,
+                border: `2px solid ${aspect.color}`
+              }}
+            >
+              <span className="text-base">{aspect.symbol}</span>
+              <span>{aspect.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-600 dark:text-gray-400 text-center mt-2">
+          💡 Toca un aspecto para filtrar solo ese tipo
+        </p>
       </div>
 
       {/* Grid de Aspectos */}

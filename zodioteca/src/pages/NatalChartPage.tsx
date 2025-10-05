@@ -357,121 +357,405 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
 
           {/* Planetas */}
           <AccordionSection title="Planetas" icon="🪐" count={result.planets.length}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-              {result.planets.map((planet, idx) => (
-                <div 
-                  key={idx} 
-                  className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-sm sm:text-base font-bold text-purple-900 dark:text-purple-100">
-                      {planet.name}
-                    </h4>
-                    {planet.retrograde && (
-                      <span className="text-xs px-1.5 py-0.5 bg-red-500 text-white rounded font-bold">℞</span>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Signo:</span>
-                      <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">{planet.sign}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Grado:</span>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{planet.degree.toFixed(0)}°</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Casa:</span>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{planet.house}</span>
-                    </div>
-                  </div>
+            {/* Resumen de Planetas por Categoría */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {/* Personales */}
+              <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border-2 border-yellow-300 dark:border-yellow-700">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">⚡</span>
+                  <h4 className="font-bold text-yellow-900 dark:text-yellow-100 text-sm">Personales</h4>
                 </div>
-              ))}
+                <div className="text-xs text-gray-600 dark:text-gray-400">☉☽☿♀♂</div>
+              </div>
+
+              {/* Sociales */}
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-700">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">🌟</span>
+                  <h4 className="font-bold text-blue-900 dark:text-blue-100 text-sm">Sociales</h4>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">♃♄</div>
+              </div>
+
+              {/* Generacionales */}
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border-2 border-purple-300 dark:border-purple-700">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">🌌</span>
+                  <h4 className="font-bold text-purple-900 dark:text-purple-100 text-sm">Generacionales</h4>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">♅♆♇</div>
+              </div>
+
+              {/* Retrógrados */}
+              <div className="p-4 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl border-2 border-red-300 dark:border-red-700">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">℞</span>
+                  <h4 className="font-bold text-red-900 dark:text-red-100 text-sm">Retrógrados</h4>
+                </div>
+                <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+                  {result.planets.filter(p => p.retrograde).length}
+                </div>
+              </div>
+            </div>
+
+            {/* Grid de Planetas Mejorado */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {result.planets.map((planet, idx) => {
+                // Mapeo de símbolos y estilos de planetas
+                const planetData: Record<string, { 
+                  symbol: string; 
+                  category: string;
+                  gradient: string;
+                  border: string;
+                  textColor: string;
+                  description: string;
+                  categoryIcon: string;
+                }> = {
+                  'Sol': {
+                    symbol: '☉',
+                    category: 'Personal',
+                    gradient: 'from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30',
+                    border: 'border-yellow-400 dark:border-yellow-600',
+                    textColor: 'text-yellow-700 dark:text-yellow-300',
+                    description: 'Identidad y vitalidad',
+                    categoryIcon: '⚡'
+                  },
+                  'Luna': {
+                    symbol: '☽',
+                    category: 'Personal',
+                    gradient: 'from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30',
+                    border: 'border-blue-400 dark:border-blue-600',
+                    textColor: 'text-blue-700 dark:text-blue-300',
+                    description: 'Emociones e instintos',
+                    categoryIcon: '⚡'
+                  },
+                  'Mercurio': {
+                    symbol: '☿',
+                    category: 'Personal',
+                    gradient: 'from-gray-100 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/30',
+                    border: 'border-gray-400 dark:border-gray-600',
+                    textColor: 'text-gray-700 dark:text-gray-300',
+                    description: 'Mente y comunicación',
+                    categoryIcon: '⚡'
+                  },
+                  'Venus': {
+                    symbol: '♀',
+                    category: 'Personal',
+                    gradient: 'from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30',
+                    border: 'border-pink-400 dark:border-pink-600',
+                    textColor: 'text-pink-700 dark:text-pink-300',
+                    description: 'Amor y valores',
+                    categoryIcon: '⚡'
+                  },
+                  'Marte': {
+                    symbol: '♂',
+                    category: 'Personal',
+                    gradient: 'from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30',
+                    border: 'border-red-400 dark:border-red-600',
+                    textColor: 'text-red-700 dark:text-red-300',
+                    description: 'Acción y energía',
+                    categoryIcon: '⚡'
+                  },
+                  'Júpiter': {
+                    symbol: '♃',
+                    category: 'Social',
+                    gradient: 'from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30',
+                    border: 'border-indigo-400 dark:border-indigo-600',
+                    textColor: 'text-indigo-700 dark:text-indigo-300',
+                    description: 'Expansión y suerte',
+                    categoryIcon: '🌟'
+                  },
+                  'Saturno': {
+                    symbol: '♄',
+                    category: 'Social',
+                    gradient: 'from-stone-100 to-neutral-100 dark:from-stone-900/30 dark:to-neutral-900/30',
+                    border: 'border-stone-400 dark:border-stone-600',
+                    textColor: 'text-stone-700 dark:text-stone-300',
+                    description: 'Límites y estructura',
+                    categoryIcon: '🌟'
+                  },
+                  'Urano': {
+                    symbol: '♅',
+                    category: 'Generacional',
+                    gradient: 'from-sky-100 to-blue-100 dark:from-sky-900/30 dark:to-blue-900/30',
+                    border: 'border-sky-400 dark:border-sky-600',
+                    textColor: 'text-sky-700 dark:text-sky-300',
+                    description: 'Innovación y cambio',
+                    categoryIcon: '🌌'
+                  },
+                  'Neptuno': {
+                    symbol: '♆',
+                    category: 'Generacional',
+                    gradient: 'from-teal-100 to-cyan-100 dark:from-teal-900/30 dark:to-cyan-900/30',
+                    border: 'border-teal-400 dark:border-teal-600',
+                    textColor: 'text-teal-700 dark:text-teal-300',
+                    description: 'Espiritualidad y sueños',
+                    categoryIcon: '🌌'
+                  },
+                  'Plutón': {
+                    symbol: '♇',
+                    category: 'Generacional',
+                    gradient: 'from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30',
+                    border: 'border-violet-400 dark:border-violet-600',
+                    textColor: 'text-violet-700 dark:text-violet-300',
+                    description: 'Transformación y poder',
+                    categoryIcon: '🌌'
+                  }
+                };
+
+                const data = planetData[planet.name] || {
+                  symbol: planet.name.charAt(0),
+                  category: 'Otro',
+                  gradient: 'from-gray-100 to-gray-200 dark:from-gray-900/30 dark:to-gray-800/30',
+                  border: 'border-gray-400 dark:border-gray-600',
+                  textColor: 'text-gray-700 dark:text-gray-300',
+                  description: planet.name,
+                  categoryIcon: '🪐'
+                };
+
+                return (
+                  <div 
+                    key={idx} 
+                    className={`p-4 bg-gradient-to-br ${data.gradient} rounded-xl border-2 ${data.border} hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 relative`}
+                  >
+                    {/* Badge retrógrado */}
+                    {planet.retrograde && (
+                      <div className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg animate-pulse">
+                        ℞
+                      </div>
+                    )}
+
+                    {/* Encabezado con símbolo y categoría */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-4xl">{data.symbol}</span>
+                        <div>
+                          <h4 className={`text-lg font-bold ${data.textColor}`}>
+                            {planet.name}
+                          </h4>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                            <span>{data.categoryIcon}</span>
+                            <span>{data.category}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Descripción */}
+                    <div className="mb-3 text-xs text-gray-600 dark:text-gray-400 italic">
+                      {data.description}
+                    </div>
+
+                    {/* Información detallada */}
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded">
+                        <span className="text-gray-600 dark:text-gray-400">Signo:</span>
+                        <span className={`font-bold ${data.textColor}`}>{planet.sign}</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Grado</div>
+                          <div className="font-semibold text-gray-700 dark:text-gray-300">
+                            {planet.degree.toFixed(2)}°
+                          </div>
+                        </div>
+                        
+                        <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Casa</div>
+                          <div className="font-semibold text-gray-700 dark:text-gray-300">
+                            {planet.house}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Longitud exacta */}
+                      <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded text-xs">
+                        <span className="text-gray-600 dark:text-gray-400">Longitud:</span>
+                        <span className="font-mono text-gray-700 dark:text-gray-300">
+                          {planet.longitude.toFixed(4)}°
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </AccordionSection>
 
           {/* Asteroides */}
           {result.asteroids && result.asteroids.length > 0 && (
             <AccordionSection title="Asteroides" icon="☄️" count={result.asteroids.length} defaultOpen={false}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+              {/* Introducción a los Asteroides */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-300 dark:border-purple-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">☄️</span>
+                  <h4 className="font-bold text-purple-900 dark:text-purple-100">Los Cuatro Asteroides Principales</h4>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Descubiertos entre 1801-1807, representan aspectos del arquetipo femenino que complementan Venus y la Luna.
+                </p>
+              </div>
+
+              {/* Grid de Asteroides Mejorado */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 {result.asteroids.map((asteroid, idx) => {
-                  // Mapeo de colores para cada asteroide
-                  const asteroidStyles: Record<string, { bg: string; border: string; text: string }> = {
+                  // Mapeo completo de datos para cada asteroide
+                  const asteroidData: Record<string, {
+                    gradient: string;
+                    border: string;
+                    textColor: string;
+                    icon: string;
+                    symbol: string;
+                    description: string;
+                    keywords: string[];
+                    mythology: string;
+                    orbitalPeriod: string;
+                  }> = {
                     'Ceres': {
-                      bg: 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
-                      border: 'border-green-200 dark:border-green-700',
-                      text: 'text-green-900 dark:text-green-100'
+                      gradient: 'from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30',
+                      border: 'border-green-400 dark:border-green-600',
+                      textColor: 'text-green-700 dark:text-green-300',
+                      icon: '🌾',
+                      symbol: '⚳',
+                      description: 'La Gran Madre cósmica',
+                      keywords: ['Nutrición', 'Maternidad', 'Pérdida', 'Regeneración', 'Fertilidad'],
+                      mythology: 'Diosa romana de la agricultura y las cosechas',
+                      orbitalPeriod: '4.6 años'
                     },
                     'Pallas': {
-                      bg: 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20',
-                      border: 'border-indigo-200 dark:border-indigo-700',
-                      text: 'text-indigo-900 dark:text-indigo-100'
+                      gradient: 'from-indigo-100 to-blue-100 dark:from-indigo-900/30 dark:to-blue-900/30',
+                      border: 'border-indigo-400 dark:border-indigo-600',
+                      textColor: 'text-indigo-700 dark:text-indigo-300',
+                      icon: '🦉',
+                      symbol: '⚴',
+                      description: 'La guerrera sabia',
+                      keywords: ['Sabiduría', 'Estrategia', 'Creatividad', 'Justicia', 'Diplomacia'],
+                      mythology: 'Diosa griega de la sabiduría y la guerra estratégica',
+                      orbitalPeriod: '4.6 años'
                     },
                     'Juno': {
-                      bg: 'bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20',
-                      border: 'border-pink-200 dark:border-pink-700',
-                      text: 'text-pink-900 dark:text-pink-100'
+                      gradient: 'from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30',
+                      border: 'border-pink-400 dark:border-pink-600',
+                      textColor: 'text-pink-700 dark:text-pink-300',
+                      icon: '💍',
+                      symbol: '⚵',
+                      description: 'La compañera divina',
+                      keywords: ['Matrimonio', 'Compromiso', 'Igualdad', 'Celos', 'Lealtad'],
+                      mythology: 'Diosa romana del matrimonio y reina de los dioses',
+                      orbitalPeriod: '4.4 años'
                     },
                     'Vesta': {
-                      bg: 'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20',
-                      border: 'border-orange-200 dark:border-orange-700',
-                      text: 'text-orange-900 dark:text-orange-100'
+                      gradient: 'from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30',
+                      border: 'border-orange-400 dark:border-orange-600',
+                      textColor: 'text-orange-700 dark:text-orange-300',
+                      icon: '🔥',
+                      symbol: '⚶',
+                      description: 'La guardiana del fuego sagrado',
+                      keywords: ['Devoción', 'Enfoque', 'Pureza', 'Servicio', 'Sexualidad sagrada'],
+                      mythology: 'Diosa romana del hogar y el fuego sagrado',
+                      orbitalPeriod: '3.6 años'
                     }
                   };
 
-                  const style = asteroidStyles[asteroid.name] || {
-                    bg: 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20',
-                    border: 'border-gray-200 dark:border-gray-700',
-                    text: 'text-gray-900 dark:text-gray-100'
-                  };
-
-                  // Iconos para cada asteroide
-                  const asteroidIcons: Record<string, string> = {
-                    'Ceres': '🌾',
-                    'Pallas': '🦉',
-                    'Juno': '💍',
-                    'Vesta': '🔥'
+                  const data = asteroidData[asteroid.name] || {
+                    gradient: 'from-gray-100 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/30',
+                    border: 'border-gray-400 dark:border-gray-600',
+                    textColor: 'text-gray-700 dark:text-gray-300',
+                    icon: '☄️',
+                    symbol: '⁂',
+                    description: asteroid.name,
+                    keywords: ['Asteroide'],
+                    mythology: 'Asteroide del cinturón principal',
+                    orbitalPeriod: 'Variable'
                   };
 
                   return (
                     <div 
                       key={idx} 
-                      className={`${style.bg} rounded-lg p-3 border ${style.border} hover:shadow-md transition-shadow`}
+                      className={`p-5 bg-gradient-to-br ${data.gradient} rounded-xl border-2 ${data.border} hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] relative`}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-lg">{asteroidIcons[asteroid.name] || '☄️'}</span>
-                          <h4 className={`text-sm sm:text-base font-bold ${style.text}`}>
+                      {/* Badge retrógrado */}
+                      {asteroid.retrograde && (
+                        <div className="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg animate-pulse">
+                          ℞
+                        </div>
+                      )}
+
+                      {/* Encabezado */}
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="flex flex-col items-center">
+                          <span className="text-5xl mb-1">{data.icon}</span>
+                          <span className="text-2xl opacity-60">{data.symbol}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className={`text-xl font-bold ${data.textColor} mb-1`}>
                             {asteroid.name}
                           </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                            {data.description}
+                          </p>
                         </div>
-                        {asteroid.retrograde && (
-                          <span className="text-xs px-1.5 py-0.5 bg-red-500 text-white rounded font-bold">℞</span>
-                        )}
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
+
+                      {/* Información astrológica */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded">
                           <span className="text-xs text-gray-600 dark:text-gray-400">Signo:</span>
-                          <span className={`text-sm font-semibold ${style.text}`}>{asteroid.sign}</span>
+                          <span className={`font-bold ${data.textColor}`}>{asteroid.sign}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Grado:</span>
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{asteroid.degree.toFixed(0)}°</span>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Grado</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {asteroid.degree.toFixed(2)}°
+                            </div>
+                          </div>
+                          
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Casa</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {asteroid.house}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Casa:</span>
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{asteroid.house}</span>
+
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded text-xs">
+                          <span className="text-gray-600 dark:text-gray-400">Longitud:</span>
+                          <span className="font-mono text-gray-700 dark:text-gray-300">
+                            {asteroid.longitude.toFixed(4)}°
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Keywords */}
+                      <div className="mb-3">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-semibold">Palabras Clave:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {data.keywords.map((keyword, i) => (
+                            <span 
+                              key={i}
+                              className={`px-2 py-1 text-xs rounded-full bg-white/60 dark:bg-black/30 ${data.textColor} font-medium`}
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mitología y período orbital */}
+                      <div className="pt-3 border-t border-gray-300 dark:border-gray-600 space-y-1">
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          <strong>Mitología:</strong> {data.mythology}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          <strong>Período orbital:</strong> {data.orbitalPeriod}
                         </div>
                       </div>
                     </div>
                   );
                 })}
-              </div>
-              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                <p><strong>🌾 Ceres:</strong> Nutrición, maternidad, ciclos de pérdida y regeneración</p>
-                <p><strong>🦉 Pallas:</strong> Sabiduría, estrategia, resolución creativa de problemas</p>
-                <p><strong>💍 Juno:</strong> Matrimonio, compromiso, relaciones de igualdad</p>
-                <p><strong>🔥 Vesta:</strong> Devoción, enfoque, sexualidad sagrada</p>
               </div>
             </AccordionSection>
           )}
@@ -484,85 +768,195 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               count={result.sensitivePoints.length}
               defaultOpen={false}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Introducción */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 via-violet-50 to-fuchsia-50 dark:from-purple-900/20 dark:via-violet-900/20 dark:to-fuchsia-900/20 rounded-xl border-2 border-purple-300 dark:border-purple-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🔮</span>
+                  <h4 className="font-bold text-purple-900 dark:text-purple-100">Puntos de Transformación Profunda</h4>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Revelan nuestras heridas más profundas, aspectos reprimidos y el camino hacia la sanación y el empoderamiento personal.
+                </p>
+              </div>
+
+              {/* Grid de Puntos Sensibles Mejorado */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {result.sensitivePoints.map((point) => {
-                  // Determinar color y estilo según el tipo
-                  let bgClass = '';
-                  let icon = '';
-                  let description = '';
-                  
-                  if (point.type === 'chiron') {
-                    bgClass = 'from-purple-500/20 to-violet-600/20 border-purple-500/30';
-                    icon = '⚕️';
-                    description = 'El sanador herido - Transformación a través del dolor';
-                  } else if (point.type === 'lilith-mean') {
-                    bgClass = 'from-gray-800/30 to-purple-900/30 border-purple-700/40';
-                    icon = '🌑';
-                    description = 'Luna Negra Media - El lado oscuro reprimido';
-                  } else if (point.type === 'lilith-true') {
-                    bgClass = 'from-indigo-900/30 to-black/40 border-indigo-600/40';
-                    icon = '🖤';
-                    description = 'Luna Negra Verdadera - La sombra auténtica';
-                  }
+                  // Datos completos para cada punto
+                  const pointData: Record<string, {
+                    gradient: string;
+                    border: string;
+                    textColor: string;
+                    icon: string;
+                    symbol: string;
+                    title: string;
+                    description: string;
+                    keywords: string[];
+                    archetype: string;
+                    interpretation: string;
+                  }> = {
+                    'chiron': {
+                      gradient: 'from-purple-100 via-violet-100 to-fuchsia-100 dark:from-purple-900/30 dark:via-violet-900/30 dark:to-fuchsia-900/30',
+                      border: 'border-purple-400 dark:border-purple-600',
+                      textColor: 'text-purple-700 dark:text-purple-300',
+                      icon: '⚕️',
+                      symbol: '⚷',
+                      title: 'Chiron - El Sanador Herido',
+                      description: 'El centauro sabio que enseña a través del dolor',
+                      keywords: ['Herida primordial', 'Sanación', 'Maestría', 'Compasión', 'Iniciación'],
+                      archetype: 'El chamán que sana a otros mientras porta su propia herida',
+                      interpretation: 'Revela dónde fuimos heridos profundamente y cómo esa herida se convierte en nuestra medicina para sanar a otros. Orbital ~50 años.'
+                    },
+                    'lilith-mean': {
+                      gradient: 'from-slate-100 via-gray-100 to-purple-100 dark:from-slate-900/30 dark:via-gray-900/30 dark:to-purple-900/30',
+                      border: 'border-gray-500 dark:border-gray-600',
+                      textColor: 'text-gray-800 dark:text-gray-300',
+                      icon: '🌑',
+                      symbol: '⚸',
+                      title: 'Lilith Media - Luna Negra',
+                      description: 'El apogeo lunar calculado matemáticamente',
+                      keywords: ['Sombra', 'Rebeldía', 'Sexualidad', 'Autonomía', 'Lo prohibido'],
+                      archetype: 'La mujer salvaje que rechaza ser domesticada',
+                      interpretation: 'Representa aspectos reprimidos, la sexualidad primordial, y el rechazo a la sumisión. Es el punto donde la Luna está más lejos de la Tierra.'
+                    },
+                    'lilith-true': {
+                      gradient: 'from-indigo-100 via-purple-100 to-black/20 dark:from-indigo-900/30 dark:via-purple-900/30 dark:to-black/40',
+                      border: 'border-indigo-500 dark:border-indigo-600',
+                      textColor: 'text-indigo-800 dark:text-indigo-300',
+                      icon: '🖤',
+                      symbol: '⚸',
+                      title: 'Lilith Verdadera - Luna Negra Real',
+                      description: 'El apogeo lunar oscilante real',
+                      keywords: ['Sombra auténtica', 'Instinto', 'Poder femenino', 'Tabú', 'Liberación'],
+                      archetype: 'La diosa oscura en su manifestación más pura',
+                      interpretation: 'La posición real y oscilante del apogeo lunar. Representa la sombra sin filtros y el poder instintivo primordial.'
+                    }
+                  };
+
+                  const data = pointData[point.type] || {
+                    gradient: 'from-gray-100 to-gray-200 dark:from-gray-900/30 dark:to-gray-800/30',
+                    border: 'border-gray-400 dark:border-gray-600',
+                    textColor: 'text-gray-700 dark:text-gray-300',
+                    icon: '🔮',
+                    symbol: '◎',
+                    title: point.name,
+                    description: 'Punto sensible',
+                    keywords: ['Sensible'],
+                    archetype: point.name,
+                    interpretation: 'Punto sensible en la carta natal'
+                  };
 
                   return (
                     <div
                       key={point.name}
                       className={`
-                        p-4 rounded-xl
-                        bg-gradient-to-br ${bgClass}
-                        border-2
-                        hover:scale-105 hover:shadow-2xl
+                        p-6 rounded-2xl
+                        bg-gradient-to-br ${data.gradient}
+                        border-2 ${data.border}
+                        hover:scale-[1.02] hover:shadow-2xl
                         transition-all duration-300
+                        cursor-pointer
+                        relative overflow-hidden
                       `}
                     >
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-4xl">{icon}</span>
-                        <div>
-                          <h4 className="font-bold text-lg">{point.name}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+                      {/* Símbolo decorativo de fondo */}
+                      <div className="absolute top-2 right-2 text-8xl opacity-10">
+                        {data.symbol}
+                      </div>
+
+                      {/* Badge retrógrado */}
+                      {point.retrograde && point.type === 'chiron' && (
+                        <div className="absolute top-4 right-4 px-3 py-1 bg-orange-500 text-white rounded-full text-xs font-bold shadow-lg animate-pulse z-10">
+                          ℞ Retrógrado
+                        </div>
+                      )}
+
+                      {/* Encabezado */}
+                      <div className="relative flex items-start gap-4 mb-4">
+                        <div className="flex flex-col items-center">
+                          <span className="text-6xl mb-1">{data.icon}</span>
+                          <span className="text-3xl opacity-60">{data.symbol}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className={`text-xl font-bold ${data.textColor} mb-1`}>
+                            {data.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                            {data.description}
+                          </p>
                         </div>
                       </div>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400">Signo:</span>
-                          <span className="font-semibold text-purple-600 dark:text-purple-400">
-                            {point.sign}
-                          </span>
+
+                      {/* Información astrológica */}
+                      <div className="relative space-y-2 mb-4">
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Signo:</span>
+                          <span className={`font-bold ${data.textColor}`}>{point.sign}</span>
                         </div>
                         
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400">Grado:</span>
-                          <span className="font-mono font-bold">
-                            {point.degree.toFixed(2)}°
-                          </span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400">Casa:</span>
-                          <span className="font-bold text-purple-700 dark:text-purple-300">
-                            {point.house}
-                          </span>
-                        </div>
-                        
-                        {point.retrograde && point.type === 'chiron' && (
-                          <div className="mt-2 text-center">
-                            <span className="inline-block px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-orange-600 dark:text-orange-400 text-xs font-bold">
-                              ℞ Retrógrado
-                            </span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Grado</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {point.degree.toFixed(2)}°
+                            </div>
                           </div>
-                        )}
+                          
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Casa</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {point.house}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded text-xs">
+                          <span className="text-gray-600 dark:text-gray-400">Longitud:</span>
+                          <span className="font-mono text-gray-700 dark:text-gray-300">
+                            {point.longitude.toFixed(4)}°
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Keywords */}
+                      <div className="relative mb-3">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-semibold">Palabras Clave:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {data.keywords.map((keyword, i) => (
+                            <span 
+                              key={i}
+                              className={`px-2 py-1 text-xs rounded-full bg-white/60 dark:bg-black/30 ${data.textColor} font-medium`}
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Arquetipo e interpretación */}
+                      <div className="relative pt-3 border-t border-gray-300 dark:border-gray-600 space-y-2">
+                        <div className="text-xs text-gray-700 dark:text-gray-300">
+                          <strong className={data.textColor}>Arquetipo:</strong> {data.archetype}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {data.interpretation}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Información adicional */}
-              <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-sm space-y-2">
-                <p><strong>⚕️ Chiron:</strong> Representa nuestras heridas más profundas y el potencial de sanación. Orbital entre Saturno y Urano (~50 años).</p>
-                <p><strong>🌑 Lilith:</strong> El punto más lejano de la órbita lunar (apogeo). Simboliza lo reprimido, la sexualidad primordial, la rebeldía femenina.</p>
+              {/* Nota educativa */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-300 dark:border-violet-700">
+                <h5 className="font-bold text-violet-900 dark:text-violet-100 mb-2 flex items-center gap-2">
+                  <span>📚</span>
+                  <span>Diferencia entre Lilith Media y Verdadera</span>
+                </h5>
+                <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                  <p><strong>Luna Negra Media:</strong> Calculada matemáticamente como promedio. Más utilizada en astrología occidental moderna.</p>
+                  <p><strong>Luna Negra Verdadera:</strong> Posición real y oscilante. Puede diferir hasta 30° de la media. Preferida por astrólogos que buscan precisión astronómica.</p>
+                </div>
               </div>
             </AccordionSection>
           )}
@@ -725,78 +1119,251 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {/* Partes Árabes - FASE 5 */}
           {result.arabicParts && result.arabicParts.length > 0 && (
             <AccordionSection 
-              title="Partes Árabes" 
+              title="Partes Árabes (Lotes)" 
               icon="🌟" 
               count={result.arabicParts.length}
               defaultOpen={false}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Introducción */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-900/20 dark:via-yellow-900/20 dark:to-orange-900/20 rounded-xl border-2 border-amber-300 dark:border-amber-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📜</span>
+                  <h4 className="font-bold text-amber-900 dark:text-amber-100">Los Lotes de la Astrología Helenística</h4>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Puntos matemáticos que sintetizan tres factores astrológicos. Originados en la astrología greco-romana 
+                  y perfeccionados por astrólogos árabes medievales (s. VIII-XII).
+                </p>
+              </div>
+
+              {/* Grid de Partes Árabes Mejorado */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
                 {result.arabicParts.map((part, idx) => {
-                  // Colores según el tipo de parte
-                  const getPartColor = (type: string) => {
-                    const colors = {
-                      fortune: 'from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 border-amber-300 dark:border-amber-700',
-                      spirit: 'from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-300 dark:border-blue-700',
-                      love: 'from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 border-pink-300 dark:border-pink-700',
-                      destiny: 'from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 border-purple-300 dark:border-purple-700',
-                      courage: 'from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 border-red-300 dark:border-red-700',
-                      children: 'from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-green-300 dark:border-green-700',
-                      commerce: 'from-cyan-100 to-teal-100 dark:from-cyan-900/30 dark:to-teal-900/30 border-cyan-300 dark:border-cyan-700',
-                    };
-                    return colors[type as keyof typeof colors] || colors.fortune;
+                  // Datos completos para cada Parte Árabe
+                  const partData: Record<string, {
+                    gradient: string;
+                    border: string;
+                    textColor: string;
+                    icon: string;
+                    symbol: string;
+                    alternativeNames: string[];
+                    formula: string;
+                    keywords: string[];
+                    tradition: string;
+                    interpretation: string;
+                  }> = {
+                    'fortune': {
+                      gradient: 'from-amber-100 via-yellow-100 to-orange-100 dark:from-amber-900/30 dark:via-yellow-900/30 dark:to-orange-900/30',
+                      border: 'border-amber-400 dark:border-amber-600',
+                      textColor: 'text-amber-700 dark:text-amber-300',
+                      icon: '🎯',
+                      symbol: '⊕',
+                      alternativeNames: ['Pars Fortunae', 'Lote de Fortuna'],
+                      formula: 'ASC + Luna - Sol (diurno) | ASC + Sol - Luna (nocturno)',
+                      keywords: ['Abundancia material', 'Bienestar', 'Suerte', 'Cuerpo físico', 'Prosperidad'],
+                      tradition: 'El más importante de todos los lotes',
+                      interpretation: 'Indica dónde encontramos éxito natural, abundancia y flujo favorable. Representa el cuerpo, la salud y los recursos materiales.'
+                    },
+                    'spirit': {
+                      gradient: 'from-blue-100 via-indigo-100 to-violet-100 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-violet-900/30',
+                      border: 'border-blue-400 dark:border-blue-600',
+                      textColor: 'text-blue-700 dark:text-blue-300',
+                      icon: '✨',
+                      symbol: '☉',
+                      alternativeNames: ['Pars Spiritus', 'Lote del Espíritu'],
+                      formula: 'ASC + Sol - Luna (diurno) | ASC + Luna - Sol (nocturno)',
+                      keywords: ['Propósito', 'Vocación', 'Alma', 'Identidad espiritual', 'Ambición'],
+                      tradition: 'Complemento solar de la Parte de Fortuna',
+                      interpretation: 'Revela nuestro propósito vital, vocación y ambiciones. Representa la mente, el espíritu y las aspiraciones del alma.'
+                    },
+                    'love': {
+                      gradient: 'from-pink-100 via-rose-100 to-red-100 dark:from-pink-900/30 dark:via-rose-900/30 dark:to-red-900/30',
+                      border: 'border-pink-400 dark:border-pink-600',
+                      textColor: 'text-pink-700 dark:text-pink-300',
+                      icon: '💕',
+                      symbol: '♡',
+                      alternativeNames: ['Pars Veneris', 'Lote de Eros'],
+                      formula: 'ASC + Regente 7 - Venus',
+                      keywords: ['Romance', 'Pasión', 'Atracción', 'Deseo', 'Relaciones íntimas'],
+                      tradition: 'Usado para timing de relaciones',
+                      interpretation: 'Señala dónde y cómo experimentamos el amor romántico, la pasión y la atracción magnética hacia otros.'
+                    },
+                    'destiny': {
+                      gradient: 'from-purple-100 via-violet-100 to-fuchsia-100 dark:from-purple-900/30 dark:via-violet-900/30 dark:to-fuchsia-900/30',
+                      border: 'border-purple-400 dark:border-purple-600',
+                      textColor: 'text-purple-700 dark:text-purple-300',
+                      icon: '🎭',
+                      symbol: '⟁',
+                      alternativeNames: ['Lote del Destino', 'Pars Necessitatis'],
+                      formula: 'ASC + Fortuna - Mercurio',
+                      keywords: ['Karma', 'Necesidad', 'Destino inevitable', 'Propósito de vida'],
+                      tradition: 'Relacionado con el dharma védico',
+                      interpretation: 'Muestra el camino que el alma debe recorrer, las lecciones kármicas y el propósito ineludible de esta encarnación.'
+                    },
+                    'courage': {
+                      gradient: 'from-red-100 via-orange-100 to-amber-100 dark:from-red-900/30 dark:via-orange-900/30 dark:to-amber-900/30',
+                      border: 'border-red-400 dark:border-red-600',
+                      textColor: 'text-red-700 dark:text-red-300',
+                      icon: '⚔️',
+                      symbol: '♂',
+                      alternativeNames: ['Pars Audaciae', 'Lote de Marte'],
+                      formula: 'ASC + Fortuna - Marte',
+                      keywords: ['Valentía', 'Acción', 'Conflicto', 'Energía guerrera', 'Iniciativa'],
+                      tradition: 'Evaluación de la fuerza marcial',
+                      interpretation: 'Indica dónde mostramos coraje, cómo enfrentamos conflictos y batallas, y nuestra capacidad de acción decidida.'
+                    },
+                    'children': {
+                      gradient: 'from-green-100 via-emerald-100 to-teal-100 dark:from-green-900/30 dark:via-emerald-900/30 dark:to-teal-900/30',
+                      border: 'border-green-400 dark:border-green-600',
+                      textColor: 'text-green-700 dark:text-green-300',
+                      icon: '👶',
+                      symbol: '♃',
+                      alternativeNames: ['Pars Filiorum', 'Lote de los Hijos'],
+                      formula: 'ASC + Júpiter - Saturno (diurno)',
+                      keywords: ['Fertilidad', 'Descendencia', 'Creatividad', 'Legado', 'Hijos'],
+                      tradition: 'Usado en astrología predictiva para hijos',
+                      interpretation: 'Revela temas relacionados con hijos, fertilidad, creatividad generativa y el legado que dejamos al mundo.'
+                    },
+                    'commerce': {
+                      gradient: 'from-cyan-100 via-teal-100 to-blue-100 dark:from-cyan-900/30 dark:via-teal-900/30 dark:to-blue-900/30',
+                      border: 'border-cyan-400 dark:border-cyan-600',
+                      textColor: 'text-cyan-700 dark:text-cyan-300',
+                      icon: '💰',
+                      symbol: '☿',
+                      alternativeNames: ['Pars Mercaturae', 'Lote del Comercio'],
+                      formula: 'ASC + Fortuna - Mercurio',
+                      keywords: ['Negocios', 'Comercio', 'Ganancias', 'Intercambio', 'Habilidad mercantil'],
+                      tradition: 'Usado por mercaderes medievales',
+                      interpretation: 'Muestra dónde y cómo obtenemos ganancias materiales a través del comercio, negociación y actividades mercuriales.'
+                    }
+                  };
+
+                  const data = partData[part.type] || {
+                    gradient: 'from-gray-100 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/30',
+                    border: 'border-gray-400 dark:border-gray-600',
+                    textColor: 'text-gray-700 dark:text-gray-300',
+                    icon: '🌟',
+                    symbol: '⊛',
+                    alternativeNames: [part.name],
+                    formula: 'Variable',
+                    keywords: ['Parte árabe'],
+                    tradition: 'Astrología helenística',
+                    interpretation: part.description || 'Parte árabe calculada'
                   };
 
                   return (
                     <div 
                       key={idx} 
-                      className={`p-4 bg-gradient-to-br ${getPartColor(part.type)} rounded-lg border-2 hover:shadow-lg transition-all`}
+                      className={`p-5 bg-gradient-to-br ${data.gradient} rounded-xl border-2 ${data.border} hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] relative overflow-hidden`}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{part.symbol}</span>
-                          <div>
-                            <h4 className="font-bold text-gray-900 dark:text-gray-100">
-                              {part.name}
-                            </h4>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                              Casa {part.house}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                            {part.sign}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {part.degree.toFixed(2)}°
+                      {/* Símbolo decorativo de fondo */}
+                      <div className="absolute top-2 right-2 text-8xl opacity-10">
+                        {data.symbol}
+                      </div>
+
+                      {/* Encabezado */}
+                      <div className="relative flex items-start gap-3 mb-4">
+                        <span className="text-5xl">{data.icon}</span>
+                        <div className="flex-1">
+                          <h4 className={`text-xl font-bold ${data.textColor} mb-1`}>
+                            {part.name}
+                          </h4>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+                            {data.alternativeNames.map((name, i) => (
+                              <div key={i} className="italic">• {name}</div>
+                            ))}
                           </div>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {part.description}
-                      </p>
+
+                      {/* Información astrológica */}
+                      <div className="relative space-y-2 mb-4">
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Signo:</span>
+                          <span className={`font-bold ${data.textColor}`}>{part.sign}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Grado</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {part.degree.toFixed(2)}°
+                            </div>
+                          </div>
+                          
+                          <div className="p-2 bg-white/50 dark:bg-black/20 rounded">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">Casa</div>
+                            <div className="font-semibold text-gray-700 dark:text-gray-300">
+                              {part.house}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center p-2 bg-white/50 dark:bg-black/20 rounded text-xs">
+                          <span className="text-gray-600 dark:text-gray-400">Longitud:</span>
+                          <span className="font-mono text-gray-700 dark:text-gray-300">
+                            {part.longitude?.toFixed(4) || 'N/A'}°
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Keywords */}
+                      <div className="relative mb-3">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-semibold">Palabras Clave:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {data.keywords.map((keyword, i) => (
+                            <span 
+                              key={i}
+                              className={`px-2 py-1 text-xs rounded-full bg-white/60 dark:bg-black/30 ${data.textColor} font-medium`}
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Fórmula */}
+                      <div className="relative mb-3 p-2 bg-white/40 dark:bg-black/20 rounded border border-gray-300 dark:border-gray-600">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Fórmula:</div>
+                        <div className="text-xs font-mono text-gray-700 dark:text-gray-300">
+                          {data.formula}
+                        </div>
+                      </div>
+
+                      {/* Tradición e interpretación */}
+                      <div className="relative pt-3 border-t border-gray-300 dark:border-gray-600 space-y-2">
+                        <div className="text-xs text-gray-700 dark:text-gray-300">
+                          <strong className={data.textColor}>Tradición:</strong> {data.tradition}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {data.interpretation}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Información adicional sobre Partes Árabes */}
-              <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
-                <h4 className="font-bold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
-                  <span>📜</span>
-                  Sobre las Partes Árabes
-                </h4>
-                <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
-                  Las <strong>Partes Árabes</strong> (también llamadas "Lotes") son puntos calculados 
-                  matemáticamente que representan la síntesis de tres factores astrológicos. Originadas 
-                  en la astrología helenística y desarrolladas por astrólogos árabes medievales, estas 
-                  partes revelan áreas específicas de la vida donde se manifiestan energías particulares.
-                </p>
-                <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed mt-2">
-                  La fórmula básica es: <strong>Parte = Ascendente + Punto1 - Punto2</strong>. 
-                  Para cartas nocturnas (Sol bajo el horizonte), algunas fórmulas se invierten, 
-                  reflejando la naturaleza cambiante de la luz solar.
-                </p>
+              {/* Nota educativa */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-300 dark:border-amber-700">
+                <h5 className="font-bold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
+                  <span>�</span>
+                  <span>Sobre las Partes Árabes (Lotes Helenísticos)</span>
+                </h5>
+                <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>
+                    <strong>Origen:</strong> Aunque llamadas "árabes", estas técnicas provienen de la astrología helenística 
+                    (s. I-III d.C.). Los astrólogos árabes medievales (Al-Biruni, Masha'allah) las preservaron y expandieron.
+                  </p>
+                  <p>
+                    <strong>Método:</strong> Se calculan sumando y restando longitudes eclípticas. La fórmula básica es 
+                    <em> Lote = ASC + Punto Activo - Punto Pasivo</em>. Algunas fórmulas se invierten en cartas nocturnas.
+                  </p>
+                  <p>
+                    <strong>Uso:</strong> Se analizan por signo, casa y aspectos que reciben. El regente del signo donde 
+                    cae el lote es especialmente importante para delinear el tema.
+                  </p>
+                </div>
               </div>
             </AccordionSection>
           )}
@@ -1054,23 +1621,178 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
 
           {/* Casas */}
           <AccordionSection title="Casas" icon="🏠" count={result.houses.length}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-              {result.houses.map((house, idx) => (
-                <div 
-                  key={idx} 
-                  className="p-2 sm:p-3 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-700 hover:shadow-md transition-shadow"
-                >
-                  <div className="text-xs sm:text-sm font-bold text-purple-900 dark:text-purple-100 mb-1">
-                    Casa {house.number}
-                  </div>
-                  <div className="text-sm sm:text-base font-semibold text-purple-700 dark:text-purple-300">
-                    {house.sign}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {house.degree.toFixed(0)}°
-                  </div>
+            {/* Resumen de Casas por Categoría */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              {/* Casas Angulares */}
+              <div className="p-4 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl border-2 border-red-300 dark:border-red-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🔷</span>
+                  <h4 className="font-bold text-red-900 dark:text-red-100">Angulares</h4>
                 </div>
-              ))}
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Casas 1, 4, 7, 10</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  Las más poderosas. Acción directa e iniciativas.
+                </div>
+              </div>
+
+              {/* Casas Sucedentes */}
+              <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-xl border-2 border-green-300 dark:border-green-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🔶</span>
+                  <h4 className="font-bold text-green-900 dark:text-green-100">Sucedentes</h4>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Casas 2, 5, 8, 11</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  Consolidan y estabilizan. Recursos y valores.
+                </div>
+              </div>
+
+              {/* Casas Cadentes */}
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-900/20 dark:to-sky-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🔹</span>
+                  <h4 className="font-bold text-blue-900 dark:text-blue-100">Cadentes</h4>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Casas 3, 6, 9, 12</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  Procesan y aprenden. Mental y espiritual.
+                </div>
+              </div>
+            </div>
+
+            {/* Grid de Casas Mejorado */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {result.houses.map((house, idx) => {
+                // Determinar categoría de la casa
+                const category = [1, 4, 7, 10].includes(house.number) ? 'angular' :
+                                [2, 5, 8, 11].includes(house.number) ? 'succedent' : 'cadent';
+                
+                // Estilos según categoría
+                const categoryStyles = {
+                  angular: {
+                    gradient: 'from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30',
+                    border: 'border-red-300 dark:border-red-600',
+                    icon: '🔷',
+                    textColor: 'text-red-700 dark:text-red-300',
+                    label: 'Angular',
+                    labelBg: 'bg-red-500/20 text-red-700 dark:text-red-300'
+                  },
+                  succedent: {
+                    gradient: 'from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30',
+                    border: 'border-green-300 dark:border-green-600',
+                    icon: '🔶',
+                    textColor: 'text-green-700 dark:text-green-300',
+                    label: 'Sucedente',
+                    labelBg: 'bg-green-500/20 text-green-700 dark:text-green-300'
+                  },
+                  cadent: {
+                    gradient: 'from-blue-100 to-sky-100 dark:from-blue-900/30 dark:to-sky-900/30',
+                    border: 'border-blue-300 dark:border-blue-600',
+                    icon: '🔹',
+                    textColor: 'text-blue-700 dark:text-blue-300',
+                    label: 'Cadente',
+                    labelBg: 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
+                  }
+                };
+
+                const style = categoryStyles[category];
+
+                // Nombres de las casas
+                const houseNames: Record<number, string> = {
+                  1: 'Yo/Identidad',
+                  2: 'Recursos',
+                  3: 'Comunicación',
+                  4: 'Hogar/Raíces',
+                  5: 'Creatividad',
+                  6: 'Salud/Servicio',
+                  7: 'Relaciones',
+                  8: 'Transformación',
+                  9: 'Filosofía',
+                  10: 'Carrera/Estatus',
+                  11: 'Comunidad',
+                  12: 'Inconsciente'
+                };
+
+                return (
+                  <div 
+                    key={idx} 
+                    className={`p-4 bg-gradient-to-br ${style.gradient} rounded-xl border-2 ${style.border} hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105`}
+                  >
+                    {/* Encabezado con número y categoría */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl font-black text-gray-800 dark:text-gray-100">
+                          {house.number}
+                        </span>
+                        <span className="text-2xl">{style.icon}</span>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${style.labelBg}`}>
+                        {style.label}
+                      </span>
+                    </div>
+
+                    {/* Nombre de la casa */}
+                    <div className="mb-2">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                        {houseNames[house.number]}
+                      </div>
+                      <div className={`text-lg font-bold ${style.textColor}`}>
+                        {house.sign}
+                      </div>
+                    </div>
+
+                    {/* Información detallada */}
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Cúspide:</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">
+                          {house.degree.toFixed(2)}°
+                        </span>
+                      </div>
+                      
+                      {/* Planetas en esta casa */}
+                      {(() => {
+                        const planetsInHouse = result.planets.filter(p => p.house === house.number);
+                        if (planetsInHouse.length > 0) {
+                          // Mapeo de símbolos de planetas
+                          const planetSymbols: Record<string, string> = {
+                            'Sol': '☉',
+                            'Luna': '☽',
+                            'Mercurio': '☿',
+                            'Venus': '♀',
+                            'Marte': '♂',
+                            'Júpiter': '♃',
+                            'Saturno': '♄',
+                            'Urano': '♅',
+                            'Neptuno': '♆',
+                            'Plutón': '♇'
+                          };
+                          
+                          return (
+                            <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+                              <div className="text-gray-600 dark:text-gray-400 mb-1">
+                                Planetas ({planetsInHouse.length}):
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {planetsInHouse.map((p, i) => (
+                                  <span 
+                                    key={i}
+                                    className="px-1.5 py-0.5 bg-white/50 dark:bg-gray-800/50 rounded text-xs font-medium"
+                                    title={`${p.name} en ${p.sign}`}
+                                  >
+                                    {planetSymbols[p.name] || p.name.charAt(0)}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </AccordionSection>
 
@@ -1308,7 +2030,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     count={statistics.polarities.masculine.count}
                     percentage={statistics.polarities.masculine.percentage}
                     color="yellow"
-                    icon="☀️"
+                    icon="♂️"
                     items={statistics.polarities.masculine.signs}
                   />
                   <StatCard
@@ -1316,7 +2038,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     count={statistics.polarities.feminine.count}
                     percentage={statistics.polarities.feminine.percentage}
                     color="purple"
-                    icon="🌙"
+                    icon="♀️"
                     items={statistics.polarities.feminine.signs}
                   />
                 </div>

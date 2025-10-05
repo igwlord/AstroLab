@@ -83,7 +83,7 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
         gradient: 'from-blue-400 via-cyan-400 to-sky-400',
         bg: 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20',
         badge: 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
-        icon: '💨',
+        icon: '🌀',
         border: 'border-blue-300 dark:border-blue-700'
       },
       agua: {
@@ -146,10 +146,10 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
                 {elementStyle.icon} {sign.element.charAt(0).toUpperCase() + sign.element.slice(1)}
               </span>
               <span className="modal-badge bg-white/20 backdrop-blur-sm">
-                {sign.modality.charAt(0).toUpperCase() + sign.modality.slice(1)}
+                {sign.modality === 'cardinal' ? '⚡' : sign.modality === 'fija' ? '🔒' : '♻️'} {sign.modality.charAt(0).toUpperCase() + sign.modality.slice(1)}
               </span>
               <span className="modal-badge bg-white/20 backdrop-blur-sm">
-                {sign.polarity === 'positiva' ? '☀️ Masculino' : '🌙 Femenino'}
+                {sign.polarity === 'positiva' ? '♂️ Masculino' : '♀️ Femenino'}
               </span>
             </div>
           </div>

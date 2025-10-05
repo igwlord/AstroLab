@@ -70,25 +70,76 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
       gradientColors={categoryStyle.gradient}
     >
       <div className={`${categoryStyle.bg} modal-content`}>
-        {/* Badges de características */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          <span className={`modal-badge ${categoryStyle.badge}`}>
-            {categoryStyle.icon} {categoryName}
-          </span>
-          <span className={`modal-badge ${categoryStyle.badge}`}>
-            Signo natural: {house.naturalSign}
-          </span>
+        {/* Representación visual de la casa */}
+        <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${categoryStyle.gradient} p-8 text-white shadow-2xl`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-8xl font-black opacity-90">
+                {house.number}
+              </div>
+              <div>
+                <div className="text-3xl font-bold">{house.name}</div>
+                <div className="text-xl opacity-90">{house.title}</div>
+              </div>
+            </div>
+            <div className="text-6xl opacity-40">
+              {categoryStyle.icon}
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-medium">
+              {categoryName}
+            </span>
+            <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-medium">
+              ♈ {house.naturalSign}
+            </span>
+            <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-medium">
+              Regente: {house.naturalRuler}
+            </span>
+          </div>
         </div>
-          {/* Descripción extensa */}
-          <section>
-            <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">
-              <span className="modal-icon-md font-bold">{house.number}</span>
-              Arquetipo de la Casa
-            </h3>
-            <p className="modal-text text-gray-700 dark:text-gray-300">
-              {house.description}
-            </p>
-          </section>
+
+        {/* Descripción extensa */}
+        <section>
+          <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+            <span className="modal-icon-md">🏛️</span>
+            Arquetipo de la Casa
+          </h3>
+          <p className="modal-text text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+            {house.description}
+          </p>
+        </section>
+
+        {/* Información de categoría */}
+        <section className={`modal-section border-l-4 ${categoryStyle.border} ${categoryStyle.bg}`}>
+          <h4 className="modal-h4 flex items-center gap-2">
+            <span className="text-2xl">{categoryStyle.icon}</span>
+            <span>Casa {categoryName}</span>
+          </h4>
+          <p className="modal-text">
+            {house.category === 'angular' && (
+              <>
+                <strong>Casas Angulares (1, 4, 7, 10):</strong> Son las más poderosas. Representan 
+                acción directa, iniciativas y experiencias inmediatas. Los planetas aquí tienen 
+                máxima expresión y visibilidad en la vida.
+              </>
+            )}
+            {house.category === 'succedent' && (
+              <>
+                <strong>Casas Sucedentes (2, 5, 8, 11):</strong> Consolidan y estabilizan lo iniciado 
+                por las angulares. Representan recursos, valores y construcción. Los planetas aquí 
+                buscan crear seguridad y permanencia.
+              </>
+            )}
+            {house.category === 'cadent' && (
+              <>
+                <strong>Casas Cadentes (3, 6, 9, 12):</strong> Procesan, aprenden y transmutan. 
+                Representan adaptación, aprendizaje y trascendencia. Los planetas aquí funcionan 
+                en lo mental y espiritual.
+              </>
+            )}
+          </p>
+        </section>
 
           {/* Manifestación cotidiana */}
           <section className={`modal-section border-2 ${categoryStyle.border} ${categoryStyle.badge}`}>
