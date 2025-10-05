@@ -102,15 +102,15 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
       onClick={handleBackdropClick}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl animate-scaleIn"
+        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
       >
         {/* Header con gradiente del elemento */}
-        <div className={`relative bg-gradient-to-r ${elementStyle.gradient} text-white p-8 overflow-hidden`}>
+        <div className={`relative bg-gradient-to-r ${elementStyle.gradient} text-white p-4 sm:p-6 md:p-8 overflow-hidden`}>
           {/* Patrón de fondo */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -122,33 +122,33 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
           {/* Botón cerrar */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10"
+            className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10"
             aria-label="Cerrar"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
           {/* Contenido del header */}
           <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="text-6xl animate-bounce">{sign.symbol}</div>
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
+              <div className="modal-icon-lg animate-bounce">{sign.symbol}</div>
               <div>
-                <h2 className="text-4xl font-bold">{sign.name}</h2>
-                <p className="text-white/90 text-lg">{sign.dateRange}</p>
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">{sign.name}</h2>
+                <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg">{sign.dateRange}</p>
               </div>
             </div>
 
             {/* Badges de características */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3 md:mt-4">
+              <span className="modal-badge bg-white/20 backdrop-blur-sm">
                 {elementStyle.icon} {sign.element.charAt(0).toUpperCase() + sign.element.slice(1)}
               </span>
-              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold">
+              <span className="modal-badge bg-white/20 backdrop-blur-sm">
                 {sign.modality.charAt(0).toUpperCase() + sign.modality.slice(1)}
               </span>
-              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-semibold">
+              <span className="modal-badge bg-white/20 backdrop-blur-sm">
                 {sign.polarity === 'positiva' ? '☀️ Masculino' : '🌙 Femenino'}
               </span>
             </div>
@@ -156,36 +156,36 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
         </div>
 
         {/* Contenido scrolleable */}
-        <div className={`${elementStyle.bg} overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6`}>
+        <div className={`${elementStyle.bg} overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-180px)] md:max-h-[calc(90vh-200px)] modal-content`}>
           {/* Descripción extensa */}
           <section>
-            <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-3xl">{sign.symbol}</span>
+            <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <span className="modal-icon-md">{sign.symbol}</span>
               Descripción Arquetípica
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+            <p className="modal-text text-gray-700 dark:text-gray-300">
               {sign.description}
             </p>
           </section>
 
           {/* Manifestación cotidiana */}
-          <section className={`p-4 rounded-xl border-2 ${elementStyle.border} ${elementStyle.badge}`}>
-            <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+          <section className={`modal-section border-2 ${elementStyle.border} ${elementStyle.badge}`}>
+            <h4 className="modal-h4 flex items-center gap-2">
               <span>🌟</span> Cómo se manifiesta en la vida cotidiana
             </h4>
-            <p className="leading-relaxed">
+            <p className="modal-text">
               {sign.dailyManifestation}
             </p>
           </section>
 
           {/* Grid de características */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="modal-grid">
             {/* Características astrológicas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="modal-card">
+              <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 📊 Características Astrológicas
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 modal-text-sm">
                 <div>
                   <span className="font-semibold">Elemento:</span> {elementStyle.icon} {sign.element.charAt(0).toUpperCase() + sign.element.slice(1)}
                 </div>
@@ -205,14 +205,14 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
             </div>
 
             {/* Características holísticas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="modal-card">
+              <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 🧘 Dimensión Holística
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 modal-text-sm">
                 <div>
                   <span className="font-semibold">Color:</span> 
-                  <span className="ml-2 inline-block w-4 h-4 rounded-full border border-gray-300" 
+                  <span className="ml-2 inline-block w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300" 
                     style={{ backgroundColor: sign.color.includes('rojo') ? '#DC2626' : 
                              sign.color.includes('verde') ? '#059669' : 
                              sign.color.includes('amarillo') ? '#FBBF24' :
@@ -230,14 +230,14 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
                 <div>
                   <span className="font-semibold">Chakra:</span> {sign.chakra}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold">Frecuencia:</span> {sign.frequency}
                   <button
                     onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
                     title="Reproducir frecuencia"
                   >
-                    ▶️ Escuchar
+                    ▶️ <span className="hidden sm:inline">Escuchar</span>
                   </button>
                 </div>
               </div>
@@ -245,12 +245,12 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
           </div>
 
           {/* Ejercicio holístico */}
-          <section className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-5 border-2 border-purple-300 dark:border-purple-700">
-            <h4 className="font-bold text-xl text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-2xl">🧘‍♀️</span>
+          <section className="modal-section bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">
+            <h4 className="modal-h4 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <span className="modal-icon-sm">🧘‍♀️</span>
               Ejercicio Holístico de Integración
             </h4>
-            <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+            <p className="modal-text text-gray-800 dark:text-gray-200">
               {sign.holisticExercise}
             </p>
           </section>

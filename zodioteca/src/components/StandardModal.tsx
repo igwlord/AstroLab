@@ -62,20 +62,20 @@ const StandardModal: React.FC<StandardModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
       onClick={handleBackdropClick}
       style={{ willChange: 'opacity' }}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl animate-scaleIn"
+        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
         style={{ 
           willChange: 'transform, opacity',
           contain: 'layout style paint'
         }}
       >
         {/* Header con gradiente */}
-        <div className={`relative bg-gradient-to-r ${gradientColors} text-white p-8 overflow-hidden`}>
+        <div className={`relative bg-gradient-to-r ${gradientColors} text-white p-4 sm:p-6 md:p-8 overflow-hidden`}>
           {/* Patrón de fondo con puntos */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -87,28 +87,28 @@ const StandardModal: React.FC<StandardModalProps> = ({
           {/* Botón cerrar - redondo con X pequeña */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10"
+            className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10"
             aria-label="Cerrar"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
           {/* Contenido del header */}
           <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-2">
-              {icon && <div className="text-6xl animate-bounce">{icon}</div>}
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
+              {icon && <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl animate-bounce">{icon}</div>}
               <div>
-                <h2 className="text-4xl font-bold">{title}</h2>
-                {subtitle && <p className="text-white/90 text-lg">{subtitle}</p>}
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">{title}</h2>
+                {subtitle && <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg">{subtitle}</p>}
               </div>
             </div>
           </div>
         </div>
 
         {/* Contenido scrolleable */}
-        <div className="bg-white dark:bg-gray-900 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="bg-white dark:bg-gray-900 overflow-y-auto max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-180px)] md:max-h-[calc(90vh-200px)]">
           {children}
         </div>
       </div>

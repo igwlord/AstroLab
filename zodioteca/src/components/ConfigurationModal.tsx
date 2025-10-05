@@ -44,13 +44,13 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({ configuration, 
       icon={configuration.symbol}
       gradientColors={gradient}
     >
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 space-y-6">
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 modal-content">
           {/* Descripción */}
           <div>
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
               📖 Descripción
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 modal-text">
               {configuration.description}
             </p>
           </div>
@@ -76,7 +76,7 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({ configuration, 
           </div>
 
           {/* Propiedades Holísticas */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="modal-grid">
             <div className="space-y-3">
               <div>
                 <span className="font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>

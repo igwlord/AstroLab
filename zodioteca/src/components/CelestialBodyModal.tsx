@@ -54,7 +54,7 @@ const CelestialBodyModal: React.FC<CelestialBodyModalProps> = ({ celestialBody, 
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
               📜 Mitología
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 modal-text">
               {celestialBody.mythology}
             </p>
           </div>
@@ -100,7 +100,7 @@ const CelestialBodyModal: React.FC<CelestialBodyModalProps> = ({ celestialBody, 
           </div>
 
           {/* Propiedades Holísticas */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="modal-grid">
             <div className="space-y-3">
               <div>
                 <span className="font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>

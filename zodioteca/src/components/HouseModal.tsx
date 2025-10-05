@@ -69,45 +69,45 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
       icon={house.number.toString()}
       gradientColors={categoryStyle.gradient}
     >
-      <div className={`${categoryStyle.bg} p-6 space-y-6`}>
+      <div className={`${categoryStyle.bg} modal-content`}>
         {/* Badges de características */}
-        <div className="flex flex-wrap gap-2">
-          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <span className={`modal-badge ${categoryStyle.badge}`}>
             {categoryStyle.icon} {categoryName}
           </span>
-          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+          <span className={`modal-badge ${categoryStyle.badge}`}>
             Signo natural: {house.naturalSign}
           </span>
         </div>
           {/* Descripción extensa */}
           <section>
-            <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-4xl font-bold">{house.number}</span>
+            <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <span className="modal-icon-md font-bold">{house.number}</span>
               Arquetipo de la Casa
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+            <p className="modal-text text-gray-700 dark:text-gray-300">
               {house.description}
             </p>
           </section>
 
           {/* Manifestación cotidiana */}
-          <section className={`p-4 rounded-xl border-2 ${categoryStyle.border} ${categoryStyle.badge}`}>
-            <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+          <section className={`modal-section border-2 ${categoryStyle.border} ${categoryStyle.badge}`}>
+            <h4 className="modal-h4 flex items-center gap-2">
               <span>🌟</span> Cómo se manifiesta en la vida cotidiana
             </h4>
-            <p className="leading-relaxed">
+            <p className="modal-text">
               {house.dailyManifestation}
             </p>
           </section>
 
           {/* Grid de características */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="modal-grid">
             {/* Características astrológicas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="modal-card">
+              <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 🏠 Características Astrológicas
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 modal-text-sm">
                 <div>
                   <span className="font-semibold">Categoría:</span> {categoryStyle.icon} {categoryName}
                 </div>
@@ -121,14 +121,14 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
             </div>
 
             {/* Características holísticas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="modal-card">
+              <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 🧘 Dimensión Holística
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 modal-text-sm">
                 <div>
                   <span className="font-semibold">Color:</span> 
-                  <span className="ml-2 inline-block w-4 h-4 rounded-full border border-gray-300" 
+                  <span className="ml-2 inline-block w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300" 
                     style={{ backgroundColor: 
                       house.color.includes('rojo') ? '#DC2626' :
                       house.color.includes('verde esmeralda') ? '#10B981' :
@@ -152,10 +152,10 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
                   <span className="font-semibold">Frecuencia:</span> {house.frequency}
                   <button
                     onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
                     title="Reproducir frecuencia"
                   >
-                    ▶️ Escuchar
+                    ▶️ <span className="hidden sm:inline">Escuchar</span>
                   </button>
                 </div>
               </div>
@@ -163,12 +163,12 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
           </div>
 
           {/* Ejercicio holístico */}
-          <section className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-5 border-2 border-purple-300 dark:border-purple-700">
-            <h4 className="font-bold text-xl text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-2xl">🧘‍♀️</span>
+          <section className="modal-section bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">
+            <h4 className="modal-h4 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <span className="modal-icon-sm">🧘‍♀️</span>
               Ejercicio Holístico de Integración
             </h4>
-            <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+            <p className="modal-text text-gray-800 dark:text-gray-200">
               {house.holisticExercise}
             </p>
           </section>

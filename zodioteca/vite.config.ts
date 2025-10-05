@@ -115,6 +115,19 @@ export default defineConfig({
       }
     })
   ],
+  assetsInclude: ['**/*.wasm', '**/*.data'],
+  optimizeDeps: {
+    exclude: ['swisseph-wasm']
+  },
+  server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin'
+    },
+    fs: {
+      allow: ['..']
+    }
+  },
   build: {
     rollupOptions: {
       output: {

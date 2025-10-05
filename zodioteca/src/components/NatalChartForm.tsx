@@ -5,6 +5,7 @@ import type { LocationService } from '../services/locationService';
 import { defaultLocationService } from '../services/locationService';
 
 const STORAGE_KEY = 'natal_form_draft';
+const LAST_SUBMITTED_KEY = 'natal_form_last_submitted';
 
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -14,16 +15,31 @@ const MONTHS_ES = [
 export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: NatalChartFormProps) {
   // Estado del formulario
   const [formData, setFormData] = useState<FormValue>(() => {
-    // Cargar draft de localStorage
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    // Prioridad 1: Cargar draft en progreso
+    const draft = localStorage.getItem(STORAGE_KEY);
+    if (draft) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(draft);
+        console.log('📝 Cargando borrador en progreso...');
+        return parsed;
       } catch {
         // Ignorar errores de parseo
       }
     }
     
+    // Prioridad 2: Cargar último formulario enviado
+    const lastSubmitted = localStorage.getItem(LAST_SUBMITTED_KEY);
+    if (lastSubmitted) {
+      try {
+        const parsed = JSON.parse(lastSubmitted);
+        console.log('♻️ Cargando últimos datos enviados...');
+        return parsed;
+      } catch {
+        // Ignorar errores de parseo
+      }
+    }
+    
+    // Prioridad 3: Usar valores por defecto
     return {
       name: defaultValues?.name || '',
       surname: defaultValues?.surname,
@@ -55,6 +71,17 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
   const [manualTz, setManualTz] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [showLoadedNotification, setShowLoadedNotification] = useState(false);
+
+  // Mostrar notificación si se cargaron datos
+  useEffect(() => {
+    const hasSavedData = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LAST_SUBMITTED_KEY);
+    if (hasSavedData) {
+      setShowLoadedNotification(true);
+      const timer = setTimeout(() => setShowLoadedNotification(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
   
   // Location data
   const [countries, setCountries] = useState<Array<{ code: string; name: string }>>([]);
@@ -264,18 +291,66 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
         ciudad: finalData.location.city,
         tzId: finalData.location.tzId
       });
-      onSubmit(finalData);
-      // Limpiar draft
+      
+      // Guardar datos enviados para recordar en próximos usos
+      localStorage.setItem(LAST_SUBMITTED_KEY, JSON.stringify(finalData));
+      console.log('💾 Datos guardados para próxima vez');
+      
+      // Limpiar draft (ya que fue enviado exitosamente)
       localStorage.removeItem(STORAGE_KEY);
+      
+      onSubmit(finalData);
     }, 300);
+  };
+
+  // Función para limpiar datos guardados
+  const handleClearSavedData = () => {
+    if (confirm('¿Estás seguro de que deseas limpiar todos los datos guardados?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LAST_SUBMITTED_KEY);
+      console.log('🗑️ Datos guardados eliminados');
+      window.location.reload(); // Recargar para aplicar cambios
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6 p-6">
+      {/* Notificación de datos cargados */}
+      {showLoadedNotification && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 animate-fade-in">
+          <div className="text-2xl">✅</div>
+          <div className="flex-1">
+            <p className="text-green-800 font-medium">Datos cargados</p>
+            <p className="text-green-600 text-sm">Se han cargado los últimos datos guardados</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowLoadedNotification(false)}
+            className="text-green-600 hover:text-green-800 text-xl"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">✨ Nueva Carta Natal</h1>
-        <p className="text-purple-100">Ingresa los datos de nacimiento para calcular tu carta astral</p>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold mb-2">✨ Nueva Carta Natal</h1>
+            <p className="text-purple-100">Ingresa los datos de nacimiento para calcular tu carta astral</p>
+          </div>
+          {(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LAST_SUBMITTED_KEY)) && (
+            <button
+              type="button"
+              onClick={handleClearSavedData}
+              className="ml-4 px-4 py-2 bg-purple-700 hover:bg-purple-800 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              title="Limpiar datos guardados"
+            >
+              🗑️ Limpiar datos
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Datos Básicos */}

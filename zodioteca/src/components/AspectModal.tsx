@@ -59,58 +59,58 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) =>
       icon={aspect.symbol}
       gradientColors={styles.gradient}
     >
-      <div className={`${styles.bg} p-6 space-y-6`}>
+      <div className={`${styles.bg} modal-content`}>
         {/* Badges */}
-        <div className="flex gap-2 flex-wrap">
-          <span className="px-3 py-1 bg-white/20 dark:bg-gray-800/50 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+          <span className="modal-badge bg-white/20 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300">
             {aspect.polarity}
           </span>
-          <span className="px-3 py-1 bg-white/20 dark:bg-gray-800/50 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span className="modal-badge bg-white/20 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300">
             Orbe: {aspect.orb}
           </span>
         </div>
           {/* Descripción */}
           <div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
+            <h3 className="modal-h4 text-gray-800 dark:text-gray-200">
               📖 Descripción
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="modal-text text-gray-700 dark:text-gray-300">
               {aspect.description}
             </p>
           </div>
 
           {/* Manifestación Cotidiana */}
-          <div className={`${styles.bg} p-4 rounded-lg`}>
-            <h3 className={`text-lg font-semibold mb-2 ${styles.text}`}>
+          <div className={`${styles.bg} modal-section`}>
+            <h3 className={`modal-h4 ${styles.text}`}>
               ✨ Manifestación Cotidiana
             </h3>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="modal-text text-gray-700 dark:text-gray-300">
               {aspect.manifestation}
             </p>
           </div>
 
           {/* Propiedades */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-3">
+          <div className="modal-grid">
+            <div className="space-y-2 sm:space-y-3">
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>
-                <p className="text-gray-600 dark:text-gray-400">{aspect.color}</p>
+                <span className="modal-text-sm font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>
+                <p className="modal-text-sm text-gray-600 dark:text-gray-400">{aspect.color}</p>
               </div>
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🧘 Chakra:</span>
-                <p className="text-gray-600 dark:text-gray-400">{aspect.chakra}</p>
+                <span className="modal-text-sm font-semibold text-gray-700 dark:text-gray-300">🧘 Chakra:</span>
+                <p className="modal-text-sm text-gray-600 dark:text-gray-400">{aspect.chakra}</p>
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="text-gray-600 dark:text-gray-400">{aspect.frequency} Hz</p>
+                <span className="modal-text-sm font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
+                <p className="modal-text-sm text-gray-600 dark:text-gray-400">{aspect.frequency} Hz</p>
               </div>
               <button
                 onClick={playFrequency}
-                className={`w-full px-4 py-2 bg-gradient-to-r ${styles.gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
+                className={`w-full px-3 py-2 sm:px-4 text-sm sm:text-base bg-gradient-to-r ${styles.gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
               >
-                ▶ Reproducir Frecuencia
+                ▶ <span className="hidden sm:inline">Reproducir </span>Frecuencia
               </button>
               <audio
                 ref={audioRef}
@@ -121,11 +121,11 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) =>
           </div>
 
           {/* Ejercicio Holístico */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2 text-purple-800 dark:text-purple-300">
+          <div className="modal-section bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+            <h3 className="modal-h4 text-purple-800 dark:text-purple-300">
               🌟 Ejercicio Holístico
             </h3>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="modal-text text-gray-700 dark:text-gray-300">
               {aspect.exercise}
             </p>
           </div>

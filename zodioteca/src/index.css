@@ -184,6 +184,15 @@ button:focus-visible {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: opacity;
@@ -452,4 +461,63 @@ html.dark .bg-blue-500,
 html.dark .bg-cyan-500 {
   /* These are colorful cards like zodiac signs - keep them vibrant */
   opacity: 0.95;
+}
+
+/* Modal responsive utilities */
+@layer utilities {
+  /* Responsive modal content */
+  .modal-content {
+    @apply p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6;
+  }
+  
+  /* Responsive modal section */
+  .modal-section {
+    @apply p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl;
+  }
+  
+  /* Responsive modal heading */
+  .modal-h3 {
+    @apply text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3;
+  }
+  
+  .modal-h4 {
+    @apply text-base sm:text-lg font-bold mb-2 sm:mb-3;
+  }
+  
+  /* Responsive modal text */
+  .modal-text {
+    @apply text-sm sm:text-base leading-relaxed;
+  }
+  
+  .modal-text-sm {
+    @apply text-xs sm:text-sm;
+  }
+  
+  /* Responsive badges */
+  .modal-badge {
+    @apply px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold;
+  }
+  
+  /* Responsive grid */
+  .modal-grid {
+    @apply grid md:grid-cols-2 gap-3 sm:gap-4;
+  }
+  
+  /* Responsive card */
+  .modal-card {
+    @apply bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3;
+  }
+  
+  /* Responsive icon sizes */
+  .modal-icon-sm {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  .modal-icon-md {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+  
+  .modal-icon-lg {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl;
+  }
 }

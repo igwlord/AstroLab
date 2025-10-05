@@ -62,12 +62,16 @@ const SettingsPage: React.FC = () => {
           <div className="text-center py-8">
             <span className="text-4xl mb-4 block">⚙️</span>
             <p className="text-purple-700">
-              Configuraciones astrológicas avanzadas estarán disponibles cuando 
-              se implemente el motor de cálculo de cartas natales.
+              Configuraciones astrológicas avanzadas (Asteroides, Chiron, Lilith, 
+              Nodos Lunares, Aspectos Menores y Partes Árabes) están disponibles.
             </p>
-            <div className="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded-lg mt-4">
+            <div className="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-lg mt-4">
+              <span className="mr-2">✅</span>
+              FASES 1-5 Completadas
+            </div>
+            <div className="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded-lg mt-2">
               <span className="mr-2">🔄</span>
-              FASE 5 - En desarrollo
+              FASE 6: Análisis de Hemisferios - En desarrollo
             </div>
           </div>
         </div>

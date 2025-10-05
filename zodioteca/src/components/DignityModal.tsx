@@ -46,7 +46,7 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose })
       icon={dignity.symbol}
       gradientColors={gradient}
     >
-      <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-6 space-y-6">
+      <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 modal-content">
         </div>
 
         {/* Content */}
@@ -56,7 +56,7 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose })
             <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
               📖 Descripción
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 modal-text">
               {dignity.description}
             </p>
           </div>
@@ -82,7 +82,7 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose })
           </div>
 
           {/* Propiedades Holísticas */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="modal-grid">
             <div className="space-y-3">
               <div>
                 <span className="font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>

@@ -21,6 +21,17 @@ export interface AstroSettings {
   showAsteroids: boolean;
   showFixedStars: boolean;
   coordinateSystem: 'tropical' | 'sidereal';
+  // 🆕 Configuraciones avanzadas (FASE 1-4)
+  showChiron: boolean;
+  lilithType: 'mean' | 'true' | 'both';
+  showLunarNodes: boolean;
+  lunarNodesType: 'mean' | 'true';
+  showQuincunx: boolean;
+  showAllMinorAspects: boolean;
+  // 🆕 FASE 5: Partes Árabes
+  showArabicParts: boolean;
+  // 🆕 FASE 6: Análisis de Hemisferios
+  showHemispheres: boolean;
 }
 
 interface SettingsState {
@@ -46,6 +57,17 @@ interface SettingsState {
   toggleAsteroids: () => void;
   toggleFixedStars: () => void;
   setCoordinateSystem: (system: 'tropical' | 'sidereal') => void;
+  // 🆕 Acciones para configuraciones avanzadas
+  toggleChiron: () => void;
+  setLilithType: (type: 'mean' | 'true' | 'both') => void;
+  toggleLunarNodes: () => void;
+  setLunarNodesType: (type: 'mean' | 'true') => void;
+  toggleQuincunx: () => void;
+  toggleAllMinorAspects: () => void;
+  toggleArabicParts: () => void; // 🆕 FASE 5
+  toggleHemispheres: () => void; // 🆕 FASE 6
+  enableAllAdvanced: () => void;
+  disableAllAdvanced: () => void;
   toggleAutoSave: () => void;
   toggleNotifications: () => void;
   toggleSound: () => void;
@@ -67,9 +89,18 @@ const defaultAstroSettings: AstroSettings = {
   houseSystem: 'placidus',
   orbs: defaultOrbSettings,
   showMinorAspects: false,
-  showAsteroids: false,
+  showAsteroids: true, // 🆕 Activado por defecto
   showFixedStars: false,
   coordinateSystem: 'tropical',
+  // 🆕 Configuraciones avanzadas por defecto
+  showChiron: true,
+  lilithType: 'mean',
+  showLunarNodes: true,
+  lunarNodesType: 'mean',
+  showQuincunx: true,
+  showAllMinorAspects: true,
+  showArabicParts: true, // 🆕 FASE 5 activado por defecto
+  showHemispheres: true, // 🆕 FASE 6 activado por defecto
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -150,6 +181,85 @@ export const useSettingsStore = create<SettingsState>()(
       setCoordinateSystem: (system) => {
         set((state) => ({
           astro: { ...state.astro, coordinateSystem: system },
+        }));
+      },
+
+      // 🆕 Acciones para configuraciones avanzadas
+      toggleChiron: () => {
+        set((state) => ({
+          astro: { ...state.astro, showChiron: !state.astro.showChiron },
+        }));
+      },
+
+      setLilithType: (type) => {
+        set((state) => ({
+          astro: { ...state.astro, lilithType: type },
+        }));
+      },
+
+      toggleLunarNodes: () => {
+        set((state) => ({
+          astro: { ...state.astro, showLunarNodes: !state.astro.showLunarNodes },
+        }));
+      },
+
+      setLunarNodesType: (type) => {
+        set((state) => ({
+          astro: { ...state.astro, lunarNodesType: type },
+        }));
+      },
+
+      toggleQuincunx: () => {
+        set((state) => ({
+          astro: { ...state.astro, showQuincunx: !state.astro.showQuincunx },
+        }));
+      },
+
+      toggleAllMinorAspects: () => {
+        set((state) => ({
+          astro: { ...state.astro, showAllMinorAspects: !state.astro.showAllMinorAspects },
+        }));
+      },
+
+      toggleArabicParts: () => {
+        set((state) => ({
+          astro: { ...state.astro, showArabicParts: !state.astro.showArabicParts },
+        }));
+      },
+
+      toggleHemispheres: () => {
+        set((state) => ({
+          astro: { ...state.astro, showHemispheres: !state.astro.showHemispheres },
+        }));
+      },
+
+      enableAllAdvanced: () => {
+        set((state) => ({
+          astro: {
+            ...state.astro,
+            showAsteroids: true,
+            showChiron: true,
+            showLunarNodes: true,
+            showQuincunx: true,
+            showAllMinorAspects: true,
+            showArabicParts: true, // 🆕 FASE 5
+            showHemispheres: true, // 🆕 FASE 6
+          },
+        }));
+      },
+
+      disableAllAdvanced: () => {
+        set((state) => ({
+          astro: {
+            ...state.astro,
+            showAsteroids: false,
+            showChiron: false,
+            showLunarNodes: false,
+            showQuincunx: false,
+            showAllMinorAspects: false,
+            showArabicParts: false, // 🆕 FASE 5
+            showHemispheres: false, // 🆕 FASE 6
+          },
         }));
       },
 

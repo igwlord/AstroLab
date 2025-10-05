@@ -4,6 +4,18 @@
  */
 
 import * as Astronomy from 'astronomy-engine';
+import { calculateAsteroids, type AsteroidPosition } from './asteroidsCalculator';
+import { calculateSensitivePoints, type SensitivePoint } from './sensitivePointsCalculator';
+import { calculateLunarNodes, type LunarNode } from './lunarNodesCalculator';
+import { calculateAspectsAdvanced, type EnhancedAspect } from './aspectsCalculator';
+import { calculateArabicParts, type ArabicPart } from './arabicPartsCalculator';
+import { calculateHemispheres, type HemispheresResult } from './hemispheresCalculator';
+import { useSettingsStore } from '../store/useSettings';
+// 🎯 Swiss Ephemeris para cálculos de alta precisión (Placidus houses)
+import { 
+  calculatePlacidusHouses, 
+  dateToJulian 
+} from './swissEphemerisCalculator';
 
 export interface PlanetPosition {
   name: string;
@@ -28,6 +40,11 @@ export interface Aspect {
   angle: number;
   orb: number;
   applying: boolean;
+  // Campos extendidos (opcionales para compatibilidad)
+  exactness?: number;
+  category?: 'mayor' | 'menor';
+  nature?: 'armonico' | 'tenso' | 'neutral';
+  symbol?: string;
 }
 
 export interface NatalChart {
@@ -37,11 +54,19 @@ export interface NatalChart {
   longitude: number;
   timezone: string;
   planets: PlanetPosition[];
+  asteroids?: AsteroidPosition[]; // 🆕 Asteroides opcionales
+  arabicParts?: ArabicPart[]; // 🆕 Partes Árabes opcionales (FASE 5)
+  sensitivePoints?: SensitivePoint[]; // 🆕 Chiron & Lilith
+  lunarNodes?: LunarNode[]; // 🆕 Nodos Lunares (Norte y Sur)
+  hemispheres?: HemispheresResult; // 🆕 Análisis de Hemisferios (FASE 6)
   houses: HousePosition[];
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
-  aspects: Aspect[];
+  aspects: Aspect[]; // Ahora con campos extendidos
 }
+
+// Re-exportar tipos
+export type { AsteroidPosition, SensitivePoint, LunarNode, EnhancedAspect, ArabicPart, HemispheresResult };
 
 const ZODIAC_SIGNS = [
   'Aries', 'Tauro', 'Géminis', 'Cáncer',
@@ -77,96 +102,60 @@ function eclipticToZodiac(longitude: number): { sign: string; degree: number } {
 }
 
 function calculateRetrograde(body: Astronomy.Body, date: Date): boolean {
-  // Calcular velocidad aparente comparando posición en t y t+1 día
+  // Calcular velocidad aparente comparando posición en intervalos más cortos (12 horas)
+  // para mayor precisión en detectar estaciones
   const currentPos = Astronomy.Ecliptic(Astronomy.GeoVector(body, date, false));
-  const nextDay = new Date(date.getTime() + 24 * 60 * 60 * 1000);
-  const nextPos = Astronomy.Ecliptic(Astronomy.GeoVector(body, nextDay, false));
+  const halfDay = new Date(date.getTime() + 12 * 60 * 60 * 1000); // +12 horas
+  const nextPos = Astronomy.Ecliptic(Astronomy.GeoVector(body, halfDay, false));
 
-  // Si la longitud disminuye, está retrógrado
-  return nextPos.elon < currentPos.elon;
+  // Calcular diferencia de longitud considerando el cruce de 0° Aries
+  let diff = nextPos.elon - currentPos.elon;
+  
+  // Ajustar si hay cruce de 360° → 0°
+  if (diff > 180) {
+    diff -= 360;
+  } else if (diff < -180) {
+    diff += 360;
+  }
+
+  // Si la longitud disminuye (diff negativo), está retrógrado
+  return diff < 0;
 }
 
-function calculateHouses(date: Date, latitude: number, longitude: number): {
+/**
+ * Calcula una cúspide de casa intermedia usando PLACIDUS SIMPLIFICADO
+ * Usa interpolación temporal del arco diurno/nocturno
+ * Basado en la implementación de Swiss Ephemeris simplificada
+ * 
+ * Para latitudes extremas (>66°), usar Porphyry como fallback
+ */
+/**
+ * 🎯 Calcula casas usando SWISS EPHEMERIS (máxima precisión)
+ * Reemplaza implementación anterior con algoritmos de precisión quirúrgica
+ */
+async function calculateHouses(date: Date, latitude: number, longitude: number): Promise<{
   houses: HousePosition[];
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
-} {
-  // Calcular tiempo sideral local (LST)
-  const siderealTime = Astronomy.SiderealTime(date);
-  const lst = (siderealTime + longitude / 15) % 24; // Horas (0-24)
-  const ramc = lst * 15; // Convertir a grados (0-360)
-
-  // Calcular oblicuidad de la eclíptica para la fecha exacta
-  const T = (date.getTime() - Date.UTC(2000, 0, 1, 12, 0, 0)) / (86400000 * 36525);
-  const obliquity = 23.4392911 - 0.0130042 * T - 0.00000016 * T * T + 0.000000504 * T * T * T;
-
-  // Convertir a radianes
-  const oblRad = (obliquity * Math.PI) / 180;
-  const latRad = (latitude * Math.PI) / 180;
-  const ramcRad = (ramc * Math.PI) / 180;
-
-  // Calcular MC (Midheaven) - punto más alto de la eclíptica
-  // MC es la longitud eclíptica del meridiano
-  const tanMC = Math.sin(ramcRad) / (Math.cos(ramcRad) * Math.cos(oblRad));
-  let mc = Math.atan(tanMC) * (180 / Math.PI);
+}> {
+  // Convertir fecha a Día Juliano
+  const jd = dateToJulian(date);
   
-  // Ajustar cuadrante del MC
-  if (Math.cos(ramcRad) < 0) {
-    mc += 180;
-  }
-  mc = ((mc % 360) + 360) % 360;
-  const mcZodiac = eclipticToZodiac(mc);
-
-  // Calcular Ascendente (ASC) - punto que asciende en el horizonte este
-  // Fórmula de Jean Meeus (Astronomical Algorithms):
-  // tan(ASC) = cos(RAMC) / (-sin(obliquity) * tan(latitude) - cos(obliquity) * sin(RAMC))
-  // Usando atan2 para manejar cuadrantes correctamente:
-  const y = Math.cos(ramcRad);
-  const x = -Math.sin(oblRad) * Math.tan(latRad) - Math.cos(oblRad) * Math.sin(ramcRad);
+  // Usar Swiss Ephemeris para cálculo Placidus preciso
+  const result = await calculatePlacidusHouses(jd, latitude, longitude);
   
-  let asc = Math.atan2(y, x) * (180 / Math.PI);
+  // Convertir formato de salida - asegurar que sign y degree existan
+  const houses: HousePosition[] = result.houses.map(h => ({
+    number: h.number,
+    sign: h.sign || 'Aries',
+    degree: h.degree || 0,
+    cusp: h.longitude || 0
+  }));
   
-  // Normalizar a 0-360
-  asc = ((asc % 360) + 360) % 360;
-  const ascZodiac = eclipticToZodiac(asc);
-
-  // Sistema de casas Placidus simplificado
-  const houses: HousePosition[] = [];
-  const ic = (mc + 180) % 360; // Immum Coeli (Casa 4)
-  const desc = (asc + 180) % 360; // Descendente (Casa 7)
-
-  // Casas 1, 4, 7, 10 (angulares)
-  houses.push({ number: 1, ...ascZodiac, cusp: asc });
-  houses.push({ number: 4, ...eclipticToZodiac(ic), cusp: ic });
-  houses.push({ number: 7, ...eclipticToZodiac(desc), cusp: desc });
-  houses.push({ number: 10, ...mcZodiac, cusp: mc });
-
-  // Interpolar casas intermedias (simplificado - no es Placidus exacto)
-  for (let i = 0; i < 3; i++) {
-    // Casas 2, 3 entre ASC y IC
-    const cusp2_3 = (asc + ((ic - asc + 360) % 360) * (i + 1) / 3) % 360;
-    houses.push({ number: i + 2, ...eclipticToZodiac(cusp2_3), cusp: cusp2_3 });
-
-    // Casas 5, 6 entre IC y DESC
-    const cusp5_6 = (ic + ((desc - ic + 360) % 360) * (i + 1) / 3) % 360;
-    houses.push({ number: i + 5, ...eclipticToZodiac(cusp5_6), cusp: cusp5_6 });
-
-    // Casas 8, 9 entre DESC y MC
-    const cusp8_9 = (desc + ((mc - desc + 360) % 360) * (i + 1) / 3) % 360;
-    houses.push({ number: i + 8, ...eclipticToZodiac(cusp8_9), cusp: cusp8_9 });
-
-    // Casas 11, 12 entre MC y ASC
-    const cusp11_12 = (mc + ((asc - mc + 360) % 360) * (i + 1) / 3) % 360;
-    houses.push({ number: i + 11, ...eclipticToZodiac(cusp11_12), cusp: cusp11_12 });
-  }
-
-  // Ordenar por número de casa
-  houses.sort((a, b) => a.number - b.number);
-
   return {
     houses,
-    ascendant: ascZodiac,
-    midheaven: mcZodiac
+    ascendant: { sign: result.ascendant.sign, degree: result.ascendant.degree },
+    midheaven: { sign: result.midheaven.sign, degree: result.midheaven.degree }
   };
 }
 
@@ -190,48 +179,48 @@ function assignHouse(longitude: number, houses: HousePosition[]): number {
   return 1; // Fallback
 }
 
+/**
+ * Calcula aspectos usando el nuevo sistema avanzado
+ * Lee configuración del usuario para incluir aspectos menores
+ */
 function calculateAspects(planets: PlanetPosition[]): Aspect[] {
-  const aspects: Aspect[] = [];
-  const aspectTypes = [
-    { name: 'Conjunción', angle: 0, orb: 10 },
-    { name: 'Sextil', angle: 60, orb: 6 },
-    { name: 'Cuadratura', angle: 90, orb: 8 },
-    { name: 'Trígono', angle: 120, orb: 8 },
-    { name: 'Oposición', angle: 180, orb: 10 }
-  ];
-
-  for (let i = 0; i < planets.length; i++) {
-    for (let j = i + 1; j < planets.length; j++) {
-      const p1 = planets[i];
-      const p2 = planets[j];
-      const angle = Math.abs(p1.longitude - p2.longitude);
-      const normalizedAngle = angle > 180 ? 360 - angle : angle;
-
-      for (const aspectType of aspectTypes) {
-        const diff = Math.abs(normalizedAngle - aspectType.angle);
-        if (diff <= aspectType.orb) {
-          aspects.push({
-            planet1: p1.name,
-            planet2: p2.name,
-            type: aspectType.name,
-            angle: normalizedAngle,
-            orb: diff,
-            applying: p1.longitude < p2.longitude
-          });
-        }
-      }
-    }
+  // Leer configuración
+  const settings = useSettingsStore.getState().astro;
+  
+  // Usar el calculador avanzado con settings del usuario
+  const enhancedAspects = calculateAspectsAdvanced(planets, {
+    includeMajor: true,
+    includeMinor: settings.showAllMinorAspects || settings.showQuincunx
+  });
+  
+  // Filtrar Quincunx si solo está activado ese y no todos los menores
+  let filteredAspects = enhancedAspects;
+  if (settings.showQuincunx && !settings.showAllMinorAspects) {
+    filteredAspects = enhancedAspects.filter(
+      a => a.category === 'mayor' || a.type === 'Quincunx'
+    );
   }
-
-  return aspects;
+  
+  // Convertir a formato Aspect (compatible con versión anterior)
+  return filteredAspects.map(ea => ({
+    planet1: ea.planet1,
+    planet2: ea.planet2,
+    type: ea.type,
+    angle: ea.angle,
+    orb: ea.orb,
+    applying: ea.applying,
+    exactness: ea.exactness,
+    category: ea.category,
+    nature: ea.nature,
+    symbol: ea.symbol
+  }));
 }
 
 export async function calculateNatalChart(
   birthDate: Date,
   latitude: number,
   longitude: number,
-  location: string,
-  _houseSystem: 'Placidus' | 'WholeSign' | 'Koch' | 'Equal' = 'Placidus'
+  location: string
 ): Promise<NatalChart> {
   // TODO: Implementar diferentes sistemas de casas
   console.log('=== CÁLCULO ASTRONÓMICO REAL ===');
@@ -254,7 +243,7 @@ export async function calculateNatalChart(
   ];
 
   // Calcular casas primero para asignar planetas
-  const { houses, ascendant, midheaven } = calculateHouses(birthDate, latitude, longitude);
+  const { houses, ascendant, midheaven } = await calculateHouses(birthDate, latitude, longitude);
 
   for (const body of bodies) {
     try {
@@ -277,6 +266,102 @@ export async function calculateNatalChart(
     }
   }
 
+  // Leer configuración del usuario
+  const settings = useSettingsStore.getState().astro;
+
+  // Calcular asteroides (Ceres, Pallas, Juno, Vesta)
+  let asteroids: AsteroidPosition[] | undefined;
+  if (settings.showAsteroids) {
+    try {
+      const houseCusps = houses.map((h: HousePosition) => h.cusp);
+      asteroids = await calculateAsteroids(birthDate, houseCusps);
+      console.log('✅ Asteroides calculados:', asteroids.length);
+    } catch (error) {
+      console.error('❌ Error calculando asteroides:', error);
+      asteroids = undefined;
+    }
+  }
+
+  // Calcular puntos sensibles (Chiron & Lilith)
+  let sensitivePoints: SensitivePoint[] | undefined;
+  if (settings.showChiron || settings.lilithType) {
+    try {
+      const houseCusps = houses.map((h: HousePosition) => h.cusp);
+      sensitivePoints = await calculateSensitivePoints(
+        birthDate,
+        houseCusps,
+        { 
+          includeChiron: settings.showChiron,
+          lilithType: settings.lilithType
+        }
+      );
+      console.log('✅ Puntos sensibles calculados:', sensitivePoints.length);
+    } catch (error) {
+      console.error('❌ Error calculando puntos sensibles:', error);
+      sensitivePoints = undefined;
+    }
+  }
+
+  // Calcular nodos lunares (Norte y Sur)
+  let lunarNodes: LunarNode[] | undefined;
+  if (settings.showLunarNodes) {
+    try {
+      const houseCusps = houses.map((h: HousePosition) => h.cusp);
+      lunarNodes = await calculateLunarNodes(
+        birthDate,
+        houseCusps,
+        settings.lunarNodesType
+      );
+      console.log('✅ Nodos lunares calculados:', lunarNodes.length);
+    } catch (error) {
+      console.error('❌ Error calculando nodos lunares:', error);
+      lunarNodes = undefined;
+    }
+  }
+
+  // Calcular Partes Árabes (FASE 5)
+  let arabicParts: ArabicPart[] | undefined;
+  if (settings.showArabicParts) {
+    try {
+      const houseCusps = houses.map((h: HousePosition) => h.cusp);
+      const ascendantLongitude = houseCusps[0]; // Ascendente = cúspide de casa 1
+      
+      // Convertir PlanetPosition[] a formato simple para el calculador
+      const planetLongitudes = planets.map(p => ({
+        name: p.name,
+        longitude: p.longitude
+      }));
+      
+      arabicParts = await calculateArabicParts(
+        planetLongitudes,
+        ascendantLongitude,
+        houseCusps
+      );
+      console.log('✅ Partes Árabes calculadas:', arabicParts.length);
+    } catch (error) {
+      console.error('❌ Error calculando Partes Árabes:', error);
+      arabicParts = undefined;
+    }
+  }
+
+  // Calcular Análisis de Hemisferios (FASE 6)
+  let hemispheres: HemispheresResult | undefined;
+  if (settings.showHemispheres) {
+    try {
+      // Convertir PlanetPosition[] a formato simple para el calculador
+      const planetsForHemispheres = planets.map(p => ({
+        name: p.name,
+        house: p.house
+      }));
+      
+      hemispheres = await calculateHemispheres(planetsForHemispheres);
+      console.log('✅ Análisis de Hemisferios calculado');
+    } catch (error) {
+      console.error('❌ Error calculando Hemisferios:', error);
+      hemispheres = undefined;
+    }
+  }
+
   // Calcular aspectos
   const aspects = calculateAspects(planets);
 
@@ -287,6 +372,11 @@ export async function calculateNatalChart(
     longitude,
     timezone: 'UTC', // TODO: usar timezone real
     planets,
+    asteroids, // 🆕 Incluir asteroides
+    sensitivePoints, // 🆕 Incluir Chiron y Lilith
+    lunarNodes, // 🆕 Incluir Nodos Lunares
+    arabicParts, // 🆕 Incluir Partes Árabes (FASE 5)
+    hemispheres, // 🆕 Incluir Análisis de Hemisferios (FASE 6)
     houses,
     ascendant,
     midheaven,

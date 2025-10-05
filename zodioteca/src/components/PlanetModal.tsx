@@ -68,45 +68,45 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
       icon={planet.symbol}
       gradientColors={categoryStyle.gradient}
     >
-      <div className={`${categoryStyle.bg} p-6 space-y-6`}>
+      <div className={`${categoryStyle.bg} p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6`}>
         {/* Badges de características */}
-        <div className="flex flex-wrap gap-2">
-          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <span className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full ${categoryStyle.badge} text-xs sm:text-sm font-semibold`}>
             {categoryStyle.icon} {planet.category === 'personal' ? 'Personal' : planet.category === 'social' ? 'Social' : 'Transpersonal'}
           </span>
-          <span className={`px-3 py-1 rounded-full ${categoryStyle.badge} text-sm font-semibold`}>
+          <span className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full ${categoryStyle.badge} text-xs sm:text-sm font-semibold`}>
             ♛ Rige: {planet.rulership}
           </span>
         </div>
           {/* Descripción extensa */}
           <section>
-            <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-4xl font-light">{planet.symbol}</span>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-purple-100 mb-2 sm:mb-3 flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-light">{planet.symbol}</span>
               Esencia Arquetípica
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm sm:text-base md:text-lg">
               {planet.description}
             </p>
           </section>
 
           {/* Manifestación cotidiana */}
-          <section className={`p-4 rounded-xl border-2 ${categoryStyle.border} ${categoryStyle.badge}`}>
-            <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+          <section className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 ${categoryStyle.border} ${categoryStyle.badge}`}>
+            <h4 className="font-bold text-base sm:text-lg mb-2 flex items-center gap-2">
               <span>🌟</span> Cómo se manifiesta en la vida cotidiana
             </h4>
-            <p className="leading-relaxed">
+            <p className="leading-relaxed text-sm sm:text-base">
               {planet.dailyManifestation}
             </p>
           </section>
 
           {/* Grid de características */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
             {/* Características astrológicas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
+              <h4 className="font-bold text-base sm:text-lg text-purple-900 dark:text-purple-100 mb-2 sm:mb-3">
                 🪐 Características Astrológicas
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                 <div>
                   <span className="font-semibold">Ritmo:</span> {planet.rhythm === 'personal' ? '⭐ Personal' : planet.rhythm === 'social' ? '🌍 Social' : '✨ Transpersonal'}
                 </div>
@@ -123,14 +123,14 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
             </div>
 
             {/* Características holísticas */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <h4 className="font-bold text-lg text-purple-900 dark:text-purple-100 mb-3">
+            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
+              <h4 className="font-bold text-base sm:text-lg text-purple-900 dark:text-purple-100 mb-2 sm:mb-3">
                 🧘 Dimensión Holística
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                 <div>
                   <span className="font-semibold">Color:</span> 
-                  <span className="ml-2 inline-block w-4 h-4 rounded-full border border-gray-300" 
+                  <span className="ml-2 inline-block w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300" 
                     style={{ backgroundColor: 
                       planet.color.includes('dorado') || planet.color.includes('amarillo') ? '#FFD700' :
                       planet.color.includes('plata') || planet.color.includes('blanco') ? '#C0C0C0' :
@@ -148,14 +148,14 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
                 <div>
                   <span className="font-semibold">Chakra:</span> {planet.chakra}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold">Frecuencia:</span> {planet.frequency}
                   <button
                     onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
                     title="Reproducir frecuencia"
                   >
-                    ▶️ Escuchar
+                    ▶️ <span className="hidden sm:inline">Escuchar</span>
                   </button>
                 </div>
               </div>
@@ -163,12 +163,12 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
           </div>
 
           {/* Ejercicio holístico */}
-          <section className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-5 border-2 border-purple-300 dark:border-purple-700">
-            <h4 className="font-bold text-xl text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span className="text-2xl">🧘‍♀️</span>
+          <section className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border-2 border-purple-300 dark:border-purple-700">
+            <h4 className="font-bold text-base sm:text-lg md:text-xl text-purple-900 dark:text-purple-100 mb-2 sm:mb-3 flex items-center gap-2">
+              <span className="text-xl sm:text-2xl">🧘‍♀️</span>
               Ejercicio Holístico de Integración
             </h4>
-            <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+            <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm sm:text-base">
               {planet.holisticExercise}
             </p>
           </section>
