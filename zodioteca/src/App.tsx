@@ -9,18 +9,6 @@ import GlossaryPage from './pages/GlossaryPage';
 import FrequenciesPage from './pages/FrequenciesPage';
 import SavedChartsPage from './pages/SavedChartsPage';
 import SettingsPage from './pages/SettingsPage';
-import TestSignsPage from './pages/TestSignsPage';
-import TestPlanetsPage from './pages/TestPlanetsPage';
-import TestHousesPage from './pages/TestHousesPage';
-import TestAspectsPage from './pages/TestAspectsPage';
-import TestMoonsPage from './pages/TestMoonsPage';
-import TestAscendantsPage from './pages/TestAscendantsPage';
-import TestAsteroidsPage from './pages/TestAsteroidsPage';
-import TestCelestialPage from './pages/TestCelestialPage';
-import TestConfigurationsPage from './pages/TestConfigurationsPage';
-import TestRelationalPage from './pages/TestRelationalPage';
-import TestDignitiesPage from './pages/TestDignitiesPage';
-import TestPolarizationsPage from './pages/TestPolarizationsPage';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -102,90 +90,6 @@ function AppRoutes() {
           <Layout>
             <SettingsPage />
           </Layout>
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para signos */}
-      <Route path="/test-signs" element={
-        <ProtectedRoute>
-          <TestSignsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para planetas */}
-      <Route path="/test-planets" element={
-        <ProtectedRoute>
-          <TestPlanetsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para casas */}
-      <Route path="/test-houses" element={
-        <ProtectedRoute>
-          <TestHousesPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para aspectos */}
-      <Route path="/test-aspects" element={
-        <ProtectedRoute>
-          <TestAspectsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para lunas */}
-      <Route path="/test-moons" element={
-        <ProtectedRoute>
-          <TestMoonsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para ascendentes */}
-      <Route path="/test-ascendants" element={
-        <ProtectedRoute>
-          <TestAscendantsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para asteroides */}
-      <Route path="/test-asteroids" element={
-        <ProtectedRoute>
-          <TestAsteroidsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para otros cuerpos celestes */}
-      <Route path="/test-celestial" element={
-        <ProtectedRoute>
-          <TestCelestialPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para configuraciones */}
-      <Route path="/test-configurations" element={
-        <ProtectedRoute>
-          <TestConfigurationsPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para astrología relacional */}
-      <Route path="/test-relational" element={
-        <ProtectedRoute>
-          <TestRelationalPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para dignidades */}
-      <Route path="/test-dignities" element={
-        <ProtectedRoute>
-          <TestDignitiesPage />
-        </ProtectedRoute>
-      } />
-      
-      {/* Ruta de prueba temporal para polarizaciones */}
-      <Route path="/test-polarizations" element={
-        <ProtectedRoute>
-          <TestPolarizationsPage />
         </ProtectedRoute>
       } />
       
