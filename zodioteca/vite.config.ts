@@ -131,6 +131,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        assetFileNames: (assetInfo) => {
+          // No agregar hash a archivos WASM y data para que swisseph-wasm los encuentre
+          if (assetInfo.name?.endsWith('.wasm') || assetInfo.name?.endsWith('.data')) {
+            return 'assets/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
         manualChunks: (id) => {
           // React vendor
           if (id.includes('node_modules/react') || 
