@@ -1,86 +1,92 @@
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <!-- Gradientes -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#9ca3ff;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#7c87e8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="flaskGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#fffbeb;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#fef3c7;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+    <radialGradient id="moonGlow" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#fcd34d;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#fcd34d;stop-opacity:0" />
+    </radialGradient>
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
     </linearGradient>
-    <radialGradient id="innerGlow" cx="50%" cy="50%">
-      <stop offset="0%" style="stop-color:#a5b4fc;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:0" />
-    </radialGradient>
   </defs>
   
-  <!-- Fondo circular con gradiente azul/púrpura -->
-  <circle cx="256" cy="256" r="256" fill="url(#bgGradient)"/>
+  <!-- Fondo oscuro estrellado -->
+  <rect width="512" height="512" rx="64" fill="url(#bgGradient)"/>
   
-  <!-- Resplandor interior -->
-  <circle cx="256" cy="256" r="220" fill="url(#innerGlow)" opacity="0.3"/>
+  <!-- Estrellas pequeñas dispersas en el fondo -->
+  <circle cx="80" cy="80" r="2" fill="#fef3c7" opacity="0.8"/>
+  <circle cx="140" cy="60" r="1.5" fill="#fef3c7" opacity="0.6"/>
+  <circle cx="430" cy="90" r="2" fill="#fef3c7" opacity="0.7"/>
+  <circle cx="380" cy="120" r="1.5" fill="#fef3c7" opacity="0.9"/>
+  <circle cx="100" cy="180" r="1.5" fill="#fef3c7" opacity="0.7"/>
+  <circle cx="450" cy="200" r="2" fill="#fef3c7" opacity="0.8"/>
+  <circle cx="60" cy="350" r="1.5" fill="#fef3c7" opacity="0.6"/>
+  <circle cx="120" cy="420" r="2" fill="#fef3c7" opacity="0.9"/>
+  <circle cx="400" cy="380" r="1.5" fill="#fef3c7" opacity="0.7"/>
+  <circle cx="460" cy="450" r="2" fill="#fef3c7" opacity="0.8"/>
+  <circle cx="320" cy="80" r="1.5" fill="#fef3c7" opacity="0.7"/>
+  <circle cx="180" cy="120" r="2" fill="#fef3c7" opacity="0.8"/>
+  <circle cx="350" cy="420" r="1.5" fill="#fef3c7" opacity="0.6"/>
+  <circle cx="220" cy="450" r="2" fill="#fef3c7" opacity="0.7"/>
   
-  <!-- Borde exterior oscuro -->
-  <circle cx="256" cy="256" r="240" fill="none" stroke="#1e1b4b" stroke-width="24"/>
+  <!-- Resplandor de la luna -->
+  <circle cx="256" cy="190" r="110" fill="url(#moonGlow)"/>
   
-  <!-- Frasco de laboratorio (Flask) centrado -->
-  <g transform="translate(256, 256)">
-    <!-- Cuello del frasco -->
-    <rect x="-40" y="-145" width="80" height="55" fill="url(#flaskGradient)" 
-          stroke="#1e1b4b" stroke-width="10" rx="10"/>
-    
-    <!-- Tapa del frasco -->
-    <rect x="-55" y="-165" width="110" height="28" fill="#1e1b4b" rx="14"/>
-    <rect x="-50" y="-160" width="100" height="22" fill="#4338ca" rx="11"/>
-    
-    <!-- Cuerpo del frasco (forma de matraz) -->
-    <path d="M -40,-90 Q -120,-10 -100,85 L 100,85 Q 120,-10 40,-90 Z" 
-          fill="url(#flaskGradient)" stroke="#1e1b4b" stroke-width="10"/>
-    
-    <!-- Contorno interno del frasco -->
-    <path d="M -35,-90 Q -110,-10 -92,78 L 92,78 Q 110,-10 35,-90 Z" 
-          fill="none" stroke="#1e1b4b" stroke-width="3" opacity="0.3"/>
-    
-    <!-- Líquido interior -->
-    <path d="M -35,15 Q -85,45 -75,78 L 75,78 Q 85,45 35,15 Z" 
-          fill="url(#liquidGradient)"/>
-    
-    <!-- Onda del líquido -->
-    <path d="M -35,15 Q -10,8 15,15 T 35,15" 
-          fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linecap="round"/>
-    
-    <!-- Brillo en el líquido -->
-    <ellipse cx="-35" cy="35" rx="25" ry="18" fill="#ffffff" opacity="0.5"/>
-    <ellipse cx="-35" cy="35" rx="12" ry="9" fill="#ffffff" opacity="0.7"/>
-    
-    <!-- Burbujas en el líquido superior -->
-    <circle cx="-15" cy="-35" r="10" fill="#fbbf24" opacity="0.7"/>
-    <circle cx="10" cy="-75" r="12" fill="#fbbf24" opacity="0.7"/>
-    <circle cx="20" cy="-115" r="9" fill="#fbbf24" opacity="0.7"/>
-    
-    <!-- Burbujas pequeñas adicionales -->
-    <circle cx="-25" cy="-100" r="6" fill="#fbbf24" opacity="0.5"/>
-    <circle cx="5" cy="-50" r="7" fill="#fbbf24" opacity="0.5"/>
-  </g>
+  <!-- Luna llena principal -->
+  <circle cx="256" cy="190" r="85" fill="#fef3c7"/>
   
-  <!-- Estrellas decorativas (4 puntas) -->
-  <!-- Estrella superior derecha -->
-  <g transform="translate(390, 160)">
-    <path d="M 0,-22 L 6,-6 L 22,0 L 6,6 L 0,22 L -6,6 L -22,0 L -6,-6 Z" 
-          fill="#fbbf24" stroke="#1e1b4b" stroke-width="4"/>
-    <circle cx="0" cy="0" r="4" fill="#ffffff" opacity="0.8"/>
-  </g>
+  <!-- Cráteres de la luna para textura -->
+  <circle cx="240" cy="170" r="12" fill="#fde68a" opacity="0.4"/>
+  <circle cx="275" cy="180" r="8" fill="#fde68a" opacity="0.3"/>
+  <circle cx="260" cy="205" r="10" fill="#fde68a" opacity="0.35"/>
+  <circle cx="235" cy="200" r="6" fill="#fde68a" opacity="0.4"/>
+  <circle cx="270" cy="160" r="5" fill="#fde68a" opacity="0.3"/>
+  <circle cx="250" cy="185" r="7" fill="#fde68a" opacity="0.35"/>
   
-  <!-- Estrella inferior izquierda -->
-  <g transform="translate(130, 360)">
-    <path d="M 0,-20 L 5,-5 L 20,0 L 5,5 L 0,20 L -5,5 L -20,0 L -5,-5 Z" 
-          fill="#fbbf24" stroke="#1e1b4b" stroke-width="4"/>
-    <circle cx="0" cy="0" r="3" fill="#ffffff" opacity="0.8"/>
-  </g>
+  <!-- Estrellas DENTRO de la luna (estrellas mágicas) -->
+  <!-- Estrella grande central -->
+  <path d="M 256 175 L 260 185 L 270 185 L 262 192 L 265 202 L 256 195 L 247 202 L 250 192 L 242 185 L 252 185 Z" 
+        fill="#f59e0b" opacity="0.7"/>
+  <!-- Estrella mediana izquierda -->
+  <path d="M 230 185 L 233 192 L 240 192 L 234 197 L 236 204 L 230 199 L 224 204 L 226 197 L 220 192 L 227 192 Z" 
+        fill="#f59e0b" opacity="0.6"/>
+  <!-- Estrella pequeña derecha -->
+  <path d="M 275 195 L 277 200 L 282 200 L 278 203 L 280 208 L 275 204 L 270 208 L 272 203 L 268 200 L 273 200 Z" 
+        fill="#f59e0b" opacity="0.5"/>
+  <!-- Estrella mini superior -->
+  <path d="M 250 165 L 251 168 L 254 168 L 252 170 L 253 173 L 250 171 L 247 173 L 248 170 L 246 168 L 249 168 Z" 
+        fill="#f59e0b" opacity="0.6"/>
+  <!-- Estrella mini inferior -->
+  <path d="M 265 210 L 266 213 L 269 213 L 267 215 L 268 218 L 265 216 L 262 218 L 263 215 L 261 213 L 264 213 Z" 
+        fill="#f59e0b" opacity="0.5"/>
+  
+  <!-- Texto "AstroLab" en dorado con sombra -->
+  <text x="256" y="345" font-family="'Arial Black', 'Arial', sans-serif" font-size="52" font-weight="900" 
+        text-anchor="middle" fill="#000" opacity="0.4" letter-spacing="1">
+    AstroLab
+  </text>
+  <text x="256" y="343" font-family="'Arial Black', 'Arial', sans-serif" font-size="52" font-weight="900" 
+        text-anchor="middle" fill="url(#goldText)" letter-spacing="1"
+        stroke="#f59e0b" stroke-width="1">
+    AstroLab
+  </text>
+  
+  <!-- Destellos decorativos alrededor del texto -->
+  <circle cx="140" cy="325" r="2.5" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="372" cy="325" r="2.5" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="160" cy="345" r="2" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="352" cy="345" r="2" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="170" cy="365" r="1.5" fill="#fbbf24" opacity="0.5"/>
+  <circle cx="342" cy="365" r="1.5" fill="#fbbf24" opacity="0.5"/>
+  
+  <!-- Línea decorativa bajo el texto -->
+  <path d="M 180 380 Q 256 385 332 380" stroke="url(#goldText)" stroke-width="2" 
+        fill="none" opacity="0.6" stroke-linecap="round"/>
 </svg>
