@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * Utilidad de Verificación de Cálculos Astrológicos
  * Compara los resultados con datos de referencia conocidos
@@ -205,17 +206,17 @@ export function verifyChart(chart: NatalChart): VerificationReport {
 export function printVerificationReport(report: VerificationReport): void {
   console.group('📊 REPORTE DE VERIFICACIÓN');
   
-  console.log(`\n${report.valid ? '✅ CÁLCULOS VÁLIDOS' : '❌ ERRORES ENCONTRADOS'}\n`);
+  logger.log(`\n${report.valid ? '✅ CÁLCULOS VÁLIDOS' : '❌ ERRORES ENCONTRADOS'}\n`);
   
   if (report.errors.length > 0) {
     console.group('🔴 ERRORES');
-    report.errors.forEach(error => console.error(error));
+    report.errors.forEach(error => logger.error(error));
     console.groupEnd();
   }
   
   if (report.warnings.length > 0) {
     console.group('⚠️ ADVERTENCIAS');
-    report.warnings.forEach(warning => console.warn(warning));
+    report.warnings.forEach(warning => logger.warn(warning));
     console.groupEnd();
   }
   
@@ -230,7 +231,7 @@ export function printVerificationReport(report: VerificationReport): void {
     console.group(`📁 ${category}`);
     results.forEach(result => {
       const icon = result.status === 'success' ? '✓' : result.status === 'warning' ? '⚠' : '✗';
-      console.log(`${icon} ${result.item}: ${result.value}`);
+      logger.log(`${icon} ${result.item}: ${result.value}`);
     });
     console.groupEnd();
   });
@@ -363,3 +364,4 @@ export function exportChartToText(chart: NatalChart): string {
   
   return text;
 }
+

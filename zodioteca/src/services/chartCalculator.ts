@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import * as Astronomy from 'astronomy-engine';
 
 // Tipos para la carta natal
@@ -145,7 +146,7 @@ function calculatePlanets(date: Date): PlanetPosition[] {
         longitude
       });
     } catch (error) {
-      console.warn(`Error calculando ${planet.name}:`, error);
+      logger.warn(`Error calculando ${planet.name}:`, error);
     }
   }
   
@@ -197,15 +198,15 @@ function calculateAscendant(date: Date, latitude: number, longitude: number): { 
     
     const zodiac = eclipticToZodiac(ascLon);
     
-    console.log('=== ASCENDENTE DEBUG ===');
-    console.log('GST (horas):', gst);
-    console.log('Longitud:', longitude);
-    console.log('LST (horas):', lstNormalized);
-    console.log('RAMC (grados):', ramc);
-    console.log('Latitud:', latitude);
-    console.log('Oblicuidad:', obliquity);
-    console.log('ASC longitud eclíptica:', ascLon);
-    console.log('Ascendente:', `${zodiac.sign} ${zodiac.degree.toFixed(2)}°`);
+    logger.log('=== ASCENDENTE DEBUG ===');
+    logger.log('GST (horas):', gst);
+    logger.log('Longitud:', longitude);
+    logger.log('LST (horas):', lstNormalized);
+    logger.log('RAMC (grados):', ramc);
+    logger.log('Latitud:', latitude);
+    logger.log('Oblicuidad:', obliquity);
+    logger.log('ASC longitud eclíptica:', ascLon);
+    logger.log('Ascendente:', `${zodiac.sign} ${zodiac.degree.toFixed(2)}°`);
     
     return {
       sign: zodiac.sign,
@@ -213,7 +214,7 @@ function calculateAscendant(date: Date, latitude: number, longitude: number): { 
       cusp: ascLon
     };
   } catch (error) {
-    console.error('Error calculando ascendente:', error);
+    logger.error('Error calculando ascendente:', error);
     throw error;
   }
 }
@@ -377,22 +378,22 @@ export async function calculateNatalChart(
   houseSystem: 'Placidus' | 'WholeSign' | 'Koch' | 'Equal' = 'Placidus'
 ): Promise<NatalChart> {
   try {
-    console.log('=== CALCULANDO CARTA NATAL ===');
-    console.log('Fecha entrada:', birthDate.toISOString());
-    console.log('Fecha local:', birthDate.toLocaleString('es-AR', { timeZone: timezone }));
-    console.log('Coordenadas:', { latitude, longitude });
-    console.log('Timezone:', timezone);
+    logger.log('=== CALCULANDO CARTA NATAL ===');
+    logger.log('Fecha entrada:', birthDate.toISOString());
+    logger.log('Fecha local:', birthDate.toLocaleString('es-AR', { timeZone: timezone }));
+    logger.log('Coordenadas:', { latitude, longitude });
+    logger.log('Timezone:', timezone);
     
     // Calcular posiciones planetarias
     const planets = calculatePlanets(birthDate);
-    console.log('Planetas calculados:', planets.map(p => `${p.name}: ${p.sign} ${p.degree.toFixed(2)}°`));
+    logger.log('Planetas calculados:', planets.map(p => `${p.name}: ${p.sign} ${p.degree.toFixed(2)}°`));
     
     // Calcular Ascendente y Medio Cielo
     const ascendant = calculateAscendant(birthDate, latitude, longitude);
     const midheaven = calculateMidheaven(birthDate, longitude);
     
-    console.log('Ascendente:', `${ascendant.sign} ${ascendant.degree.toFixed(2)}°`);
-    console.log('Medio Cielo:', `${midheaven.sign} ${midheaven.degree.toFixed(2)}°`);
+    logger.log('Ascendente:', `${ascendant.sign} ${ascendant.degree.toFixed(2)}°`);
+    logger.log('Medio Cielo:', `${midheaven.sign} ${midheaven.degree.toFixed(2)}°`);
     
     // Calcular casas según el sistema elegido
     let houses: HousePosition[];
@@ -428,7 +429,7 @@ export async function calculateNatalChart(
       aspects
     };
   } catch (error) {
-    console.error('Error calculando carta natal:', error);
+    logger.error('Error calculando carta natal:', error);
     throw new Error('No se pudo calcular la carta natal. Verifica los datos ingresados.');
   }
 }
@@ -585,3 +586,4 @@ export function findLocation(
     loc.city === city
   ) || null;
 }
+

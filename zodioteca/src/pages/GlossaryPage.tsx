@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useI18n } from '../i18n';
 import { createGlossaryParser, GlossaryParser } from '../utils/parseGlossary';
 import type { GlossaryEntry } from '../types/glossary';
@@ -17,18 +17,21 @@ import { DIGNITIES } from '../types/dignity';
 import { POLARIZATIONS } from '../types/polarization';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
 import GlossarySearch from '../components/GlossarySearch';
-import ZodiacSignsGrid from '../components/ZodiacSignsGrid';
-import PlanetsGrid from '../components/PlanetsGrid';
-import HousesGrid from '../components/HousesGrid';
-import AspectsGrid from '../components/AspectsGrid';
-import MoonSignsGrid from '../components/MoonSignsGrid';
-import AscendantsGrid from '../components/AscendantsGrid';
-import AsteroidsGrid from '../components/AsteroidsGrid';
-import CelestialBodiesGrid from '../components/CelestialBodiesGrid';
-import ConfigurationsGrid from '../components/ConfigurationsGrid';
-import RelationalGrid from '../components/RelationalGrid';
-import DignitiesGrid from '../components/DignitiesGrid';
-import PolarizationsGrid from '../components/PolarizationsGrid';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+// Lazy load grids - reduce initial bundle by ~30 KB
+const ZodiacSignsGrid = lazy(() => import('../components/ZodiacSignsGrid'));
+const PlanetsGrid = lazy(() => import('../components/PlanetsGrid'));
+const HousesGrid = lazy(() => import('../components/HousesGrid'));
+const AspectsGrid = lazy(() => import('../components/AspectsGrid'));
+const MoonSignsGrid = lazy(() => import('../components/MoonSignsGrid'));
+const AscendantsGrid = lazy(() => import('../components/AscendantsGrid'));
+const AsteroidsGrid = lazy(() => import('../components/AsteroidsGrid'));
+const CelestialBodiesGrid = lazy(() => import('../components/CelestialBodiesGrid'));
+const ConfigurationsGrid = lazy(() => import('../components/ConfigurationsGrid'));
+const RelationalGrid = lazy(() => import('../components/RelationalGrid'));
+const DignitiesGrid = lazy(() => import('../components/DignitiesGrid'));
+const PolarizationsGrid = lazy(() => import('../components/PolarizationsGrid'));
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
@@ -303,68 +306,69 @@ const GlossaryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Results Grid */}
-      {selectedCategory === 'signs' ? (
-        /* Mostrar grid de signos zodiacales */
-        <div>
-          <ZodiacSignsGrid />
-        </div>
-      ) : selectedCategory === 'planets' ? (
-        /* Mostrar grid de planetas */
-        <div>
-          <PlanetsGrid />
-        </div>
-      ) : selectedCategory === 'houses' ? (
-        /* Mostrar grid de casas */
-        <div>
-          <HousesGrid />
-        </div>
-      ) : selectedCategory === 'aspects' ? (
-        /* Mostrar grid de aspectos */
-        <div>
-          <AspectsGrid />
-        </div>
-      ) : selectedCategory === 'lunar' ? (
-        /* Mostrar grid de lunas */
-        <div>
-          <MoonSignsGrid />
-        </div>
-      ) : selectedCategory === 'ascendants' ? (
-        /* Mostrar grid de ascendentes */
-        <div>
-          <AscendantsGrid />
-        </div>
-      ) : selectedCategory === 'asteroids' ? (
-        /* Mostrar grid de asteroides */
-        <div>
-          <AsteroidsGrid />
-        </div>
-      ) : selectedCategory === 'celestial' ? (
-        /* Mostrar grid de otros cuerpos celestes */
-        <div>
-          <CelestialBodiesGrid />
-        </div>
-      ) : selectedCategory === 'configurations' ? (
-        /* Mostrar grid de configuraciones planetarias */
-        <div>
-          <ConfigurationsGrid />
-        </div>
-      ) : selectedCategory === 'relational' ? (
-        /* Mostrar grid de astrología relacional */
-        <div>
-          <RelationalGrid />
-        </div>
-      ) : selectedCategory === 'dignities' ? (
-        /* Mostrar grid de dignidades planetarias */
-        <div>
-          <DignitiesGrid />
-        </div>
-      ) : selectedCategory === 'polarizations' ? (
-        /* Mostrar grid de polarizaciones planetarias */
-        <div>
-          <PolarizationsGrid />
-        </div>
-      ) : filteredEntries.length === 0 ? (
+      {/* Results Grid - Lazy loaded for performance */}
+      <Suspense fallback={<div className="flex justify-center py-8"><LoadingSpinner /></div>}>
+        {selectedCategory === 'signs' ? (
+          /* Mostrar grid de signos zodiacales */
+          <div>
+            <ZodiacSignsGrid />
+          </div>
+        ) : selectedCategory === 'planets' ? (
+          /* Mostrar grid de planetas */
+          <div>
+            <PlanetsGrid />
+          </div>
+        ) : selectedCategory === 'houses' ? (
+          /* Mostrar grid de casas */
+          <div>
+            <HousesGrid />
+          </div>
+        ) : selectedCategory === 'aspects' ? (
+          /* Mostrar grid de aspectos */
+          <div>
+            <AspectsGrid />
+          </div>
+        ) : selectedCategory === 'lunar' ? (
+          /* Mostrar grid de lunas */
+          <div>
+            <MoonSignsGrid />
+          </div>
+        ) : selectedCategory === 'ascendants' ? (
+          /* Mostrar grid de ascendentes */
+          <div>
+            <AscendantsGrid />
+          </div>
+        ) : selectedCategory === 'asteroids' ? (
+          /* Mostrar grid de asteroides */
+          <div>
+            <AsteroidsGrid />
+          </div>
+        ) : selectedCategory === 'celestial' ? (
+          /* Mostrar grid de otros cuerpos celestes */
+          <div>
+            <CelestialBodiesGrid />
+          </div>
+        ) : selectedCategory === 'configurations' ? (
+          /* Mostrar grid de configuraciones planetarias */
+          <div>
+            <ConfigurationsGrid />
+          </div>
+        ) : selectedCategory === 'relational' ? (
+          /* Mostrar grid de astrología relacional */
+          <div>
+            <RelationalGrid />
+          </div>
+        ) : selectedCategory === 'dignities' ? (
+          /* Mostrar grid de dignidades planetarias */
+          <div>
+            <DignitiesGrid />
+          </div>
+        ) : selectedCategory === 'polarizations' ? (
+          /* Mostrar grid de polarizaciones planetarias */
+          <div>
+            <PolarizationsGrid />
+          </div>
+        ) : filteredEntries.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-purple-400 mb-4">
             <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -390,6 +394,7 @@ const GlossaryPage: React.FC = () => {
           ))}
         </div>
       )}
+      </Suspense>
 
       {/* Footer stats */}
       {filteredEntries.length > 0 && selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && (

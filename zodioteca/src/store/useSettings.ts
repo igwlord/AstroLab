@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -321,7 +322,7 @@ export const useSettingsStore = create<SettingsState>()(
           
           return true;
         } catch (error) {
-          console.error('Error importing settings:', error);
+          logger.error('Error importing settings:', error);
           return false;
         }
       },

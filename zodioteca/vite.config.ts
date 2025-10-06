@@ -139,11 +139,15 @@ export default defineConfig({
           return 'assets/[name]-[hash][extname]';
         },
         manualChunks: (id) => {
-          // React vendor
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') || 
-              id.includes('node_modules/react-router-dom')) {
-            return 'react-vendor';
+          // React vendor - split into smaller chunks
+          if (id.includes('node_modules/react-dom')) {
+            return 'react-dom';
+          }
+          if (id.includes('node_modules/react-router-dom')) {
+            return 'react-router';
+          }
+          if (id.includes('node_modules/react/')) {
+            return 'react-core';
           }
           
           // Astronomy calculations
@@ -151,10 +155,17 @@ export default defineConfig({
             return 'astronomy';
           }
           
-          // PDF generation
-          if (id.includes('node_modules/jspdf') || 
-              id.includes('node_modules/html2canvas')) {
-            return 'pdf-vendor';
+          // Swiss Ephemeris (heavy)
+          if (id.includes('node_modules/swisseph-wasm')) {
+            return 'swisseph';
+          }
+          
+          // PDF generation - split
+          if (id.includes('node_modules/html2canvas')) {
+            return 'html2canvas';
+          }
+          if (id.includes('node_modules/jspdf')) {
+            return 'jspdf';
           }
           
           // i18n
@@ -163,7 +174,17 @@ export default defineConfig({
             return 'i18n';
           }
           
-          // Glossary modals - group 1
+          // Lucide icons (separate from main bundle)
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
+          }
+          
+          // Zustand state management
+          if (id.includes('node_modules/zustand')) {
+            return 'state';
+          }
+          
+          // Glossary modals - group 1 (Basics)
           if (id.includes('PlanetModal') || 
               id.includes('HouseModal') || 
               id.includes('AspectModal') || 
@@ -171,7 +192,7 @@ export default defineConfig({
             return 'glossary-modals';
           }
           
-          // Glossary modals - group 2
+          // Glossary modals - group 2 (Advanced)
           if (id.includes('CelestialBodyModal') || 
               id.includes('AsteroidModal') || 
               id.includes('MoonSignModal') || 
@@ -179,12 +200,23 @@ export default defineConfig({
             return 'glossary-modals-2';
           }
           
-          // Glossary modals - group 3
+          // Glossary modals - group 3 (Special)
           if (id.includes('ConfigurationModal') || 
               id.includes('RelationalModal') || 
               id.includes('DignityModal') || 
               id.includes('PolarizationModal')) {
             return 'glossary-modals-3';
+          }
+          
+          // Glossary Grids (lazy loaded, but grouped)
+          if (id.includes('Grid.tsx') && id.includes('/components/')) {
+            return 'glossary-grids';
+          }
+          
+          // Chart calculators - group heavy calculation modules
+          if (id.includes('/services/') && 
+              (id.includes('Calculator') || id.includes('calculator'))) {
+            return 'calculators';
           }
         }
       }

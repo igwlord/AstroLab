@@ -1,3 +1,4 @@
+import { logger } from './logger';
 import type { GlossaryEntry } from '../types/glossary';
 import { categorizeEntry } from '../types/glossary';
 
@@ -310,7 +311,7 @@ export const createGlossaryParser = async (): Promise<GlossaryParser> => {
     const content = await response.text();
     return new GlossaryParser(content);
   } catch (error) {
-    console.error('Error loading glossary:', error);
+    logger.error('Error loading glossary:', error);
     // Return parser with empty content as fallback
     return new GlossaryParser('');
   }

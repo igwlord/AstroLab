@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * CALCULADOR DE PUNTOS SENSIBLES
  * Calcula las posiciones de:
@@ -110,7 +111,7 @@ export async function calculateLilith(
   type: 'mean' | 'true' = 'mean'
 ): Promise<SensitivePoint> {
   if (type === 'true') {
-    console.warn('⚠️ Lilith True no implementada con Swiss Ephemeris. Usando Mean.');
+    logger.warn('⚠️ Lilith True no implementada con Swiss Ephemeris. Usando Mean.');
   }
   
   const jd = dateToJulian(date);
@@ -154,7 +155,7 @@ export async function calculateSensitivePoints(
     if (includeChiron) {
       const chiron = await calculateChiron(date, houseCusps);
       points.push(chiron);
-      console.log('✅ Chiron calculado:', chiron);
+      logger.log('✅ Chiron calculado:', chiron);
     }
     
     // Calcular Lilith
@@ -162,15 +163,16 @@ export async function calculateSensitivePoints(
       const lilithMean = await calculateLilith(date, houseCusps, 'mean');
       const lilithTrue = await calculateLilith(date, houseCusps, 'true');
       points.push(lilithMean, lilithTrue);
-      console.log('✅ Lilith Mean y True calculadas');
+      logger.log('✅ Lilith Mean y True calculadas');
     } else {
       const lilith = await calculateLilith(date, houseCusps, lilithType);
       points.push(lilith);
-      console.log(`✅ Lilith ${lilithType} calculada`);
+      logger.log(`✅ Lilith ${lilithType} calculada`);
     }
   } catch (error) {
-    console.error('❌ Error calculando puntos sensibles:', error);
+    logger.error('❌ Error calculando puntos sensibles:', error);
   }
   
   return points;
 }
+

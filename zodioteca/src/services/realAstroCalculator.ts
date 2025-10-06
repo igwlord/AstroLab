@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * Calculador Astronómico Real usando astronomy-engine
  * Calcula posiciones planetarias precisas para cualquier fecha/ubicación
@@ -223,9 +224,9 @@ export async function calculateNatalChart(
   location: string
 ): Promise<NatalChart> {
   // TODO: Implementar diferentes sistemas de casas
-  console.log('=== CÁLCULO ASTRONÓMICO REAL ===');
-  console.log('Fecha:', birthDate.toISOString());
-  console.log('Ubicación:', { latitude, longitude, location });
+  logger.log('=== CÁLCULO ASTRONÓMICO REAL ===');
+  logger.log('Fecha:', birthDate.toISOString());
+  logger.log('Ubicación:', { latitude, longitude, location });
 
   // Calcular posiciones planetarias
   const planets: PlanetPosition[] = [];
@@ -262,7 +263,7 @@ export async function calculateNatalChart(
         house
       });
     } catch (error) {
-      console.error(`Error calculando ${body}:`, error);
+      logger.error(`Error calculando ${body}:`, error);
     }
   }
 
@@ -275,9 +276,9 @@ export async function calculateNatalChart(
     try {
       const houseCusps = houses.map((h: HousePosition) => h.cusp);
       asteroids = await calculateAsteroids(birthDate, houseCusps);
-      console.log('✅ Asteroides calculados:', asteroids.length);
+      logger.log('✅ Asteroides calculados:', asteroids.length);
     } catch (error) {
-      console.error('❌ Error calculando asteroides:', error);
+      logger.error('❌ Error calculando asteroides:', error);
       asteroids = undefined;
     }
   }
@@ -295,9 +296,9 @@ export async function calculateNatalChart(
           lilithType: settings.lilithType
         }
       );
-      console.log('✅ Puntos sensibles calculados:', sensitivePoints.length);
+      logger.log('✅ Puntos sensibles calculados:', sensitivePoints.length);
     } catch (error) {
-      console.error('❌ Error calculando puntos sensibles:', error);
+      logger.error('❌ Error calculando puntos sensibles:', error);
       sensitivePoints = undefined;
     }
   }
@@ -312,9 +313,9 @@ export async function calculateNatalChart(
         houseCusps,
         settings.lunarNodesType
       );
-      console.log('✅ Nodos lunares calculados:', lunarNodes.length);
+      logger.log('✅ Nodos lunares calculados:', lunarNodes.length);
     } catch (error) {
-      console.error('❌ Error calculando nodos lunares:', error);
+      logger.error('❌ Error calculando nodos lunares:', error);
       lunarNodes = undefined;
     }
   }
@@ -337,9 +338,9 @@ export async function calculateNatalChart(
         ascendantLongitude,
         houseCusps
       );
-      console.log('✅ Partes Árabes calculadas:', arabicParts.length);
+      logger.log('✅ Partes Árabes calculadas:', arabicParts.length);
     } catch (error) {
-      console.error('❌ Error calculando Partes Árabes:', error);
+      logger.error('❌ Error calculando Partes Árabes:', error);
       arabicParts = undefined;
     }
   }
@@ -355,9 +356,9 @@ export async function calculateNatalChart(
       }));
       
       hemispheres = await calculateHemispheres(planetsForHemispheres);
-      console.log('✅ Análisis de Hemisferios calculado');
+      logger.log('✅ Análisis de Hemisferios calculado');
     } catch (error) {
-      console.error('❌ Error calculando Hemisferios:', error);
+      logger.error('❌ Error calculando Hemisferios:', error);
       hemispheres = undefined;
     }
   }
@@ -383,3 +384,4 @@ export async function calculateNatalChart(
     aspects
   };
 }
+
