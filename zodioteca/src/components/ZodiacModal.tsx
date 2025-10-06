@@ -156,24 +156,24 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
         </div>
 
         {/* Contenido scrolleable */}
-        <div className={`${elementStyle.bg} overflow-y-auto max-h-[calc(88vh-100px)] sm:max-h-[calc(90vh-140px)] md:max-h-[calc(90vh-180px)] lg:max-h-[calc(90vh-200px)] modal-content`}>
+        <div className="bg-white dark:bg-gray-900 overflow-y-auto max-h-[calc(88vh-100px)] sm:max-h-[calc(90vh-140px)] md:max-h-[calc(90vh-180px)] lg:max-h-[calc(90vh-200px)] modal-content">
           {/* Descripción extensa */}
           <section>
             <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">
               <span className="modal-icon-md">{sign.symbol}</span>
               Descripción Arquetípica
             </h3>
-            <p className="modal-text text-gray-700 dark:text-gray-300">
+            <p className="modal-text text-gray-800 dark:text-gray-200">
               {sign.description}
             </p>
           </section>
 
           {/* Manifestación cotidiana */}
-          <section className={`modal-section border-2 ${elementStyle.border} ${elementStyle.badge}`}>
-            <h4 className="modal-h4 flex items-center gap-2">
+          <section className={`modal-section border-2 ${elementStyle.border} bg-gradient-to-br ${elementStyle.bg}`}>
+            <h4 className="modal-h4 flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <span>🌟</span> Cómo se manifiesta en la vida cotidiana
             </h4>
-            <p className="modal-text">
+            <p className="modal-text text-gray-800 dark:text-gray-200">
               {sign.dailyManifestation}
             </p>
           </section>
@@ -181,7 +181,7 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
           {/* Grid de características */}
           <div className="modal-grid">
             {/* Características astrológicas */}
-            <div className="modal-card">
+            <div className="modal-card bg-white dark:bg-gray-800">
               <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 📊 Características Astrológicas
               </h4>
@@ -205,11 +205,11 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
             </div>
 
             {/* Características holísticas */}
-            <div className="modal-card">
+            <div className="modal-card bg-white dark:bg-gray-800">
               <h4 className="modal-h4 text-purple-900 dark:text-purple-100">
                 🧘 Dimensión Holística
               </h4>
-              <div className="space-y-1.5 sm:space-y-2 modal-text-sm">
+              <div className="space-y-1.5 sm:space-y-2 modal-text-sm text-gray-800 dark:text-gray-200">
                 <div>
                   <span className="font-semibold">Color:</span> 
                   <span className="ml-2 inline-block w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300" 
@@ -243,17 +243,6 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
               </div>
             </div>
           </div>
-
-          {/* Ejercicio holístico */}
-          <section className="modal-section bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">
-            <h4 className="modal-h4 text-purple-900 dark:text-purple-100 flex items-center gap-2">
-              <span className="modal-icon-sm">🧘‍♀️</span>
-              Ejercicio Holístico de Integración
-            </h4>
-            <p className="modal-text text-gray-800 dark:text-gray-200">
-              {sign.holisticExercise}
-            </p>
-          </section>
         </div>
       </div>
     </div>

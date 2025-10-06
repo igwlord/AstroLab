@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StarryBackground from '../components/StarryBackground';
+import CosmicLoader from '../components/CosmicLoader';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEnterLab = () => {
+    setIsLoading(true);
+  };
+
+  const handleLoadingComplete = () => {
     navigate('/dashboard');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8">
-      {/* Fondo de estrellas reutilizable */}
-      <StarryBackground />
+    <>
+      {/* Cosmic Loader */}
+      {isLoading && <CosmicLoader onComplete={handleLoadingComplete} />}
+
+      {/* Login Page - Solo visible cuando NO está cargando */}
+      {!isLoading && (
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8">
+        {/* Fondo de estrellas reutilizable */}
+        <StarryBackground />
 
       {/* Contenido principal */}
       <div className="relative z-10 w-full max-w-lg mx-auto">
@@ -53,7 +65,9 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      )}
+    </>
   );
 };
 

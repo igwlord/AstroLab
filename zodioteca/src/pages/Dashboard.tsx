@@ -18,89 +18,75 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Grid de funcionalidades */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 justify-items-center max-w-6xl mx-auto">
+          {/* Grid de funcionalidades - Cuadrícula compacta en móviles */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 max-w-6xl mx-auto">
             {/* Carta Natal */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎯</span>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100">{t('dashboard.natalChart.title')}</h3>
-              </div>
-              <p className="text-sm sm:text-base text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
+            <Link 
+              to="/natal-chart"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 md:p-6 shadow-md sm:shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-all duration-300 hover:scale-105 flex flex-col items-center text-center group"
+            >
+              <span className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform">🎯</span>
+              <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-1 sm:mb-2">
+                {t('dashboard.natalChart.title')}
+              </h3>
+              <p className="text-xs sm:text-base text-purple-700 dark:text-purple-300 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none hidden sm:block">
                 {t('dashboard.natalChart.description')}
               </p>
-              <Link 
-                to="/natal-chart"
-                className="block w-full bg-purple-600 text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200 text-center text-sm sm:text-base"
-              >
+              <span className="text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400 group-hover:text-purple-700 dark:group-hover:text-purple-300">
                 {t('dashboard.natalChart.button')}
-              </Link>
-            </div>
+              </span>
+            </Link>
 
             {/* Glosario */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">📚</span>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100">{t('dashboard.glossary.title')}</h3>
-              </div>
-              <p className="text-sm sm:text-base text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
+            <Link 
+              to="/glossary"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 md:p-6 shadow-md sm:shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-all duration-300 hover:scale-105 flex flex-col items-center text-center group"
+            >
+              <span className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform">📚</span>
+              <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-1 sm:mb-2">
+                {t('dashboard.glossary.title')}
+              </h3>
+              <p className="text-xs sm:text-base text-purple-700 dark:text-purple-300 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none hidden sm:block">
                 {t('dashboard.glossary.description')}
               </p>
-              <Link 
-                to="/glossary"
-                className="block w-full bg-indigo-600 text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-center text-sm sm:text-base"
-              >
+              <span className="text-xs sm:text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
                 {t('dashboard.glossary.button')}
-              </Link>
-            </div>
+              </span>
+            </Link>
 
             {/* Cartas Guardadas */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">💾</span>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100">Mis Cartas</h3>
-              </div>
-              <p className="text-sm sm:text-base text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
+            <Link 
+              to="/saved-charts"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 md:p-6 shadow-md sm:shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-all duration-300 hover:scale-105 flex flex-col items-center text-center group"
+            >
+              <span className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform">💾</span>
+              <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-1 sm:mb-2">
+                Mis Cartas
+              </h3>
+              <p className="text-xs sm:text-base text-purple-700 dark:text-purple-300 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none hidden sm:block">
                 Gestiona tus cartas natales guardadas y exporta datos
               </p>
-              <Link 
-                to="/saved-charts"
-                className="block w-full bg-green-600 text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 text-center text-sm sm:text-base"
-              >
+              <span className="text-xs sm:text-sm font-medium text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300">
                 Ver cartas
-              </Link>
-            </div>
+              </span>
+            </Link>
 
-            {/* Configuración */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-shadow duration-300 w-full max-w-sm">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">⚙️</span>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100">Configuración</h3>
-              </div>
-              <p className="text-sm sm:text-base text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
-                Personaliza tema, orbes, métodos de casas y más
+            {/* Frecuencias */}
+            <Link 
+              to="/frequencies"
+              className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 md:p-6 shadow-md sm:shadow-lg border border-purple-100 dark:border-purple-700 hover:shadow-xl transition-all duration-300 hover:scale-105 flex flex-col items-center text-center group"
+            >
+              <span className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform">🎵</span>
+              <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-1 sm:mb-2">
+                Frecuencias
+              </h3>
+              <p className="text-xs sm:text-base text-purple-700 dark:text-purple-300 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none hidden sm:block">
+                Explora frecuencias sagradas y solfeggio
               </p>
-              <Link 
-                to="/settings"
-                className="block w-full bg-gray-600 text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200 text-center text-sm sm:text-base"
-              >
-                Configurar
-              </Link>
-            </div>
-
-            {/* Próximamente */}
-            <div className="bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg border border-purple-200 dark:border-purple-700 w-full max-w-sm">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🔮</span>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-purple-800 dark:text-purple-200">Próximamente</h3>
-              </div>
-              <p className="text-sm sm:text-base text-purple-600 dark:text-purple-300 mb-3 sm:mb-4">
-                Tránsitos, sinastría, calendario lunar y más funciones
-              </p>
-              <div className="bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-100 py-2 px-3 sm:px-4 rounded-lg text-center font-medium text-sm sm:text-base">
-                En desarrollo
-              </div>
-            </div>
+              <span className="text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400 group-hover:text-purple-700 dark:group-hover:text-purple-300">
+                Explorar
+              </span>
+            </Link>
           </div>
 
           {/* Stats rápidas */}

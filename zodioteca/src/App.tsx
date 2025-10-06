@@ -103,9 +103,9 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Ruta raíz - redirige según estado de auth */}
+      {/* Ruta raíz - redirige al login */}
       <Route path="/" element={
-        <Navigate to="/dashboard" replace />
+        <Navigate to="/login" replace />
       } />
       
       {/* 404 */}

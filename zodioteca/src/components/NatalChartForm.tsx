@@ -12,11 +12,6 @@ const MONTHS_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-const MONTHS_ES_SHORT = [
-  'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-  'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-];
-
 export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: NatalChartFormProps) {
   // Estado del formulario
   const [formData, setFormData] = useState<FormValue>(() => {
@@ -474,8 +469,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
             >
               {MONTHS_ES.map((month, idx) => (
                 <option key={idx} value={idx + 1}>
-                  <span className="hidden sm:inline">{month}</span>
-                  <span className="sm:hidden">{MONTHS_ES_SHORT[idx]}</span>
+                  {month}
                 </option>
               ))}
             </select>
@@ -797,11 +791,11 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
 
         {/* Timezone */}
         {formData.location.tzId && (
-          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-purple-100/80 dark:bg-purple-900/40 rounded-lg border border-purple-300/50 dark:border-purple-500/30 backdrop-blur-sm">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-blue-900">Zona horaria detectada:</p>
-                <p className="text-base sm:text-lg font-bold text-blue-700">{formData.location.tzId}</p>
+                <p className="text-xs sm:text-sm font-medium text-purple-900 dark:text-purple-200">Zona horaria detectada:</p>
+                <p className="text-base sm:text-lg font-bold text-purple-700 dark:text-purple-300">{formData.location.tzId}</p>
               </div>
               <button
                 type="button"
@@ -810,9 +804,9 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   e.stopPropagation();
                   setManualTz(!manualTz);
                 }}
-                className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium px-2 py-1 sm:px-3 rounded-lg hover:bg-blue-50 transition-colors"
+                className="text-xs sm:text-sm text-purple-600 dark:text-purple-300 hover:text-purple-700 dark:hover:text-purple-200 font-medium px-2 py-1 sm:px-3 rounded-lg hover:bg-purple-200/50 dark:hover:bg-purple-700/50 transition-colors flex items-center gap-1"
               >
-                {manualTz ? 'Auto' : 'Manual'}
+                📍 {manualTz ? 'Auto' : 'Manual'}
               </button>
             </div>
             
@@ -840,21 +834,21 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
       </div>
 
       {/* Configuración Avanzada (Acordeón) */}
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-purple-100 overflow-hidden">
+      <div className="bg-white/80 dark:bg-purple-950/40 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-purple-200/50 dark:border-purple-500/30 overflow-hidden">
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full px-4 py-3 sm:px-5 sm:py-4 md:px-6 flex justify-between items-center bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 transition-colors"
+          className="w-full px-4 py-3 sm:px-5 sm:py-4 md:px-6 flex justify-between items-center bg-gradient-to-r from-purple-100/80 to-indigo-100/80 dark:from-purple-900/50 dark:to-indigo-900/50 hover:from-purple-200/80 hover:to-indigo-200/80 dark:hover:from-purple-800/60 dark:hover:to-indigo-800/60 transition-colors backdrop-blur-sm"
         >
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900">⚙️ Configuración Avanzada</h2>
-          <span className="text-xl sm:text-2xl">{showAdvanced ? '▼' : '▶'}</span>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-purple-200">⚙️ Configuración Avanzada</h2>
+          <span className="text-xl sm:text-2xl text-purple-700 dark:text-purple-300">{showAdvanced ? '▼' : '▶'}</span>
         </button>
 
         {showAdvanced && (
-          <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
+          <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6 bg-gradient-to-b from-purple-50/50 to-indigo-50/50 dark:from-purple-950/20 dark:to-indigo-950/20">
             {/* Sistema de Casas */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Sistema de Casas
               </label>
               <select
@@ -874,7 +868,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
 
             {/* Asteroides */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
                 Asteroides
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
@@ -889,7 +883,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700 text-xs sm:text-sm capitalize">{key}</span>
+                    <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm capitalize">{key}</span>
                   </label>
                 ))}
               </div>
@@ -897,7 +891,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
 
             {/* Aspectos */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
                 Aspectos
               </label>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
@@ -912,13 +906,13 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700 capitalize">{key}</span>
+                    <span className="text-gray-700 dark:text-gray-300 capitalize">{key}</span>
                   </label>
                 ))}
               </div>
 
               <div>
-                <label htmlFor="aspectOrbs" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="aspectOrbs" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Orbe de aspectos: {formData.settings.aspectOrbs}°
                 </label>
                 <input
@@ -939,7 +933,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
             {/* Lilith & Nodos */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Lilith
                 </label>
                 <div className="space-y-2">
@@ -953,7 +947,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700">Mean (Promedio)</span>
+                    <span className="text-gray-700 dark:text-gray-300">Mean (Promedio)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -965,13 +959,13 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700">True (Verdadera)</span>
+                    <span className="text-gray-700 dark:text-gray-300">True (Verdadera)</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Nodos Lunares
                 </label>
                 <div className="space-y-2">
@@ -985,7 +979,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700">Mean (Promedio)</span>
+                    <span className="text-gray-700 dark:text-gray-300">Mean (Promedio)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -997,7 +991,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                       })}
                       className="w-4 h-4 text-purple-600 rounded"
                     />
-                    <span className="text-gray-700">True (Verdaderos)</span>
+                    <span className="text-gray-700 dark:text-gray-300">True (Verdaderos)</span>
                   </label>
                 </div>
               </div>
@@ -1015,7 +1009,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   })}
                   className="w-4 h-4 text-purple-600 rounded"
                 />
-                <span className="text-gray-700">Polarizaciones</span>
+                <span className="text-gray-700 dark:text-gray-300">Polarizaciones</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -1028,7 +1022,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   })}
                   className="w-4 h-4 text-purple-600 rounded"
                 />
-                <span className="text-gray-700">Partes Árabes</span>
+                <span className="text-gray-700 dark:text-gray-300">Partes Árabes</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -1041,7 +1035,7 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   })}
                   className="w-4 h-4 text-purple-600 rounded"
                 />
-                <span className="text-gray-700">Declinaciones Paralelas</span>
+                <span className="text-gray-700 dark:text-gray-300">Declinaciones Paralelas</span>
               </label>
             </div>
           </div>
