@@ -1,31 +1,57 @@
+export {};
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [error, setError] = useState<string>('');
-  const navigate = useNavigate();
-  const { loginAnonymous, loading } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { loginWithGoogle, loginAnonymous, loading } = useAuth();
 
   const handleGoogleLogin = async () => {
-    // Botón visible sin conexión (no-op). Mostramos un mensaje suave.
-    setError('La opción de Google está desactivada por ahora. Usa "Modo Prueba".');
+    console.log('🔵 [LoginPage] Botón clickeado - FORZANDO REDIRECT', { isProcessing, loading });
+    
+    // CRÍTICO: Evitar doble click
+    if (isProcessing || loading) {
+      console.log('⚠️ [LoginPage] Ya hay un proceso en curso, ignorando click');
+      return;
+    }
+    
+    setIsProcessing(true);
+    setError('');
+    
+    try {
+      console.log('🔵 [LoginPage] Llamando loginWithGoogle con REDIRECT...');
+      // FORZAR REDIRECT en lugar de popup
+      const result = await loginWithGoogle(true); // true = usar redirect
+      console.log('🔵 [LoginPage] Resultado:', result);
+      
+      // Con redirect, la página se recarga, así que esto no se ejecutará
+      if (!result.success && !result.pending) {
+        const errorMsg = result.error || 'Error al iniciar sesión con Google';
+        setError(errorMsg);
+        
+        // Limpiar error después de 5 segundos si fue cerrada por usuario
+        if (errorMsg.includes('cerrada')) {
+          setTimeout(() => setError(''), 5000);
+        }
+      }
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleAnonymousLogin = async () => {
     setError('');
-    try {
-      await loginAnonymous();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      setError('Error al iniciar sesión anónima.');
-      console.error('Error en modo anónimo:', err);
+    const result = await loginAnonymous();
+    if (!result.success) {
+      setError(result.error || 'Error al iniciar sesión en modo prueba');
+      setTimeout(() => setError(''), 5000);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 relative overflow-hidden p-4">
-      {/* Estrellas decorativas */}
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center px-4 py-8 overflow-hidden">
+      {/* Estrellas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
         <div className="absolute top-40 right-20 w-1 h-1 bg-white rounded-full animate-pulse"></div>
@@ -54,11 +80,20 @@ const LoginPage: React.FC = () => {
             Inicia sesión para continuar
           </h2>
 
-          {/* Error message */}
+          {/* Error/Info message */}
           {error && (
-            <div className="mb-4 p-3 rounded-lg border bg-red-500/20 border-red-400/50">
-              <p className="text-sm text-center text-red-200">
-                {error}
+            <div className={`mb-4 p-3 rounded-lg border ${
+              error.includes('cerrada') || error.includes('cancelada') 
+                ? 'bg-yellow-500/20 border-yellow-400/50' 
+                : 'bg-red-500/20 border-red-400/50'
+            }`}>
+              <p className={`text-sm text-center flex items-center justify-center gap-2 ${
+                error.includes('cerrada') || error.includes('cancelada')
+                  ? 'text-yellow-200'
+                  : 'text-red-200'
+              }`}>
+                <span>{error.includes('cerrada') || error.includes('cancelada') ? '⚠️' : '❌'}</span>
+                <span>{error}</span>
               </p>
             </div>
           )}
@@ -66,13 +101,13 @@ const LoginPage: React.FC = () => {
           {/* Google Sign In */}
           <button
             onClick={handleGoogleLogin}
-            disabled={loading}
+            disabled={loading || isProcessing}
             className="w-full bg-white text-gray-700 py-4 px-4 rounded-lg font-semibold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mb-4 flex items-center justify-center gap-3"
           >
-            {loading ? (
+            {(loading || isProcessing) ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-700 border-t-transparent"></div>
-                <span className="ml-2">Redirigiendo...</span>
+                <span className="ml-2">Redirigiendo a Google...</span>
               </div>
             ) : (
               <>
@@ -115,6 +150,11 @@ const LoginPage: React.FC = () => {
 
           {/* Info */}
           <div className="mt-4 space-y-2">
+            <div className="p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+              <p className="text-yellow-100 text-xs text-center">
+                <span className="font-semibold">⚡ Nota:</span> Serás redirigido a Google para autenticarte de forma segura. La página se recargará automáticamente.
+              </p>
+            </div>
             <div className="p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
               <p className="text-blue-100 text-xs text-center">
                 <span className="font-semibold">Con Google:</span> Guarda tus cartas y configuración en la nube ☁️
@@ -129,10 +169,16 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-purple-200 text-sm">
-            🔒 Tus datos están protegidos y encriptados
-          </p>
+        <div className="text-center mt-6">
+          <div className="p-4 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
+            <ul className="text-purple-200 text-sm space-y-2 text-left">
+              <li>🎯 Calcula tu carta natal completa</li>
+              <li>📚 Explora el glosario astrológico</li>
+              <li>🎵 Medita con frecuencias holísticas</li>
+              <li>💾 Guarda y comparte tus cartas</li>
+              <li>🌙 Funciona sin conexión</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

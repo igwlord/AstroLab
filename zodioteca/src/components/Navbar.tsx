@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../i18n';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import LanguageSelector from './LanguageSelector';
 import ThemeToggle from './ThemeToggle';
 

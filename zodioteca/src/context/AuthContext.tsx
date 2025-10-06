@@ -1,84 +1,76 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { AuthContext } from './AuthObject';
+import type { AuthContextType, User } from './AuthObject';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+// ============================================
+// TIPOS
+// ============================================
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (email: string, password?: string) => Promise<void>;
-  logout: () => void;
-  loading: boolean;
-}
+// Tipo User importado desde AuthObject
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Tipo importado desde AuthObject
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+// ============================================
+// CONTEXT (local, sin Firebase)
+// ============================================
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+// Context definido en AuthObject.ts para compatibilidad con Fast Refresh
+
+const GUEST_KEY = 'zodioteca_guest_enabled';
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, _password?: string) => {
-    setIsLoading(true);
-    
-    // Simulamos una llamada a la API - en el futuro será Firebase
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Usuario demo para testing
-    const mockUser: User = {
-      id: '1',
-      name: 'Usuario Demo',
-      email: email,
-      avatar: '🌟'
-    };
-    
-    setUser(mockUser);
-    setIsLoading(false);
-    
-    // Guardamos en localStorage para persistencia
-    localStorage.setItem('zodioteca_user', JSON.stringify(mockUser));
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('zodioteca_user');
-  };
-
-  // Revisar si hay usuario guardado al inicializar
-  React.useEffect(() => {
-    const savedUser = localStorage.getItem('zodioteca_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+  // Cargar estado desde localStorage (modo prueba persistente)
+  useEffect(() => {
+    const isGuest = localStorage.getItem(GUEST_KEY) === '1';
+    if (isGuest) {
+      setUser({
+        id: 'guest',
+        name: 'Invitado',
+        email: null,
+        isAnonymous: true,
+      });
     }
+    setLoading(false);
   }, []);
+
+  const loginWithGoogle = async () => {
+    // Deshabilitado: botón visible pero sin conexión
+    return Promise.reject(new Error('Inicio con Google no disponible'));
+  };
+
+  const loginAnonymous = async () => {
+    setUser({ id: 'guest', name: 'Invitado', email: null, isAnonymous: true });
+    localStorage.setItem(GUEST_KEY, '1');
+  };
+
+  const logout = async () => {
+    setUser(null);
+    localStorage.removeItem(GUEST_KEY);
+  };
+
+  const syncSettings = async (settings: Record<string, unknown>) => {
+    // Guardado local únicamente en modo prueba
+    try {
+      localStorage.setItem('zodioteca_settings', JSON.stringify(settings));
+    } catch {
+      // no-op
+    }
+  };
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
-    login,
+    loading,
+    loginWithGoogle,
+    loginAnonymous,
     logout,
-    loading: isLoading
+    syncSettings,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Nota: el hook useAuth vive en src/context/useAuth.ts para compatibilidad con Fast Refresh
