@@ -62,10 +62,15 @@ const SolarPlayer: React.FC<SolarPlayerProps> = ({ selectedFrequency }) => {
       <button
         onClick={togglePlay}
         disabled={!selectedFrequency}
+        aria-label={selectedFrequency 
+          ? `${isPlaying ? 'Pausar' : 'Reproducir'} frecuencia de ${selectedFrequency.name}, ${selectedFrequency.frequency} Hz`
+          : 'Selecciona un signo para reproducir su frecuencia'
+        }
         className={`
           relative z-10 w-full h-full rounded-full
           flex flex-col items-center justify-center
           transition-all duration-300 cursor-pointer
+          focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2
           ${selectedFrequency 
             ? 'bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-400 hover:from-yellow-400 hover:via-yellow-500 hover:to-orange-500 shadow-lg hover:shadow-xl' 
             : 'bg-gradient-to-br from-gray-300 to-gray-400 cursor-not-allowed'

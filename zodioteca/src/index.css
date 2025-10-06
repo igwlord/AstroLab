@@ -680,46 +680,52 @@ html.dark .bg-cyan-500 {
 /* Animación de halo que respira para frecuencias */
 @keyframes breathe {
   0%, 100% {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     opacity: 0.5;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.2) translateZ(0);
     opacity: 0.2;
   }
 }
 
 .animate-breathe {
   animation: breathe 2s ease-in-out infinite;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 /* Animaciones de ondas lentas para el reproductor solar */
 @keyframes ripple {
   0% {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     opacity: 0.6;
   }
   100% {
-    transform: scale(1.8);
+    transform: scale(1.8) translateZ(0);
     opacity: 0;
   }
 }
 
 @keyframes ripple-slow {
   0% {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     opacity: 0.4;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(2.2) translateZ(0);
     opacity: 0;
   }
 }
 
 .animate-ripple {
   animation: ripple 3s ease-out infinite;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .animate-ripple-slow {
   animation: ripple-slow 4s ease-out infinite;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }

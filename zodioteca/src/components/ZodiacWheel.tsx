@@ -49,10 +49,13 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
           <button
             key={frequency.id}
             onClick={() => onSelect(frequency.id)}
+            aria-label={`Seleccionar frecuencia de ${frequency.name}, ${frequency.frequency} Hz`}
+            aria-pressed={isSelected}
             className={`
               absolute w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24
               rounded-full flex flex-col items-center justify-center
               transition-all duration-300 cursor-pointer
+              focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-offset-2
               ${isSelected 
                 ? 'scale-110 z-20 shadow-2xl ring-4 ring-white dark:ring-gray-900' 
                 : 'hover:scale-105 hover:z-10 hover:shadow-xl'
