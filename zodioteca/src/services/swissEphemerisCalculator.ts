@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 /**
  * 🎯 SWISS EPHEMERIS CALCULATOR
  * Cálculos de alta precisión usando Swiss Ephemeris WASM
@@ -27,7 +28,7 @@ async function initSwissEph(): Promise<any> {
     sweInstance = (swe as any).SweModule;
     sweInitialized = true;
     const version = sweInstance.ccall('swe_version', 'string', [], []);
-    console.log('✅ Swiss Ephemeris WASM initialized:', version);
+    logger.log('✅ Swiss Ephemeris WASM initialized:', version);
   }
   return sweInstance;
 }
@@ -162,14 +163,14 @@ export async function calculateLilithMeanPrecise(jd: number): Promise<{ longitud
     
     const zodiac = longitudeToZodiac(longitude);
     
-    console.log(`✅ Lilith Mean (Swiss Ephemeris SE_OSCU_APOG): ${longitude.toFixed(6)}° = ${zodiac.sign} ${zodiac.degree.toFixed(2)}°`);
+    logger.log(`✅ Lilith Mean (Swiss Ephemeris SE_OSCU_APOG): ${longitude.toFixed(6)}° = ${zodiac.sign} ${zodiac.degree.toFixed(2)}°`);
     
     return {
       longitude,
       ...zodiac
     };
   } catch (error) {
-    console.error('❌ Error calculando Lilith Mean con Swiss Ephemeris:', error);
+    logger.error('❌ Error calculando Lilith Mean con Swiss Ephemeris:', error);
     throw error;
   }
 }
@@ -263,12 +264,12 @@ export async function calculatePlacidusHouses(
         ...longitudeToZodiac(ascmc[1])
       };
       
-      console.log(`✅ Placidus Houses (Swiss Ephemeris nativo):`);
-      console.log(`   ARMC: ${ascmc[2].toFixed(4)}°`);
-      console.log(`   ASC: ${ascendant.longitude.toFixed(4)}° = ${ascendant.sign} ${ascendant.degree.toFixed(2)}°`);
-      console.log(`   MC:  ${midheaven.longitude.toFixed(4)}° = ${midheaven.sign} ${midheaven.degree.toFixed(2)}°`);
-      console.log(`   Casa 2: ${cusps[2].toFixed(4)}°`);
-      console.log(`   Casa 3: ${cusps[3].toFixed(4)}°`);
+      logger.log(`✅ Placidus Houses (Swiss Ephemeris nativo):`);
+      logger.log(`   ARMC: ${ascmc[2].toFixed(4)}°`);
+      logger.log(`   ASC: ${ascendant.longitude.toFixed(4)}° = ${ascendant.sign} ${ascendant.degree.toFixed(2)}°`);
+      logger.log(`   MC:  ${midheaven.longitude.toFixed(4)}° = ${midheaven.sign} ${midheaven.degree.toFixed(2)}°`);
+      logger.log(`   Casa 2: ${cusps[2].toFixed(4)}°`);
+      logger.log(`   Casa 3: ${cusps[3].toFixed(4)}°`);
       
       return {
         houses: housesData,
@@ -283,7 +284,7 @@ export async function calculatePlacidusHouses(
     }
     
   } catch (error) {
-    console.error('❌ Error calculando Placidus con Swiss Ephemeris:', error);
+    logger.error('❌ Error calculando Placidus con Swiss Ephemeris:', error);
     throw error;
   }
 }
@@ -292,3 +293,4 @@ export async function calculatePlacidusHouses(
  * Exportar función helper para conversión de fecha
  */
 export { dateToJulian };
+

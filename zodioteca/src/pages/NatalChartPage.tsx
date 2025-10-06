@@ -8,6 +8,7 @@ import { calculateNatalChart, type NatalChart } from '../services/realAstroCalcu
 import { calculateChartStatistics } from '../utils/chartStatistics';
 import type { ChartStatistics } from '../types/chartStatistics';
 import { verifyChart, printVerificationReport, exportChartToText } from '../utils/verifyCalculations';
+import { logger } from '../utils/logger';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -20,7 +21,7 @@ export default function NatalChartPage() {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (formData: FormValue) => {
-    console.log('📋 Form data received:', formData);
+    logger.log('📋 Form data received:', formData);
     
     // Guardar nombre completo de la persona
     const fullName = [formData.name, formData.surname].filter(Boolean).join(' ').trim();
@@ -39,7 +40,7 @@ Por favor:
 3. O usa el toggle "🗺️ Coordenadas manuales" para ingresar lat/lon
 
 Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region || 'Sin región'}`);
-      console.error('Location sin coordenadas:', location);
+      logger.error('Location sin coordenadas:', location);
       return;
     }
     
@@ -68,7 +69,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     // Determinar el nombre de la ubicación
     const locationName = location.city || location.region || location.countryCode || 'Ubicación desconocida';
     
-    console.log('✅ Enviando a calcular:', {
+    logger.log('✅ Enviando a calcular:', {
       fecha: birthDateUTC,
       lat: location.lat,
       lon: location.lon,
@@ -86,26 +87,26 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
       );
 
       // 🔍 VERIFICACIÓN AUTOMÁTICA DE CÁLCULOS
-      console.log('\n' + '='.repeat(60));
-      console.log('🔍 VERIFICACIÓN AUTOMÁTICA DE CÁLCULOS');
-      console.log('='.repeat(60));
+      logger.log('\n' + '='.repeat(60));
+      logger.log('🔍 VERIFICACIÓN AUTOMÁTICA DE CÁLCULOS');
+      logger.log('='.repeat(60));
       
       const verificationReport = verifyChart(chart);
       printVerificationReport(verificationReport);
       
       // Exportar a texto para comparación fácil
-      console.log('\n📄 EXPORTACIÓN PARA COMPARACIÓN:');
-      console.log(exportChartToText(chart));
+      logger.log('\n📄 EXPORTACIÓN PARA COMPARACIÓN:');
+      logger.log(exportChartToText(chart));
       
-      console.log('\n💡 CÓMO VERIFICAR:');
-      console.log('1. Ve a https://www.astro.com/cgi/chart.cgi?rs=3');
-      console.log('2. Introduce estos datos:');
-      console.log(`   - Fecha: ${birth.day}/${birth.month}/${birth.year}`);
-      console.log(`   - Hora: ${birth.time ? `${birth.time.hour}:${birth.time.minute}` : '12:00 (mediodía por defecto)'}`);
-      console.log(`   - Lugar: ${locationName}`);
-      console.log('3. Compara las posiciones planetarias con la tabla anterior');
-      console.log('4. Diferencias menores a 0.5° son aceptables');
-      console.log('='.repeat(60) + '\n');
+      logger.log('\n💡 CÓMO VERIFICAR:');
+      logger.log('1. Ve a https://www.astro.com/cgi/chart.cgi?rs=3');
+      logger.log('2. Introduce estos datos:');
+      logger.log(`   - Fecha: ${birth.day}/${birth.month}/${birth.year}`);
+      logger.log(`   - Hora: ${birth.time ? `${birth.time.hour}:${birth.time.minute}` : '12:00 (mediodía por defecto)'}`);
+      logger.log(`   - Lugar: ${locationName}`);
+      logger.log('3. Compara las posiciones planetarias con la tabla anterior');
+      logger.log('4. Diferencias menores a 0.5° son aceptables');
+      logger.log('='.repeat(60) + '\n');
 
       // Calcular estadísticas de la carta
       const stats = calculateChartStatistics(chart.planets);
@@ -114,9 +115,9 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
       setStatistics(stats);
       setShowForm(false);
       
-      console.log('📊 Estadísticas calculadas:', stats);
+      logger.log('📊 Estadísticas calculadas:', stats);
     } catch (error) {
-      console.error('Error calculating chart:', error);
+      logger.error('Error calculating chart:', error);
       alert('Error al calcular la carta natal. Por favor verifica los datos.');
     }
   };
@@ -193,9 +194,9 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
       // 7. Descargar
       pdf.save(fileName);
       
-      console.log('✅ PDF generado con éxito:', fileName);
+      logger.log('✅ PDF generado con éxito:', fileName);
     } catch (error) {
-      console.error('❌ Error generando PDF:', error);
+      logger.error('❌ Error generando PDF:', error);
       alert('Error al generar el PDF. Por favor intenta de nuevo.');
     } finally {
       setIsGeneratingPDF(false);
