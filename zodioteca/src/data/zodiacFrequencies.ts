@@ -110,8 +110,8 @@ export const ZODIAC_FREQUENCIES: ZodiacFrequencies = [
       name: 'Plexo Solar (Manipura)',
       location: 'Ombligo'
     },
-    frequency: 528,
-    audioFile: '/media/528.mp3',
+    frequency: 444,
+    audioFile: '/media/444.mp3',
     color: {
       primary: 'Dorado',
       gradient: 'from-yellow-500 via-amber-400 to-yellow-600',
