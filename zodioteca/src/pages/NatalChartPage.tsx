@@ -355,7 +355,13 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           </div>
 
-          {/* Planetas */}
+          {/* ==================== SECCIONES DE LA CARTA NATAL ==================== */}
+          {/* ORDEN: 1.Casas → 2.Planetas → 3.Aspectos → 4.Nodos → 5.Puntos Sensibles → 6.Asteroides → 7.Partes Árabes → 8.Síntesis */}
+
+          {/* 🏠 1. CASAS (incluye ASC/MC) */}
+          {/* TODO: Mover sección de Casas aquí */}
+
+          {/* 🪐 2. PLANETAS */}
           <AccordionSection title="Planetas" icon="🪐" count={result.planets.length}>
             {/* Resumen de Planetas por Categoría */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
