@@ -1,0 +1,8 @@
+connectorId: example
+generate:
+  javascriptSdk:
+    - outputDir: ..\..\zodioteca\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\zodioteca
+      react: true
+      angular: false

@@ -1,0 +1,178 @@
+{
+  "app": {
+    "name": "AstroLab",
+    "tagline": "Your personal astrological laboratory",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "export": "Export",
+    "import": "Import"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Enter my universe ✨",
+    "demoButton": "🌟 Try with demo account",
+    "demoInfo": "Demo: Test all features without registration",
+    "newUser": "New to AstroLab?",
+    "discoverFeatures": "Discover what you can do",
+    "loggingIn": "Logging in...",
+    "welcome": "Welcome, {{name}}! ✨",
+    "welcomeMessage": "Your personal astrological laboratory awaits you"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "natalChart": "Natal Chart",
+    "glossary": "Glossary",
+    "frequencies": "Frequencies",
+    "savedCharts": "My Charts",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Welcome, {{name}}! ✨",
+    "subtitle": "Your personal astrological laboratory awaits you",
+    "natalChart": {
+      "title": "Natal Chart",
+      "description": "Discover your complete astral map with planets, houses and aspects",
+      "button": "Calculate chart"
+    },
+    "glossary": {
+      "title": "Glossary",
+      "description": "Explore astrological terms with holistic practices",
+      "button": "Explore"
+    },
+    "frequencies": {
+      "title": "Frequencies",
+      "description": "Meditate with holistic sounds and integration exercises",
+      "button": "Listen"
+    },
+    "savedCharts": {
+      "title": "My Charts",
+      "description": "Manage your saved natal charts and export data",
+      "button": "View charts"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Customize theme, orbs, house methods and more",
+      "button": "Configure"
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "description": "Transits, synastry, lunar calendar and more features",
+      "status": "In development"
+    },
+    "stats": {
+      "title": "Your laboratory status",
+      "chartsCreated": "Charts created",
+      "glossaryTerms": "Terms in glossary",
+      "frequencies": "Available frequencies"
+    }
+  },
+  "natalChart": {
+    "title": "Natal Chart",
+    "form": {
+      "name": "Name",
+      "birthDate": "Birth date",
+      "birthTime": "Birth time",
+      "birthPlace": "Birth place",
+      "timezone": "Timezone",
+      "calculate": "Calculate chart",
+      "save": "Save chart"
+    },
+    "results": {
+      "summary": "Summary",
+      "planets": "Planets",
+      "houses": "Houses",
+      "aspects": "Aspects",
+      "dignities": "Dignities"
+    }
+  },
+  "glossary": {
+    "title": "Astrological Glossary",
+    "search": "Search terms...",
+    "categories": "Categories",
+    "all": "All",
+    "planets": "Planets",
+    "signs": "Signs",
+    "houses": "Houses",
+    "aspects": "Aspects",
+    "basics": "Basic concepts",
+    "advanced": "Advanced",
+    "practices": "Holistic practices"
+  },
+  "frequencies": {
+    "title": "Holistic Frequencies",
+    "player": {
+      "play": "Play",
+      "pause": "Pause",
+      "stop": "Stop",
+      "volume": "Volume",
+      "duration": "Duration"
+    },
+    "frequencies": {
+      "432hz": "432 Hz - Earth's Frequency",
+      "528hz": "528 Hz - Love Frequency",
+      "639hz": "639 Hz - Connection and Relationships",
+      "741hz": "741 Hz - Intuitive Awakening",
+      "852hz": "852 Hz - Return to Spiritual Order"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto",
+      "language": "Language"
+    },
+    "astrology": {
+      "title": "Astrological Settings",
+      "houseSystem": "House system",
+      "orbs": "Orbs",
+      "minorAspects": "Show minor aspects",
+      "asteroids": "Show asteroids",
+      "fixedStars": "Show fixed stars",
+      "coordinateSystem": "Coordinate system",
+      "tropical": "Tropical",
+      "sidereal": "Sidereal"
+    },
+    "general": {
+      "title": "General",
+      "autoSave": "Auto save",
+      "notifications": "Notifications",
+      "sound": "Sounds",
+      "export": "Export settings",
+      "import": "Import settings",
+      "reset": "Reset to defaults"
+    }
+  },
+  "errors": {
+    "general": "An unexpected error occurred",
+    "network": "Connection error",
+    "validation": "Please check the entered data",
+    "notFound": "Requested resource not found",
+    "unauthorized": "You don't have permission to perform this action"
+  },
+  "features": {
+    "calculate": "🎯 Calculate your complete natal chart",
+    "explore": "📚 Explore the astrological glossary",
+    "meditate": "🎵 Meditate with holistic frequencies",
+    "manage": "💾 Save and share your charts",
+    "offline": "🌙 Works offline"
+  }
+}

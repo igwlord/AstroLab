@@ -1,0 +1,178 @@
+{
+  "app": {
+    "name": "AstroLab",
+    "tagline": "Tu laboratorio astrológico personal",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpiar",
+    "export": "Exportar",
+    "import": "Importar"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Email",
+    "password": "Contraseña",
+    "loginButton": "Ingresar a mi universo ✨",
+    "demoButton": "🌟 Probar con cuenta demo",
+    "demoInfo": "Demo: Prueba todas las funciones sin registrarte",
+    "newUser": "¿Nuevo en AstroLab?",
+    "discoverFeatures": "Descubre qué puedes hacer",
+    "loggingIn": "Ingresando...",
+    "welcome": "¡Bienvenido/a, {{name}}! ✨",
+    "welcomeMessage": "Tu laboratorio astrológico personal te está esperando"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "natalChart": "Carta Natal",
+    "glossary": "Glosario",
+    "frequencies": "Frecuencias",
+    "savedCharts": "Mis Cartas",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "¡Bienvenido/a, {{name}}! ✨",
+    "subtitle": "Tu laboratorio astrológico personal te está esperando",
+    "natalChart": {
+      "title": "Carta Natal",
+      "description": "Descubre tu mapa astral completo con planetas, casas y aspectos",
+      "button": "Calcular carta"
+    },
+    "glossary": {
+      "title": "Glosario",
+      "description": "Explora términos astrológicos con prácticas holísticas",
+      "button": "Explorar"
+    },
+    "frequencies": {
+      "title": "Frecuencias",
+      "description": "Medita con sonidos holísticos y ejercicios de integración",
+      "button": "Escuchar"
+    },
+    "savedCharts": {
+      "title": "Mis Cartas",
+      "description": "Gestiona tus cartas natales guardadas y exporta datos",
+      "button": "Ver cartas"
+    },
+    "settings": {
+      "title": "Configuración",
+      "description": "Personaliza tema, orbes, métodos de casas y más",
+      "button": "Configurar"
+    },
+    "comingSoon": {
+      "title": "Próximamente",
+      "description": "Tránsitos, sinastría, calendario lunar y más funciones",
+      "status": "En desarrollo"
+    },
+    "stats": {
+      "title": "Estado de tu laboratorio",
+      "chartsCreated": "Cartas creadas",
+      "glossaryTerms": "Términos en glosario",
+      "frequencies": "Frecuencias disponibles"
+    }
+  },
+  "natalChart": {
+    "title": "Carta Natal",
+    "form": {
+      "name": "Nombre",
+      "birthDate": "Fecha de nacimiento",
+      "birthTime": "Hora de nacimiento",
+      "birthPlace": "Lugar de nacimiento",
+      "timezone": "Zona horaria",
+      "calculate": "Calcular carta",
+      "save": "Guardar carta"
+    },
+    "results": {
+      "summary": "Resumen",
+      "planets": "Planetas",
+      "houses": "Casas",
+      "aspects": "Aspectos",
+      "dignities": "Dignidades"
+    }
+  },
+  "glossary": {
+    "title": "Glosario Astrológico",
+    "search": "Buscar términos...",
+    "categories": "Categorías",
+    "all": "Todos",
+    "planets": "Planetas",
+    "signs": "Signos",
+    "houses": "Casas",
+    "aspects": "Aspectos",
+    "basics": "Conceptos básicos",
+    "advanced": "Avanzado",
+    "practices": "Prácticas holísticas"
+  },
+  "frequencies": {
+    "title": "Frecuencias Holísticas",
+    "player": {
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "stop": "Detener",
+      "volume": "Volumen",
+      "duration": "Duración"
+    },
+    "frequencies": {
+      "432hz": "432 Hz - Frecuencia de la Tierra",
+      "528hz": "528 Hz - Frecuencia del Amor",
+      "639hz": "639 Hz - Conexión y Relaciones",
+      "741hz": "741 Hz - Despertar Intuitivo",
+      "852hz": "852 Hz - Retorno al Orden Espiritual"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "appearance": {
+      "title": "Apariencia",
+      "theme": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "auto": "Automático",
+      "language": "Idioma"
+    },
+    "astrology": {
+      "title": "Configuración Astrológica",
+      "houseSystem": "Sistema de casas",
+      "orbs": "Orbes",
+      "minorAspects": "Mostrar aspectos menores",
+      "asteroids": "Mostrar asteroides",
+      "fixedStars": "Mostrar estrellas fijas",
+      "coordinateSystem": "Sistema de coordenadas",
+      "tropical": "Tropical",
+      "sidereal": "Sideral"
+    },
+    "general": {
+      "title": "General",
+      "autoSave": "Guardado automático",
+      "notifications": "Notificaciones",
+      "sound": "Sonidos",
+      "export": "Exportar configuración",
+      "import": "Importar configuración",
+      "reset": "Restaurar valores por defecto"
+    }
+  },
+  "errors": {
+    "general": "Ha ocurrido un error inesperado",
+    "network": "Error de conexión",
+    "validation": "Por favor verifica los datos ingresados",
+    "notFound": "No se encontró el recurso solicitado",
+    "unauthorized": "No tienes permisos para realizar esta acción"
+  },
+  "features": {
+    "calculate": "🎯 Calcula tu carta natal completa",
+    "explore": "📚 Explora el glosario astrológico",
+    "meditate": "🎵 Medita con frecuencias holísticas",
+    "manage": "💾 Guarda y comparte tus cartas",
+    "offline": "🌙 Funciona sin conexión"
+  }
+}

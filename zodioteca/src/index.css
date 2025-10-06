@@ -1,0 +1,511 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  /* Light theme colors */
+  --bg-primary: 249 250 251;
+  --bg-secondary: 255 255 255;
+  --bg-tertiary: 243 244 246;
+  --text-primary: 17 24 39;
+  --text-secondary: 75 85 99;
+  --text-tertiary: 107 114 128;
+  --border-primary: 229 231 235;
+  --accent-primary: 124 58 237;
+  --accent-secondary: 168 85 247;
+}
+
+.dark {
+  /* Dark theme colors - Dramatic purples, golds, dark blues */
+  --bg-primary: 15 13 35; /* Very dark blue-purple #0f0d23 */
+  --bg-secondary: 25 20 50; /* Dark purple #191432 */
+  --bg-tertiary: 35 28 65; /* Medium dark purple #231c41 */
+  --text-primary: 250 250 255; /* Almost white with blue tint */
+  --text-secondary: 203 213 225; /* Light slate */
+  --text-tertiary: 148 163 184; /* Medium slate */
+  --border-primary: 71 55 115; /* Purple border */
+  --accent-primary: 196 181 253; /* Light purple */
+  --accent-secondary: 251 191 36; /* Gold */
+  --accent-gold: 251 191 36; /* Gold accent */
+  --accent-violet: 139 92 246; /* Violet */
+}
+
+/* Estilos básicos para AstroLab */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: white;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+
+/* Componentes básicos */
+.btn-primary {
+  background-color: #d946ef;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #c026d3;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+/* Links y estilos básicos manejados por Tailwind */
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f3e8ff;
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #c084fc;
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
+}
+
+/* Smooth scrolling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #c084fc #f3e8ff;
+}
+
+/* Animaciones para modales - Optimizadas con GPU acceleration */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* ============================================
+   DARK THEME - Dramatic Purples, Blues & Gold
+   ============================================ */
+
+/* Base dark theme - applies gradient background */
+html.dark {
+  background: linear-gradient(135deg, #0f0d23 0%, #191432 50%, #231c41 100%) fixed;
+  min-height: 100vh;
+}
+
+html.dark body {
+  background: transparent !important;
+  color: #fafaff;
+}
+
+html.dark #root {
+  background: transparent !important;
+}
+
+/* Gradient backgrounds en dark mode - manejado por Tailwind dark: classes */
+
+/* Text colors legacy support (la mayoría ya tienen dark: classes) */
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: #fafaff;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: #cbd5e1;
+}
+
+.dark .text-purple-900,
+.dark .text-purple-700 {
+  color: #c4b5fd;
+}
+
+.dark .text-purple-600 {
+  color: #fbbf24;
+}
+
+/* Background colors legacy support */
+.dark .bg-white {
+  background-color: rgba(25, 20, 50, 0.9);
+}
+
+.dark .bg-gray-50,
+.dark .bg-purple-50,
+.dark .bg-indigo-50 {
+  background: linear-gradient(135deg, rgba(15, 13, 35, 0.8), rgba(25, 20, 50, 0.8));
+}
+
+.dark .bg-gray-100 {
+  background-color: rgba(35, 28, 65, 0.7);
+}
+
+.dark .bg-purple-100 {
+  background-color: rgba(139, 92, 246, 0.2);
+}
+
+.dark .bg-purple-200 {
+  background-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Buttons mantienen color en dark mode */
+.dark .bg-purple-600 {
+  background-color: #8b5cf6;
+}
+
+.dark .bg-purple-600:hover,
+.dark .hover\:bg-purple-700:hover {
+  background-color: #fbbf24;
+}
+
+.dark .bg-green-600 {
+  background-color: #fbbf24;
+}
+
+.dark .bg-green-600:hover {
+  background-color: #f59e0b;
+}
+
+/* Borders en dark mode */
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-purple-100,
+.dark .border-purple-200 {
+  border-color: #473773;
+}
+
+/* Cards legacy */
+.dark .card {
+  background-color: rgba(25, 20, 50, 0.8);
+  border-color: #473773;
+  backdrop-filter: blur(10px);
+}
+
+/* Shadows mejoradas para dark mode */
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Form inputs legacy (mayoría tienen dark: classes ahora) */
+.dark input:not([class*="dark:"]),
+.dark select:not([class*="dark:"]),
+.dark textarea:not([class*="dark:"]) {
+  background-color: rgba(35, 28, 65, 0.9);
+  border-color: #473773;
+  color: #fafaff;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #fbbf24;
+  outline-color: #fbbf24;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Select options */
+.dark select option {
+  background-color: #191432;
+  color: #fafaff;
+}
+
+/* Scrollbars */
+.dark .scrollbar-thin::-webkit-scrollbar-track,
+.dark .overflow-x-auto::-webkit-scrollbar-track,
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(35, 28, 65, 0.5);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+.dark .overflow-x-auto::-webkit-scrollbar-thumb,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #fbbf24;
+}
+
+/* Pages con dark background */
+html.dark .min-h-screen {
+  background: transparent;
+}
+
+/* Navbar y headers (mayoría tienen dark: classes) */
+html.dark nav:not([class*="dark:"]),
+html.dark header:not([class*="dark:"]) {
+  background: rgba(25, 20, 50, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #473773;
+}
+
+/* Chips/badges en glossary legacy */
+html.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+html.dark .text-blue-800 {
+  color: #93c5fd;
+}
+
+html.dark .text-purple-800 {
+  color: #c4b5fd;
+}
+
+html.dark .text-green-800 {
+  color: #fbbf24;
+}
+
+/* ===========================================
+   OPTIMIZACIONES DE PERFORMANCE
+   =========================================== */
+
+/* Smooth card transitions with GPU acceleration */
+.card-transition {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.card-transition:hover {
+  transform: translateY(-4px) translateZ(0) scale(1.02);
+}
+
+/* Optimize hover effects */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) translateZ(0);
+}
+
+/* Smooth opacity transitions */
+.smooth-opacity {
+  transition: opacity 0.15s ease-in-out;
+  will-change: opacity;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Buttons legacy */
+html.dark button:not([class*="dark:"]) {
+  color: #fafaff;
+}
+
+html.dark .bg-blue-600 {
+  background-color: #6366f1;
+}
+
+html.dark .bg-blue-600:hover {
+  background-color: #8b5cf6;
+}
+
+/* Cards coloridas (signos zodiacales) mantienen vibrancia */
+html.dark .bg-red-500,
+html.dark .bg-orange-500,
+html.dark .bg-green-500,
+html.dark .bg-blue-500,
+html.dark .bg-cyan-500 {
+  opacity: 0.95;
+}
+
+/* ===================================================
+   RESPONSIVE UTILITIES - FASE 1 & 7 OPTIMIZADAS
+   ===================================================
+   
+   Utilities custom para modales y componentes.
+   Patrón mobile-first: base → sm:640px → md:768px → lg:1024px
+   Desktop preservado en lg: breakpoint.
+   
+   USO:
+   - .modal-content: Contenedor principal de modal
+   - .modal-section: Secciones dentro de modal
+   - .modal-h3/.modal-h4: Títulos responsivos
+   - .modal-text: Texto de párrafo
+   - .modal-badge: Etiquetas/chips
+   - .modal-grid: Grid de 2 columnas
+   - .modal-card: Tarjetas internas
+   - .modal-icon-*: Iconos en 3 tamaños
+   =================================================== */
+
+@layer utilities {
+  /* Container principal de modal - Optimizado móvil */
+  .modal-content {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6 space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6;
+  }
+  
+  /* Secciones internas - Compactas en móvil */
+  .modal-section {
+    @apply p-2.5 sm:p-3 md:p-4 lg:p-5 rounded-lg sm:rounded-xl;
+  }
+  
+  /* Títulos H3 - Progressive enhancement */
+  .modal-h3 {
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 sm:mb-3;
+  }
+  
+  /* Títulos H4 - Subtítulos */
+  .modal-h4 {
+    @apply text-sm sm:text-base md:text-lg font-bold mb-2;
+  }
+  
+  /* Texto de párrafo responsive */
+  .modal-text {
+    @apply text-sm sm:text-base leading-relaxed;
+  }
+  
+  /* Texto pequeño (descripciones) */
+  .modal-text-sm {
+    @apply text-xs sm:text-sm;
+  }
+  
+  /* Badges/Chips responsive */
+  .modal-badge {
+    @apply px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold;
+  }
+  
+  /* Grid de 2 columnas en tablet+ */
+  .modal-grid {
+    @apply grid md:grid-cols-2 gap-3 sm:gap-4;
+  }
+  
+  /* Cards internas con dark mode */
+  .modal-card {
+    @apply bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3;
+  }
+  
+  /* Iconos pequeños (20px → 24px) */
+  .modal-icon-sm {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  /* Iconos medianos (24px → 40px) */
+  .modal-icon-md {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+  
+  /* Iconos grandes (30px → 60px) */
+  .modal-icon-lg {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl;
+  }
+}
+
+/* ===================================================
+   NOTAS DE OPTIMIZACIÓN FASE 7
+   ===================================================
+   
+   ✅ Removidos !important innecesarios (50+ instancias)
+   ✅ Estilos legacy HTML convertidos a Tailwind
+   ✅ Dark mode optimizado con :not([class*="dark:"])
+   ✅ Animaciones GPU-optimizadas mantenidas
+   ✅ Utilities de modales documentadas
+   ✅ Scrollbar custom mantenido
+   ✅ Performance utilities preservadas
+   
+   PATRÓN ESTABLECIDO:
+   - Mobile first: 12px → 16px → 20px → 24px
+   - Text: text-xs → text-sm → text-base → text-lg
+   - Spacing: gap-2 → gap-3 → gap-4 → gap-6
+   - Padding: p-3 → p-4 → p-5 → p-6
+   
+   =================================================== */
