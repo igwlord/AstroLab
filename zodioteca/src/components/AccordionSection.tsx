@@ -7,13 +7,17 @@ interface AccordionSectionProps {
   count?: number;
   children: ReactNode;
   defaultOpen?: boolean;
+  'data-chart-section'?: string; // Para filtrado de secciones
 }
 
-export default function AccordionSection({ title, icon, count, children, defaultOpen = false }: AccordionSectionProps) {
+export default function AccordionSection({ title, icon, count, children, defaultOpen = false, 'data-chart-section': dataChartSection }: AccordionSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg border border-purple-100 dark:border-purple-700 overflow-hidden">
+    <div 
+      className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg border border-purple-100 dark:border-purple-700 overflow-hidden"
+      data-chart-section={dataChartSection}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-3 sm:p-4 md:p-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 hover:from-purple-100 hover:to-indigo-100 dark:hover:bg-purple-900/20 transition-colors"

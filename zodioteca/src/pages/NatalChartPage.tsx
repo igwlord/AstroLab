@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import NatalChartForm from '../components/NatalChartForm';
+import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
 import StatCard from '../components/StatCard';
 import type { FormValue } from '../types/natalForm';
@@ -355,6 +356,9 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           </div>
 
+          {/* ==================== FILTRO DE SECCIONES ==================== */}
+          <ChartSectionFilter />
+
           {/* ==================== SECCIONES DE LA CARTA NATAL ==================== */}
           {/* ORDEN: 1.Casas → 2.Planetas → 3.Aspectos → 4.Nodos → 5.Puntos Sensibles → 6.Asteroides → 7.Partes Árabes → 8.Síntesis */}
 
@@ -362,7 +366,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {/* TODO: Mover sección de Casas aquí */}
 
           {/* 🪐 2. PLANETAS */}
-          <AccordionSection title="Planetas" icon="🪐" count={result.planets.length}>
+          <AccordionSection title="Planetas" icon="🪐" count={result.planets.length} data-chart-section="Planetas">
             {/* Resumen de Planetas por Categoría */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {/* Personales */}
@@ -591,7 +595,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
 
           {/* Asteroides */}
           {result.asteroids && result.asteroids.length > 0 && (
-            <AccordionSection title="Asteroides" icon="☄️" count={result.asteroids.length} defaultOpen={false}>
+            <AccordionSection title="Asteroides" icon="☄️" count={result.asteroids.length} defaultOpen={false} data-chart-section="Asteroides">
               {/* Introducción a los Asteroides */}
               <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-300 dark:border-purple-700">
                 <div className="flex items-center gap-2 mb-2">
@@ -773,6 +777,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               icon="🔮" 
               count={result.sensitivePoints.length}
               defaultOpen={false}
+              data-chart-section="Puntos Sensibles"
             >
               {/* Introducción */}
               <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 via-violet-50 to-fuchsia-50 dark:from-purple-900/20 dark:via-violet-900/20 dark:to-fuchsia-900/20 rounded-xl border-2 border-purple-300 dark:border-purple-700">
@@ -974,6 +979,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               icon="☯️" 
               count={result.lunarNodes.length}
               defaultOpen={false}
+              data-chart-section="Nodos Lunares"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {result.lunarNodes.map((node) => {
@@ -1129,6 +1135,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               icon="🌟" 
               count={result.arabicParts.length}
               defaultOpen={false}
+              data-chart-section="Partes Árabes"
             >
               {/* Introducción */}
               <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-900/20 dark:via-yellow-900/20 dark:to-orange-900/20 rounded-xl border-2 border-amber-300 dark:border-amber-700">
@@ -1381,6 +1388,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               icon="🧭" 
               count={4}
               defaultOpen={false}
+              data-chart-section="Hemisferios"
             >
               {/* Resumen ejecutivo */}
               <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border-2 border-indigo-200 dark:border-indigo-700">
@@ -1626,7 +1634,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           )}
 
           {/* Casas */}
-          <AccordionSection title="Casas" icon="🏠" count={result.houses.length}>
+          <AccordionSection title="Casas" icon="🏠" count={result.houses.length} data-chart-section="Casas">
             {/* Resumen de Casas por Categoría */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               {/* Casas Angulares */}
@@ -1803,7 +1811,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           </AccordionSection>
 
           {/* Aspectos */}
-          <AccordionSection title="Aspectos" icon="⚡" count={result.aspects?.length || 0}>
+          <AccordionSection title="Aspectos" icon="⚡" count={result.aspects?.length || 0} data-chart-section="Aspectos">
             {result.aspects && result.aspects.length > 0 ? (
               <>
                 {/* Resumen de aspectos */}
@@ -1950,7 +1958,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {statistics && (
             <>
               {/* 1. MODALIDADES (Cualidades) */}
-              <AccordionSection title="Modalidades" icon="⚡" count={3} defaultOpen={false}>
+              <AccordionSection title="Modalidades" icon="⚡" count={3} defaultOpen={false} data-chart-section="Modalidades">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <StatCard
                     label="Cardinal"
@@ -1985,7 +1993,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               </AccordionSection>
 
               {/* 2. ELEMENTOS */}
-              <AccordionSection title="Elementos" icon="🌍" count={4} defaultOpen={false}>
+              <AccordionSection title="Elementos" icon="🌍" count={4} defaultOpen={false} data-chart-section="Elementos">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard
                     label="Fuego"
@@ -2029,7 +2037,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               </AccordionSection>
 
               {/* 3. POLARIDADES */}
-              <AccordionSection title="Polaridades" icon="☯️" count={2} defaultOpen={false}>
+              <AccordionSection title="Polaridades" icon="☯️" count={2} defaultOpen={false} data-chart-section="Polaridades">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <StatCard
                     label="Masculino"
@@ -2055,7 +2063,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               </AccordionSection>
 
               {/* 4. CUADRANTES */}
-              <AccordionSection title="Cuadrantes" icon="🧭" count={4} defaultOpen={false}>
+              <AccordionSection title="Cuadrantes" icon="🧭" count={4} defaultOpen={false} data-chart-section="Cuadrantes">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard
                     label="Cuadrante I"
