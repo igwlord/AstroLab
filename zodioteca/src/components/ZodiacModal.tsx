@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import type { ZodiacSign } from '../types/zodiacSign';
+import FrequencyBadge from './FrequencyBadge';
 
 interface ZodiacModalProps {
   sign: ZodiacSign | null;
@@ -9,18 +10,12 @@ interface ZodiacModalProps {
 
 const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
-      // Stop audio when modal closes
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
     }
 
     return () => {
@@ -43,22 +38,6 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
       onClose();
     }
-  };
-
-  const playFrequency = () => {
-    if (!sign) return;
-    
-    const frequencyValue = sign.frequency.split('/')[0].trim().replace(' Hz', '');
-    const audioPath = `/media/${frequencyValue}.mp3`;
-    
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    
-    audioRef.current = new Audio(audioPath);
-    audioRef.current.play().catch(err => {
-      console.error('Error playing audio:', err);
-    });
   };
 
   if (!isOpen || !sign) return null;
@@ -230,19 +209,15 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
                 <div>
                   <span className="font-semibold">Chakra:</span> {sign.chakra}
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold">Frecuencia:</span> {sign.frequency}
-                  <button
-                    onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
-                    title="Reproducir frecuencia"
-                  >
-                    ▶️ <span className="hidden sm:inline">Escuchar</span>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+
+          {/* Frequency Badge - Reemplaza el reproductor */}
+          <FrequencyBadge
+            frequency={sign.frequency}
+            onClose={onClose}
+          />
         </div>
       </div>
     </div>

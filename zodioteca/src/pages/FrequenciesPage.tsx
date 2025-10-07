@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ZODIAC_FREQUENCIES, getFrequencyOfTheDay } from '../data/zodiacFrequencies';
 import ZodiacWheel from '../components/ZodiacWheel';
 import FrequencyInfoPanel from '../components/FrequencyInfoPanel';
@@ -6,8 +7,26 @@ import StarryBackground from '../components/StarryBackground';
 
 const FrequenciesPage: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
+  const location = useLocation();
   const frequencyOfTheDay = getFrequencyOfTheDay();
   const selectedFrequency = ZODIAC_FREQUENCIES.find(f => f.id === selectedId);
+
+  // Auto-seleccionar frecuencia cuando se navega desde un modal
+  useEffect(() => {
+    const state = location.state as { autoPlayId?: string } | null;
+    if (state?.autoPlayId) {
+      // Auto-seleccionar la frecuencia y marcar para auto-play
+      setSelectedId(state.autoPlayId);
+      setShouldAutoPlay(true);
+      
+      // Limpiar el estado para que no se repita al navegar
+      window.history.replaceState({}, document.title);
+      
+      // Resetear autoPlay después de usarlo
+      setTimeout(() => setShouldAutoPlay(false), 1000);
+    }
+  }, [location]);
 
   return (
     <div className="relative min-h-screen">
@@ -59,6 +78,7 @@ const FrequenciesPage: React.FC = () => {
           frequencies={ZODIAC_FREQUENCIES}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          autoPlay={shouldAutoPlay}
         />
       </div>
 

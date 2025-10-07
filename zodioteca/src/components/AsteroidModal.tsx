@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Asteroid } from '../types/asteroid';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface AsteroidModalProps {
   asteroid: Asteroid | null;
@@ -9,14 +10,6 @@ interface AsteroidModalProps {
 }
 
 const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
   if (!isOpen || !asteroid) return null;
 
   const getAsteroidGradient = (name: string) => {
@@ -110,24 +103,13 @@ const AsteroidModal: React.FC<AsteroidModalProps> = ({ asteroid, isOpen, onClose
                 <p className="text-gray-600 dark:text-gray-400">{asteroid.stone}</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="text-gray-600 dark:text-gray-400">{asteroid.frequency} Hz</p>
-              </div>
-              <button
-                onClick={playFrequency}
-                className={`w-full px-4 py-2 bg-gradient-to-r ${gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
-              >
-                ▶ Reproducir Frecuencia
-              </button>
-              <audio
-                ref={audioRef}
-                src={`/media/${asteroid.frequency}.mp3`}
-                preload="none"
-              />
-            </div>
           </div>
+
+          {/* Frequency Badge - Reemplaza el reproductor */}
+          <FrequencyBadge
+            frequency={`${asteroid.frequency} Hz`}
+            onClose={onClose}
+          />
 
         {/* Ejercicio Holístico */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">

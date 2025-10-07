@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Polarization } from '../types/polarization';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface PolarizationModalProps {
   polarization: Polarization | null;
@@ -9,14 +10,6 @@ interface PolarizationModalProps {
 }
 
 const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
   if (!isOpen || !polarization) return null;
 
   const getPolarizationGradient = (name: string) => {
@@ -34,7 +27,6 @@ const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, isO
   };
 
   const gradient = getPolarizationGradient(polarization.name);
-  const frequencyNumber = typeof polarization.frequency === 'number' ? polarization.frequency : 528;
 
   return (
     <StandardModal
@@ -98,28 +90,13 @@ const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, isO
                 <p className="text-gray-600 dark:text-gray-400">{polarization.chakra}</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="text-gray-600 dark:text-gray-400">{polarization.frequency} Hz</p>
-              </div>
-              {typeof polarization.frequency === 'number' && (
-                <>
-                  <button
-                    onClick={playFrequency}
-                    className={`w-full px-4 py-2 bg-gradient-to-r ${gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
-                  >
-                    ▶ Reproducir Frecuencia
-                  </button>
-                  <audio
-                    ref={audioRef}
-                    src={`/media/${frequencyNumber}.mp3`}
-                    preload="none"
-                  />
-                </>
-              )}
-            </div>
           </div>
+
+          {/* Frequency Badge */}
+          <FrequencyBadge
+            frequency={polarization.frequency + ' Hz'}
+            onClose={onClose}
+          />
         </div>
     </StandardModal>
   );

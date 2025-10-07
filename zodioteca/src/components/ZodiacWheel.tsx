@@ -6,16 +6,17 @@ interface ZodiacWheelProps {
   frequencies: ZodiacFrequency[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  autoPlay?: boolean;
 }
 
-const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSelect }) => {
+const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSelect, autoPlay = false }) => {
   // Obtener la frecuencia seleccionada
   const selectedFrequency = frequencies.find(f => f.id === selectedId) || null;
 
-  // Calcular la posición de cada signo en el círculo (empezando desde Aries en la posición de las 9)
+  // Calcular la posición de cada signo en el círculo (empezando desde Aries a las 12:00)
   const getPosition = (index: number) => {
-    // Empezamos en 180° (izquierda) y vamos en sentido antihorario
-    const angle = 180 - (index * 30); // 360° / 12 signos = 30° por signo
+    // Empezamos en 90° (arriba, 12:00) y vamos en sentido horario
+    const angle = 90 - (index * 30); // 360° / 12 signos = 30° por signo
     const radian = (angle * Math.PI) / 180;
     const radius = 42; // Porcentaje del radio del círculo
 
@@ -37,7 +38,7 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
       
       {/* Centro con reproductor solar */}
       <div className="absolute inset-[35%]">
-        <SolarPlayer selectedFrequency={selectedFrequency} />
+        <SolarPlayer selectedFrequency={selectedFrequency} autoPlay={autoPlay} />
       </div>
 
       {/* Signos zodiacales posicionados en círculo */}

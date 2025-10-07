@@ -27,6 +27,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.3",
     "swisseph-wasm": "^0.0.2",
+    "vaul": "^1.1.2",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

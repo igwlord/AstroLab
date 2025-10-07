@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { RelationalTechnique } from '../types/relational';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface RelationalModalProps {
   technique: RelationalTechnique | null;
@@ -9,14 +10,6 @@ interface RelationalModalProps {
 }
 
 const RelationalModal: React.FC<RelationalModalProps> = ({ technique, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
   if (!isOpen || !technique) return null;
 
   const getTechniqueGradient = (name: string) => {
@@ -32,7 +25,6 @@ const RelationalModal: React.FC<RelationalModalProps> = ({ technique, isOpen, on
   };
 
   const gradient = getTechniqueGradient(technique.name);
-  const frequencyNumber = typeof technique.frequency === 'number' ? technique.frequency : 639;
 
   return (
     <StandardModal
@@ -91,25 +83,14 @@ const RelationalModal: React.FC<RelationalModalProps> = ({ technique, isOpen, on
                 <span className="font-semibold text-gray-700 dark:text-gray-300">🧘 Chakras:</span>
                 <p className="text-gray-600 dark:text-gray-400">{technique.chakras}</p>
               </div>
-              <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="text-gray-600 dark:text-gray-400">{technique.frequency} Hz</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <button
-                onClick={playFrequency}
-                className={`w-full px-4 py-2 bg-gradient-to-r ${gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
-              >
-                ▶ Reproducir Frecuencia
-              </button>
-              <audio
-                ref={audioRef}
-                src={`/media/${frequencyNumber}.mp3`}
-                preload="none"
-              />
             </div>
           </div>
+
+          {/* Frequency Badge */}
+          <FrequencyBadge
+            frequency={technique.frequency + ' Hz'}
+            onClose={onClose}
+          />
 
           {/* Ejercicio Holístico */}
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">

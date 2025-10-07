@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Planet } from '../types/planet';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface PlanetModalProps {
   planet: Planet | null;
@@ -9,24 +10,6 @@ interface PlanetModalProps {
 }
 
 const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (!planet) return;
-    
-    const frequencyValue = planet.frequency.split('/')[0].trim().replace(' Hz', '');
-    const audioPath = `/media/${frequencyValue}.mp3`;
-    
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    
-    audioRef.current = new Audio(audioPath);
-    audioRef.current.play().catch(err => {
-      console.error('Error playing audio:', err);
-    });
-  };
-
   if (!isOpen || !planet) return null;
 
   const getCategoryStyles = (category: string) => {
@@ -148,19 +131,15 @@ const PlanetModal: React.FC<PlanetModalProps> = ({ planet, isOpen, onClose }) =>
                 <div>
                   <span className="font-semibold">Chakra:</span> {planet.chakra}
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold">Frecuencia:</span> {planet.frequency}
-                  <button
-                    onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
-                    title="Reproducir frecuencia"
-                  >
-                    ▶️ <span className="hidden sm:inline">Escuchar</span>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+
+          {/* Frequency Badge - Reemplaza el reproductor */}
+          <FrequencyBadge
+            frequency={planet.frequency}
+            onClose={onClose}
+          />
 
           {/* Ejercicio holístico */}
           <section className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border-2 border-purple-300 dark:border-purple-700">

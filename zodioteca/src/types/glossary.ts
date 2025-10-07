@@ -37,26 +37,13 @@ export interface GlossaryCategory {
 }
 
 export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
+  // === 5 TABS PRINCIPALES (Desktop) ===
   {
     id: 'signs',
     name: 'Signos',
     icon: '♈',
     description: 'Los 12 signos del zodíaco',
     color: 'orange'
-  },
-  {
-    id: 'planets',
-    name: 'Planetas',
-    icon: '🪐',
-    description: 'Planetas personales, sociales y transpersonales',
-    color: 'green'
-  },
-  {
-    id: 'asteroids',
-    name: 'Asteroides',
-    icon: '☄️',
-    description: 'Asteroides y cuerpos menores',
-    color: 'pink'
   },
   {
     id: 'houses',
@@ -66,25 +53,41 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     color: 'indigo'
   },
   {
+    id: 'planets',
+    name: 'Planetas',
+    icon: '🪐',
+    description: 'Planetas personales, sociales y transpersonales',
+    color: 'green'
+  },
+  {
+    id: 'lunar',
+    name: 'Lunas',
+    icon: '�',
+    description: 'Luna en cada signo del zodiaco',
+    color: 'slate'
+  },
+  {
+    id: 'ascendants',
+    name: 'Ascendentes',
+    icon: '🌅',
+    description: 'Ascendente en cada signo del zodiaco',
+    color: 'orange'
+  },
+  
+  // === CATEGORÍAS DEL MENÚ "+" (More) ===
+  {
+    id: 'asteroids',
+    name: 'Asteroides',
+    icon: '☄️',
+    description: 'Asteroides y cuerpos menores',
+    color: 'pink'
+  },
+  {
     id: 'aspects',
     name: 'Aspectos',
     icon: '📐',
     description: 'Ángulos entre planetas',
     color: 'yellow'
-  },
-  {
-    id: 'celestial',
-    name: 'Otros Cuerpos',
-    icon: '🌌',
-    description: 'Quirón, centauros, transneptunianos',
-    color: 'violet'
-  },
-  {
-    id: 'advanced',
-    name: 'Dimensiones Astrológicas',
-    icon: '🌠',
-    description: 'Técnicas avanzadas y dimensiones del alma',
-    color: 'purple'
   },
   {
     id: 'configurations',
@@ -101,18 +104,11 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     color: 'gold'
   },
   {
-    id: 'lunar',
-    name: 'Lunas',
-    icon: '🌙',
-    description: 'Luna en cada signo del zodiaco',
-    color: 'slate'
-  },
-  {
-    id: 'ascendants',
-    name: 'Ascendentes',
-    icon: '🌅',
-    description: 'Ascendente en cada signo del zodiaco',
-    color: 'orange'
+    id: 'advanced',
+    name: 'Dimensiones Astrológicas',
+    icon: '�',
+    description: 'Técnicas avanzadas y dimensiones del alma',
+    color: 'purple'
   },
   {
     id: 'relational',
@@ -127,6 +123,13 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     icon: '⚖️',
     description: 'Desequilibrios energéticos planetarios',
     color: 'indigo'
+  },
+  {
+    id: 'celestial',
+    name: 'Otros Cuerpos',
+    icon: '🌌',
+    description: 'Quirón, centauros, transneptunianos',
+    color: 'violet'
   }
 ];
 

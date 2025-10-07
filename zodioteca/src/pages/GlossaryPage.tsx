@@ -18,6 +18,7 @@ import { POLARIZATIONS } from '../types/polarization';
 import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
 import GlossarySearch from '../components/GlossarySearch';
+import GlossaryCategories from '../components/GlossaryCategories';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 // Lazy load grids - reduce initial bundle by ~30 KB
@@ -222,44 +223,13 @@ const GlossaryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Categories - Horizontal Scrollable Tabs */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-purple-100">
-          {GLOSSARY_CATEGORIES.map(category => {
-            const count = entryCounts[category.id] || 0;
-            const isActive = selectedCategory === category.id;
-            
-            return (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                disabled={count === 0 && category.id !== 'all'}
-                className={`
-                  flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                  transition-all duration-200
-                  ${isActive 
-                    ? 'bg-purple-600 text-white shadow-lg scale-105' 
-                    : count === 0 && category.id !== 'all'
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-purple-700 border-2 border-purple-200 hover:border-purple-400 hover:shadow-md'
-                  }
-                `}
-              >
-                <span className="text-lg">{category.icon}</span>
-                <span>{category.name}</span>
-                {count > 0 && (
-                  <span className={`
-                    ml-1 px-2 py-0.5 rounded-full text-xs font-semibold
-                    ${isActive ? 'bg-purple-500' : 'bg-purple-100 text-purple-700'}
-                  `}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Categories - Hybrid Tabs Component */}
+      <GlossaryCategories
+        categories={GLOSSARY_CATEGORIES}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        entryCounts={entryCounts}
+      />
 
       {/* Results header and actions (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades o polarizaciones) */}
       {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && (

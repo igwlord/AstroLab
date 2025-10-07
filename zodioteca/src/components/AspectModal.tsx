@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Aspect } from '../types/aspect';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface AspectModalProps {
   aspect: Aspect | null;
@@ -9,14 +10,6 @@ interface AspectModalProps {
 }
 
 const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
   if (!isOpen || !aspect) return null;
 
   const getCategoryStyles = (category: string) => {
@@ -101,24 +94,13 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) =>
                 <p className="modal-text-sm text-gray-600 dark:text-gray-400">{aspect.chakra}</p>
               </div>
             </div>
-            <div className="space-y-2 sm:space-y-3">
-              <div>
-                <span className="modal-text-sm font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="modal-text-sm text-gray-600 dark:text-gray-400">{aspect.frequency} Hz</p>
-              </div>
-              <button
-                onClick={playFrequency}
-                className={`w-full px-3 py-2 sm:px-4 text-sm sm:text-base bg-gradient-to-r ${styles.gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
-              >
-                ▶ <span className="hidden sm:inline">Reproducir </span>Frecuencia
-              </button>
-              <audio
-                ref={audioRef}
-                src={`/media/${aspect.frequency}.mp3`}
-                preload="none"
-              />
-            </div>
           </div>
+
+          {/* Frequency Badge - Reemplaza el reproductor */}
+          <FrequencyBadge
+            frequency={`${aspect.frequency} Hz`}
+            onClose={onClose}
+          />
 
           {/* Ejercicio Holístico */}
           <div className="modal-section bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">

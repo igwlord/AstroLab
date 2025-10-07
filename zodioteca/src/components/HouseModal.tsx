@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { House } from '../types/house';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface HouseModalProps {
   house: House | null;
@@ -9,24 +10,6 @@ interface HouseModalProps {
 }
 
 const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (!house) return;
-    
-    const frequencyValue = house.frequency.split('/')[0].trim().replace(' Hz', '');
-    const audioPath = `/media/${frequencyValue}.mp3`;
-    
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    
-    audioRef.current = new Audio(audioPath);
-    audioRef.current.play().catch(err => {
-      console.error('Error playing audio:', err);
-    });
-  };
-
   if (!isOpen || !house) return null;
 
   const getCategoryStyles = (category: string) => {
@@ -199,19 +182,15 @@ const HouseModal: React.FC<HouseModalProps> = ({ house, isOpen, onClose }) => {
                 <div>
                   <span className="font-semibold">Chakra:</span> {house.chakra}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">Frecuencia:</span> {house.frequency}
-                  <button
-                    onClick={playFrequency}
-                    className="px-2 py-1 text-xs rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center gap-1"
-                    title="Reproducir frecuencia"
-                  >
-                    ▶️ <span className="hidden sm:inline">Escuchar</span>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+
+          {/* Frequency Badge - Reemplaza el reproductor */}
+          <FrequencyBadge
+            frequency={house.frequency}
+            onClose={onClose}
+          />
 
           {/* Ejercicio holístico */}
           <section className="modal-section bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">

@@ -3,9 +3,10 @@ import type { ZodiacFrequency } from '../types/zodiacFrequency';
 
 interface SolarPlayerProps {
   selectedFrequency: ZodiacFrequency | null;
+  autoPlay?: boolean;
 }
 
-const SolarPlayer: React.FC<SolarPlayerProps> = ({ selectedFrequency }) => {
+const SolarPlayer: React.FC<SolarPlayerProps> = ({ selectedFrequency, autoPlay = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -16,7 +17,18 @@ const SolarPlayer: React.FC<SolarPlayerProps> = ({ selectedFrequency }) => {
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
     }
-  }, [selectedFrequency]);
+
+    // Auto-reproducir si se indica
+    if (autoPlay && selectedFrequency && audioRef.current) {
+      setTimeout(() => {
+        audioRef.current?.play().then(() => {
+          setIsPlaying(true);
+        }).catch(err => {
+          console.warn('Auto-play blocked by browser:', err);
+        });
+      }, 500); // Pequeño delay para asegurar que el audio está listo
+    }
+  }, [selectedFrequency, autoPlay]);
 
   const togglePlay = () => {
     if (!audioRef.current || !selectedFrequency) return;

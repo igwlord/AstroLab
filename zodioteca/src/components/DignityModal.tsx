@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Dignity } from '../types/dignity';
 import StandardModal from './StandardModal';
+import FrequencyBadge from './FrequencyBadge';
 
 interface DignityModalProps {
   dignity: Dignity | null;
@@ -9,14 +10,6 @@ interface DignityModalProps {
 }
 
 const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playFrequency = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  };
-
   if (!isOpen || !dignity) return null;
 
   const getDignityGradient = (name: string) => {
@@ -35,7 +28,6 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose })
   };
 
   const gradient = getDignityGradient(dignity.name);
-  const frequencyNumber = typeof dignity.frequency === 'number' ? dignity.frequency : 528;
 
   return (
     <StandardModal
@@ -93,24 +85,13 @@ const DignityModal: React.FC<DignityModalProps> = ({ dignity, isOpen, onClose })
                 <p className="text-gray-600 dark:text-gray-400">{dignity.chakra}</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎵 Frecuencia:</span>
-                <p className="text-gray-600 dark:text-gray-400">{dignity.frequency} Hz</p>
-              </div>
-              <button
-                onClick={playFrequency}
-                className={`w-full px-4 py-2 bg-gradient-to-r ${gradient} text-white rounded-lg hover:opacity-90 transition-opacity`}
-              >
-                ▶ Reproducir Frecuencia
-              </button>
-              <audio
-                ref={audioRef}
-                src={`/media/${frequencyNumber}.mp3`}
-                preload="none"
-              />
-            </div>
           </div>
+
+          {/* Frequency Badge */}
+          <FrequencyBadge
+            frequency={dignity.frequency + ' Hz'}
+            onClose={onClose}
+          />
 
           {/* Ejercicio Holístico */}
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
