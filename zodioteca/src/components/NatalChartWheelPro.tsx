@@ -29,22 +29,19 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     window.print();
   };
 
-  // RADIOS EXACTOS según documento
-  // const R_INNER = 0.32 * R; // Para futuro uso en disco central
-  const R_ASPECTS = 0.52 * R;
-  const R_PLANETS = 0.60 * R;
-  const R_HOUSE_NUMBERS = 0.72 * R;
-  const R_SIGNS_INNER = 0.84 * R;
-  const R_SIGNS_OUTER = 0.92 * R;
-  const R_TICKS_INNER = 0.93 * R;
-  const R_TICKS_OUTER = 1.00 * R;
+  // RADIOS EXACTOS - Casas cerca del centro, Signos afuera (ORDEN NATURAL)
+  const R_ASPECTS = 0.52 * R;      // Anillo de aspectos (centro)
+  const R_PLANETS = 0.60 * R;      // Anillo de planetas
+  const R_HOUSES_INNER = 0.70 * R; // Inicio del anillo de casas (cerca del centro)
+  const R_HOUSES_OUTER = 0.78 * R; // Fin del anillo de casas
+  const R_SIGNS_INNER = 0.86 * R;  // Signos van afuera (inicio)
+  const R_SIGNS_OUTER = 0.94 * R;  // Borde externo de signos (antes del borde)
 
   // Longitudes de ticks
-  const LEN_TICK_1 = Math.max(2, 0.012 * R);
-  const LEN_TICK_5 = Math.max(3, 0.020 * R);
-  const LEN_TICK_10 = Math.max(4, 0.030 * R);
+  const LEN_TICK_1 = Math.max(2, 0.008 * R);
+  const LEN_TICK_5 = Math.max(3, 0.015 * R);
+  const LEN_TICK_10 = Math.max(4, 0.025 * R);
 
-  const R_DEG_LABELS = R_TICKS_INNER + LEN_TICK_10 + 0.012 * R;
   const R_SIGN_SYMBOL = (R_SIGNS_INNER + R_SIGNS_OUTER) / 2;
 
   // Tamaños de texto
@@ -111,11 +108,10 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const ASPECT_COLORS: Record<string, string> = THEME.aspects;
 
   // ============================================
-  // 1. CORONA DE TICKS (360 grados)
+  // 1. CORONA DE TICKS (360 grados) - APUNTAN HACIA ADENTRO
   // ============================================
   const renderTicks = () => {
     const ticks: React.ReactElement[] = [];
-    const labels: React.ReactElement[] = [];
 
     for (let deg = 0; deg < 360; deg++) {
       const rad = absToRad(deg);
@@ -127,8 +123,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const opacity = THEME.ticksOpacity[opacityIndex];
       const strokeWidth = is10 ? 1.2 : is5 ? 0.9 : 0.6;
 
-      const [x1, y1] = polar(cx, cy, R_TICKS_INNER, rad);
-      const [x2, y2] = polar(cx, cy, R_TICKS_INNER + len, rad);
+      // Ticks hacia ADENTRO desde el borde externo de signos
+      const [x1, y1] = polar(cx, cy, R_SIGNS_OUTER, rad);
+      const [x2, y2] = polar(cx, cy, R_SIGNS_OUTER - len, rad);
 
       ticks.push(
         <line
@@ -144,35 +141,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       );
     }
 
-    // Etiquetas 0/10/20 por cada signo (36 etiquetas)
-    for (let signIdx = 0; signIdx < 12; signIdx++) {
-      for (const degInSign of [0, 10, 20]) {
-        const absDeg = signIdx * 30 + degInSign;
-        const rad = absToRad(absDeg);
-        const [x, y] = polar(cx, cy, R_DEG_LABELS, rad);
-
-        labels.push(
-          <text
-            key={`label-${absDeg}`}
-            x={x}
-            y={y}
-            fontSize={LABEL_SIZE}
-            fill={THEME.degLabels}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            opacity={0.9}
-            fontWeight="500"
-          >
-            {degInSign}°
-          </text>
-        );
-      }
-    }
-
     return (
       <g id="ticks">
         {ticks}
-        {labels}
       </g>
     );
   };
@@ -258,14 +229,15 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         ? THEME.houseLines.succedent
         : THEME.houseLines.cadent;
 
-      // Línea desde centro hasta borde interno de signos
-      const [x2, y2] = polar(cx, cy, R_SIGNS_INNER, rad);
+      // Línea de cúspide: atraviesa el anillo de casas y va hasta el borde externo de signos
+      const [x1, y1] = polar(cx, cy, R_HOUSES_INNER, rad);
+      const [x2, y2] = polar(cx, cy, R_SIGNS_OUTER, rad);
 
       lines.push(
         <line
           key={`house-line-${house.number}`}
-          x1={cx}
-          y1={cy}
+          x1={x1}
+          y1={y1}
           x2={x2}
           y2={y2}
           stroke={color}
@@ -275,41 +247,32 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         />
       );
 
-      // Número de casa en midpoint
+      // Número de casa en midpoint (en el centro del anillo de casas, cerca del centro)
       const nextHouse = data.houses[(idx + 1) % 12];
       const span = deltaPos(cusp, nextHouse.cusp);
       const midDeg = normalize(cusp + span / 2);
       const radMid = absToRad(midDeg);
-      const [xNum, yNum] = polar(cx, cy, R_HOUSE_NUMBERS, radMid);
+      // Posición en el centro del anillo de casas (entre HOUSES_INNER y HOUSES_OUTER)
+      const [xNum, yNum] = polar(cx, cy, (R_HOUSES_INNER + R_HOUSES_OUTER) / 2, radMid);
 
       numbers.push(
-        <g key={`house-num-${house.number}`}>
-          <circle
-            cx={xNum}
-            cy={yNum}
-            r={HOUSE_NUMBER_SIZE * 0.85}
-            fill={THEME.houseNumbers.bg}
-            stroke={THEME.houseNumbers.fill}
-            strokeWidth={1.5}
-            opacity={0.95}
-          />
-          <text
-            x={xNum}
-            y={yNum}
-            fontSize={HOUSE_NUMBER_SIZE}
-            fill={THEME.houseNumbers.fill}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontWeight="bold"
-          >
-            {house.number}
-          </text>
-        </g>
+        <text
+          key={`house-num-${house.number}`}
+          x={xNum}
+          y={yNum}
+          fontSize={HOUSE_NUMBER_SIZE}
+          fill={THEME.houseNumbers.fill}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontWeight="bold"
+        >
+          {house.number}
+        </text>
       );
 
-      // Etiquetas ASC/MC/DSC/IC
+      // Etiquetas ASC/MC/DSC/IC (FUERA del borde externo, en el anillo de signos)
       if (house.number === 1) {
-        const [xAsc, yAsc] = polar(cx, cy, R_TICKS_OUTER + 12, rad);
+        const [xAsc, yAsc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
         axesLabels.push(
           <text
             key="asc-label"
@@ -327,7 +290,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 10) {
-        const [xMc, yMc] = polar(cx, cy, R_TICKS_OUTER + 12, rad);
+        const [xMc, yMc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
         axesLabels.push(
           <text
             key="mc-label"
@@ -345,7 +308,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 7) {
-        const [xDsc, yDsc] = polar(cx, cy, R_TICKS_OUTER + 12, rad);
+        const [xDsc, yDsc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
         axesLabels.push(
           <text
             key="dsc-label"
@@ -363,7 +326,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 4) {
-        const [xIc, yIc] = polar(cx, cy, R_TICKS_OUTER + 12, rad);
+        const [xIc, yIc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
         axesLabels.push(
           <text
             key="ic-label"
@@ -432,14 +395,62 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   // ============================================
-  // 5. PLANETAS (con grados y minutos)
+  // 5. PLANETAS (con grados y minutos + ANTI-COLISIÓN estilo Astro-Seek)
   // ============================================
   const renderPlanets = () => {
     const planetGlyphs: React.ReactElement[] = [];
 
-    data.planets.forEach((planet) => {
+    // PASO 1: Detectar planetas cercanos y asignar capas (como Astro-Seek)
+    interface PlanetWithLayer {
+      planet: typeof data.planets[0];
+      layer: number; // 0=interior, 1=medio, 2=exterior
+      radius: number;
+    }
+
+    const planetsWithLayers: PlanetWithLayer[] = [];
+    const sortedPlanets = [...data.planets].sort((a, b) => a.longitude - b.longitude);
+
+    sortedPlanets.forEach((planet, index) => {
+      // Calcular distancia angular con vecinos
+      const prev = sortedPlanets[(index - 1 + sortedPlanets.length) % sortedPlanets.length];
+      const next = sortedPlanets[(index + 1) % sortedPlanets.length];
+      
+      const distPrev = Math.min(
+        Math.abs(planet.longitude - prev.longitude),
+        360 - Math.abs(planet.longitude - prev.longitude)
+      );
+      const distNext = Math.min(
+        Math.abs(planet.longitude - next.longitude),
+        360 - Math.abs(planet.longitude - next.longitude)
+      );
+
+      // Si está muy cerca de vecinos (< 12°), usar capas alternas
+      const COLLISION_THRESHOLD = 12;
+      let layer = 0;
+
+      if (distPrev < COLLISION_THRESHOLD || distNext < COLLISION_THRESHOLD) {
+        // Alternar capas para evitar superposición
+        layer = index % 3; // 0, 1, 2 rotando
+      }
+
+      // Radios para cada capa (como en Astro-Seek: 3 anillos concéntricos)
+      const layerRadii = [
+        R_PLANETS - 0.04 * R, // Capa interna
+        R_PLANETS,            // Capa media (default)
+        R_PLANETS + 0.04 * R, // Capa externa
+      ];
+
+      planetsWithLayers.push({
+        planet,
+        layer,
+        radius: layerRadii[layer],
+      });
+    });
+
+    // PASO 2: Renderizar planetas con sus capas asignadas
+    planetsWithLayers.forEach(({ planet, radius }) => {
       const rad = absToRad(planet.longitude);
-      const [x, y] = polar(cx, cy, R_PLANETS, rad);
+      const [x, y] = polar(cx, cy, radius, rad);
 
       const symbol = PLANET_SYMBOLS[planet.name] || '●';
 
@@ -495,101 +506,306 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   // ============================================
-  // 6. TABLA DE DATOS (inferior)
+  // 6. TABLA DE ASPECTOS PROFESIONAL (estilo Astro-Seek exacto)
   // ============================================
-  const renderDataTable = () => {
-    if (!showDataTable) return null;
+  const renderAspectsGrid = () => {
+    if (!showDataTable || !data.aspects || data.aspects.length === 0) return null;
+
+    // Símbolos de aspectos
+    const ASPECT_SYMBOLS: Record<string, string> = {
+      'conjunction': '☌',
+      'conjuncion': '☌',
+      'opposition': '☍',
+      'oposicion': '☍',
+      'trine': '△',
+      'trigono': '△',
+      'square': '□',
+      'cuadratura': '□',
+      'sextile': '⚹',
+      'sextil': '⚹',
+    };
+
+    // Símbolos de puntos especiales
+    const SPECIAL_SYMBOLS: Record<string, string> = {
+      'Node': '☊',
+      'Nodo Norte': '☊',
+      'Lilith': '⚸',
+      'Chiron': '⚷',
+      'Fortune': '⊗',
+      'Fortuna': '⊗',
+      'Vertex': '⚹',
+      'ASC': 'AC',
+      'MC': 'MC',
+    };
+
+    // Combinar planetas + puntos especiales + ASC/MC
+    const allBodies: Array<{ name: string; longitude: number; house?: number }> = [
+      ...data.planets.map(p => ({ 
+        name: p.name, 
+        longitude: p.longitude,
+        house: data.houses.find(h => {
+          const nextHouse = data.houses.find(h2 => h2.number === (h.number % 12) + 1);
+          if (!nextHouse) return false;
+          const span = deltaPos(h.cusp, nextHouse.cusp);
+          const inHouse = deltaPos(h.cusp, p.longitude) < span;
+          return inHouse;
+        })?.number
+      }))
+    ];
+
+    // Agregar puntos especiales si existen
+    if (data.points) {
+      data.points.forEach(point => {
+        allBodies.push({ 
+          name: point.name, 
+          longitude: point.longitude,
+          house: data.houses.find(h => {
+            const nextHouse = data.houses.find(h2 => h2.number === (h.number % 12) + 1);
+            if (!nextHouse) return false;
+            const span = deltaPos(h.cusp, nextHouse.cusp);
+            const inHouse = deltaPos(h.cusp, point.longitude) < span;
+            return inHouse;
+          })?.number
+        });
+      });
+    }
+
+    // Agregar ASC (Casa 1) y MC (Casa 10)
+    const ascHouse = data.houses.find(h => h.number === 1);
+    const mcHouse = data.houses.find(h => h.number === 10);
+    
+    if (ascHouse) {
+      allBodies.push({ name: 'ASC', longitude: ascHouse.cusp, house: 1 });
+    }
+    if (mcHouse) {
+      allBodies.push({ name: 'MC', longitude: mcHouse.cusp, house: 10 });
+    }
+
+    const allNames = allBodies.map(b => b.name);
 
     return (
-      <div
-        className="mt-6 rounded-lg shadow-xl p-6 max-w-4xl mx-auto border"
+      <div 
+        className="mt-8 mx-auto p-6 rounded-2xl shadow-2xl"
         style={{
-          background: THEME.table.bg,
-          borderColor: THEME.table.accent,
+          background: 'radial-gradient(circle at 50% 30%, #1A0033, #0B0018)',
+          maxWidth: '900px',
         }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {data.planets.map((planet) => {
-            const { deg, min } = degMin(planet.longitude);
-            const signIdx = getSignIndex(planet.longitude);
-            const signSymbol = getSignSymbol(signIdx);
-
-            return (
-              <div
-                key={planet.name}
-                className="flex items-center gap-2 p-3 rounded border"
-                style={{
-                  backgroundColor: 'rgba(212, 175, 55, 0.05)',
-                  borderColor: 'rgba(212, 175, 55, 0.2)',
-                }}
-              >
-                <span
-                  className="text-xl"
-                  style={{ color: THEME.planets.glyph }}
-                >
-                  {PLANET_SYMBOLS[planet.name] || '●'}
-                </span>
-                <div>
-                  <div
-                    className="font-medium text-sm"
-                    style={{ color: THEME.table.text }}
+        <h3 
+          className="text-xl font-bold mb-6 text-center"
+          style={{ 
+            color: '#FFD700',
+            textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+          }}
+        >
+          Tabla de Aspectos
+        </h3>
+        
+        {/* Tabla en formato Astro-Seek */}
+        <div className="overflow-x-auto">
+          <table 
+            className="mx-auto"
+            style={{ 
+              borderCollapse: 'separate',
+              borderSpacing: '2px',
+            }}
+          >
+            {/* Encabezado superior (planetas + puntos especiales horizontales) */}
+            <thead>
+              <tr>
+                <th style={{ width: '80px', height: '60px' }}></th>
+                {allNames.slice(0, -1).map((name) => (
+                  <th
+                    key={name}
+                    style={{
+                      backgroundColor: 'rgba(30, 20, 50, 0.8)',
+                      border: '1px solid rgba(255, 215, 0, 0.4)',
+                      color: '#EDE6FF',
+                      width: '50px',
+                      height: '50px',
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                      padding: '8px',
+                      borderRadius: '4px',
+                    }}
                   >
-                    {planet.name}
-                  </div>
-                  <div
-                    className="text-xs"
-                    style={{ color: THEME.table.accent }}
-                  >
-                    {deg}°{min.toString().padStart(2, '0')}′ {signSymbol}
-                    {planet.retrograde && ' ℞'}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {data.aspects && data.aspects.length > 0 && (
-          <div className="mt-5">
-            <h4
-              className="font-bold mb-3"
-              style={{ color: THEME.table.accent }}
-            >
-              Aspectos
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {data.aspects.map((aspect, idx) => (
-                <div
-                  key={idx}
-                  className="text-sm p-3 rounded border"
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '18px', color: '#FFD700' }}>
+                        {PLANET_SYMBOLS[name] || SPECIAL_SYMBOLS[name] || '●'}
+                      </span>
+                      <span style={{ fontSize: '8px', color: '#D4AF37' }}>
+                        {name}
+                      </span>
+                    </div>
+                  </th>
+                ))}
+                <th 
                   style={{
-                    backgroundColor: 'rgba(212, 175, 55, 0.05)',
-                    borderColor: 'rgba(212, 175, 55, 0.2)',
-                    color: THEME.table.text,
+                    backgroundColor: 'rgba(30, 20, 50, 0.8)',
+                    border: '1px solid rgba(255, 215, 0, 0.4)',
+                    color: '#EDE6FF',
+                    width: '50px',
+                    textAlign: 'center',
+                    fontSize: '10px',
+                    padding: '8px',
+                    borderRadius: '4px',
                   }}
                 >
-                  <span className="font-medium">
-                    <span style={{ color: THEME.planets.glyph }}>
-                      {PLANET_SYMBOLS[aspect.planet1] || aspect.planet1}
-                    </span>{' '}
-                    <span style={{ color: ASPECT_COLORS[aspect.type] }}>
-                      {aspect.type}
-                    </span>{' '}
-                    <span style={{ color: THEME.planets.glyph }}>
-                      {PLANET_SYMBOLS[aspect.planet2] || aspect.planet2}
-                    </span>
-                  </span>
-                  <span
-                    className="ml-2"
-                    style={{ color: THEME.table.accent, opacity: 0.7 }}
-                  >
-                    orbe: {aspect.orb.toFixed(1)}°
-                  </span>
-                </div>
-              ))}
-            </div>
+                  Casa
+                </th>
+              </tr>
+            </thead>
+            
+            {/* Cuerpo de la tabla (solo mitad inferior - forma de escalera) */}
+            <tbody>
+              {allBodies.slice(1).map((body1, rowIndex) => {
+                const actualRowIndex = rowIndex + 1;
+                const { name: name1, house: house1 } = body1;
+                
+                return (
+                  <tr key={name1}>
+                    {/* Encabezado lateral (planeta/punto vertical) */}
+                    <td
+                      style={{
+                        backgroundColor: 'rgba(30, 20, 50, 0.8)',
+                        border: '1px solid rgba(255, 215, 0, 0.4)',
+                        color: '#EDE6FF',
+                        width: '80px',
+                        height: '50px',
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                        padding: '8px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '18px', color: '#FFD700' }}>
+                          {PLANET_SYMBOLS[name1] || SPECIAL_SYMBOLS[name1] || '●'}
+                        </span>
+                        <span style={{ fontSize: '8px', color: '#D4AF37' }}>
+                          {name1}
+                        </span>
+                      </div>
+                    </td>
+                    
+                    {/* Celdas de aspectos (solo hasta la columna actual - forma triangular) */}
+                    {allNames.slice(0, actualRowIndex).map((name2) => {
+                      // Buscar si existe un aspecto entre estos dos cuerpos
+                      const aspect = data.aspects?.find(
+                        a => (a.planet1 === name1 && a.planet2 === name2) ||
+                             (a.planet1 === name2 && a.planet2 === name1)
+                      );
+                      
+                      const aspectSymbol = aspect ? ASPECT_SYMBOLS[aspect.type.toLowerCase()] : null;
+                      const color = aspect ? ASPECT_COLORS[aspect.type] : '#A38BFF';
+                      
+                      return (
+                        <td
+                          key={`${name1}-${name2}`}
+                          style={{
+                            backgroundColor: aspectSymbol 
+                              ? `${color}25` 
+                              : 'rgba(15, 10, 30, 0.6)',
+                            border: '1px solid rgba(255, 215, 0, 0.3)',
+                            width: '50px',
+                            height: '50px',
+                            textAlign: 'center',
+                            verticalAlign: 'middle',
+                            padding: '4px',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {aspectSymbol && (
+                            <div style={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'center', 
+                              justifyContent: 'center',
+                              height: '100%'
+                            }}>
+                              <span 
+                                style={{ 
+                                  fontSize: '22px',
+                                  fontWeight: 'bold',
+                                  color: color,
+                                  textShadow: `0 0 8px ${color}80`,
+                                  lineHeight: '1'
+                                }}
+                              >
+                                {aspectSymbol}
+                              </span>
+                              {aspect && (
+                                <span 
+                                  style={{ 
+                                    fontSize: '9px',
+                                    color: '#D4AF37',
+                                    opacity: 0.8,
+                                    marginTop: '2px'
+                                  }}
+                                >
+                                  {Math.abs(aspect.orb).toFixed(1)}°
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                    
+                    {/* Columna de Casa */}
+                    <td
+                      style={{
+                        backgroundColor: 'rgba(30, 20, 50, 0.8)',
+                        border: '1px solid rgba(255, 215, 0, 0.4)',
+                        color: '#FFD700',
+                        width: '50px',
+                        height: '50px',
+                        textAlign: 'center',
+                        verticalAlign: 'middle',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {house1 || '-'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Leyenda de aspectos */}
+        <div 
+          className="mt-6 flex flex-wrap justify-center gap-6 text-sm"
+          style={{ 
+            borderTop: '1px solid rgba(255, 215, 0, 0.3)',
+            paddingTop: '16px'
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ color: ASPECT_COLORS.conjunction, textShadow: `0 0 8px ${ASPECT_COLORS.conjunction}80` }}>☌</span>
+            <span style={{ color: '#EDE6FF' }}>Conjunción</span>
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ color: ASPECT_COLORS.opposition, textShadow: `0 0 8px ${ASPECT_COLORS.opposition}80` }}>☍</span>
+            <span style={{ color: '#EDE6FF' }}>Oposición</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ color: ASPECT_COLORS.trine, textShadow: `0 0 8px ${ASPECT_COLORS.trine}80` }}>△</span>
+            <span style={{ color: '#EDE6FF' }}>Trígono</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ color: ASPECT_COLORS.square, textShadow: `0 0 8px ${ASPECT_COLORS.square}80` }}>□</span>
+            <span style={{ color: '#EDE6FF' }}>Cuadratura</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ color: ASPECT_COLORS.sextil, textShadow: `0 0 8px ${ASPECT_COLORS.sextil}80` }}>⚹</span>
+            <span style={{ color: '#EDE6FF' }}>Sextil</span>
+          </div>
+        </div>
       </div>
     );
   };
@@ -626,7 +842,20 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             </radialGradient>
           </defs>
           <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
-          <circle cx={cx} cy={cy} r={R} fill="none" stroke={THEME.ticks} strokeWidth={1.5} opacity={0.3} />
+
+          {/* Círculos concéntricos principales - SOLO los necesarios */}
+          <g id="structure-circles">
+            {/* Círculo de aspectos (centro) */}
+            <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
+            
+            {/* Anillo de CASAS (cerca del centro) */}
+            <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+            <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+            
+            {/* Anillo de SIGNOS (exterior) */}
+            <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+            <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+          </g>
 
           {renderTicks()}
           {renderSigns()}
@@ -636,7 +865,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         </svg>
       </div>
 
-      {renderDataTable()}
+      {renderAspectsGrid()}
     </div>
   );
 };

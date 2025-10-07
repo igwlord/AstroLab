@@ -1,7 +1,8 @@
 import type { FC } from 'react';
 import { X } from 'lucide-react';
 import type { ChartWithStatus } from '../services/chartStorage';
-import NatalChartWheel from './NatalChartWheel';
+import NatalChartWheelPro from './NatalChartWheelPro';
+import { adaptChartData } from '../utils/chartAdapter';
 
 interface ChartModalProps {
   chart: ChartWithStatus;
@@ -52,9 +53,11 @@ const ChartModal: FC<ChartModalProps> = ({ chart, onClose }) => {
         <div className="p-3 sm:p-4 md:p-6 overflow-y-auto max-h-[calc(95vh-80px)] sm:max-h-[calc(90vh-100px)] md:max-h-[calc(90vh-120px)]">
           {/* RUEDA DE CARTA NATAL */}
           <div className="mb-4 sm:mb-6 md:mb-8">
-            <NatalChartWheel 
-              chart={chart} 
+            <NatalChartWheelPro 
+              data={adaptChartData(chart)} 
               size={typeof window !== 'undefined' && window.innerWidth < 640 ? 300 : 600}
+              showPlanetDegrees={true}
+              showDataTable={false}
             />
           </div>
 
