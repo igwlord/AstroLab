@@ -157,8 +157,8 @@ export const ZODIAC_FREQUENCIES: ZodiacFrequencies = [
       name: 'Corazón (Anahata)',
       location: 'Centro del pecho'
     },
-    frequency: 639,
-    audioFile: '/media/639.mp3',
+    frequency: 285,
+    audioFile: '/media/285.mp3',
     color: {
       primary: 'Rosa suave',
       secondary: 'Verde pastel',
@@ -229,13 +229,13 @@ export const ZODIAC_FREQUENCIES: ZodiacFrequencies = [
       name: 'Raíz (Muladhara)',
       location: 'Base de la columna'
     },
-    frequency: 396,
-    audioFile: '/media/396.mp3',
+    frequency: 432,
+    audioFile: '/media/432.mp3',
     color: {
-      primary: 'Gris oscuro',
-      secondary: 'Negro',
-      gradient: 'from-gray-700 via-slate-800 to-gray-900',
-      hex: '#374151'
+      primary: 'Marrón tierra',
+      secondary: 'Marrón cálido',
+      gradient: 'from-amber-700 via-orange-800 to-amber-900',
+      hex: '#B45309'
     },
     exercise: {
       title: 'Raíces de Propósito',
@@ -253,8 +253,8 @@ export const ZODIAC_FREQUENCIES: ZodiacFrequencies = [
       name: 'Garganta + Corona',
       location: 'Garganta y coronilla'
     },
-    frequency: 963,
-    audioFile: '/media/963.mp3',
+    frequency: 888,
+    audioFile: '/media/888.mp3',
     color: {
       primary: 'Azul eléctrico',
       secondary: 'Turquesa',
