@@ -120,7 +120,7 @@ const GlossaryCategoriesComponent: React.FC<GlossaryCategoriesProps> = ({
             </button>
 
             {/* Dropdown Menu */}
-            <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-purple-200 dark:border-purple-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-purple-200 dark:border-purple-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               <div className="p-2 max-h-96 overflow-y-auto">
                 {moreCategories.map(category => {
                   const count = entryCounts[category.id] || 0;
@@ -139,9 +139,9 @@ const GlossaryCategoriesComponent: React.FC<GlossaryCategoriesProps> = ({
                         }
                       `}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{category.icon}</span>
-                        <span className="font-medium">{category.name}</span>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-lg flex-shrink-0">{category.icon}</span>
+                        <span className="font-medium whitespace-nowrap">{category.name}</span>
                       </div>
                       {count > 0 && (
                         <span className={`
