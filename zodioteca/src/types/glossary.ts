@@ -62,7 +62,7 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
   {
     id: 'lunar',
     name: 'Lunas',
-    icon: '�',
+    icon: '🌛',
     description: 'Luna en cada signo del zodiaco',
     color: 'slate'
   },
@@ -106,7 +106,7 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
   {
     id: 'advanced',
     name: 'Dimensiones Astrológicas',
-    icon: '�',
+    icon: '🍥',
     description: 'Técnicas avanzadas y dimensiones del alma',
     color: 'purple'
   },
