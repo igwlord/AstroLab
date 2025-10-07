@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import NatalChartForm from '../components/NatalChartForm';
-import NatalChartWheel from '../components/NatalChartWheel';
+import NatalChartWheelPro from '../components/NatalChartWheelPro';
+import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
 import StatCard from '../components/StatCard';
@@ -355,10 +356,10 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           </div>
 
-          {/* RUEDA DE CARTA NATAL */}
+          {/* RUEDA DE CARTA NATAL - PRO (según rudea astro modelo.md) */}
           <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-            <NatalChartWheel 
-              chart={{
+            <NatalChartWheelPro 
+              data={adaptChartData({
                 id: crypto.randomUUID(),
                 data: {
                   id: crypto.randomUUID(),
@@ -382,8 +383,10 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   source: 'local'
                 },
                 syncStatus: 'local-only'
-              }}
-              size={typeof window !== 'undefined' && window.innerWidth < 640 ? 300 : 600}
+              })}
+              size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
+              showPlanetDegrees={true}
+              showDataTable={true}
             />
           </div>
 

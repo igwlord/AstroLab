@@ -8,7 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:precision": "tsx test/precisionTest.ts"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:precision": "tsx test/precisionTest.ts",
+    "benchmark": "tsx test/benchmark.ts"
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
@@ -32,16 +37,21 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.0",
     "canvas": "^3.2.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "jsdom": "^27.0.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "tsx": "^4.20.6",
@@ -49,6 +59,7 @@
     "typescript-eslint": "^8.45.0",
     "vite": "npm:rolldown-vite@7.1.14",
     "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^3.2.4",
     "workbox-window": "^7.3.0"
   },
   "overrides": {

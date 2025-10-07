@@ -729,3 +729,54 @@ html.dark .bg-cyan-500 {
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
+
+/* Estilos para impresión de la rueda natal */
+@media print {
+  /* Ocultar todo excepto la rueda */
+  body > *:not(.natal-chart-wheel-pro) {
+    display: none !important;
+  }
+
+  /* Ocultar navegación y otros elementos */
+  nav, header, footer, .no-print {
+    display: none !important;
+  }
+
+  /* Asegurar que la rueda use toda la página */
+  .natal-chart-wheel-pro {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    page-break-inside: avoid;
+  }
+
+  /* Centrar el SVG en la página */
+  .natal-chart-wheel-pro svg {
+    display: block !important;
+    margin: 0 auto !important;
+    max-width: 90% !important;
+    height: auto !important;
+  }
+
+  /* Mantener la tabla de datos visible */
+  .natal-chart-wheel-pro > div:not(svg) {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-top: 20px !important;
+  }
+
+  /* Ajustes de color para impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Fondo blanco para impresión si es necesario */
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+}

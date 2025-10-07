@@ -1,33 +1,54 @@
-import React from 'react';
-import type { ChartWithStatus } from '../services/chartStorage';
-
-interface NatalChartWheelProps {
-  chart: ChartWithStatus;
-  size?: number;
-  className?: string;
-}
+import React, { useRef } from 'react';
+import type { NatalChartWheelProps } from '../types/chartWheel';
+import { validateChartData } from '../types/chartWheel';
+import { 
+  normalize, 
+  deltaPos, 
+  absToRad, 
+  mid, 
+  absToCoords, 
+  degMin, 
+  getSignIndex, 
+  getSignSymbol 
+} from '../utils/chartGeometry';
+import { 
+  getTheme, 
+  PLANET_SYMBOLS, 
+  SPECIAL_POINT_SYMBOLS, 
+  getPlanetColor 
+} from '../utils/chartThemes';
 
 /**
  * NATAL CHART WHEEL - Representación gráfica de la carta natal
  * 
- * Sistema de coordenadas (ZODÍACO FIJO - convención Astro.com/tradicional):
- * - 0° ARIES = 9:00 posición (lado izquierdo)
- * - Zodíaco FIJO: Aries siempre a la izquierda, crece antihorario
- * - Casas ROTAN según hora de nacimiento (longitudes eclípticas absolutas)
- * - ASC (Casa 1) marca el horizonte este en el momento del nacimiento
- * - MC (Casa 10) marca la culminación del meridiano
+ * Sistema de coordenadas (ZODÍACO FIJO - convención Astro-Seek):
+ * - 0° ARIES = 9:00 posición (lado izquierdo), aumenta ANTIHORARIO
+ * - Zodíaco FIJO: Aries siempre a la izquierda
+ * - Casas ROTAN según hora/lugar de nacimiento (longitudes eclípticas absolutas)
+ * - ASC (Casa 1) marca el horizonte este; MC (Casa 10) marca la culminación
  * 
- * Anillos (desde el centro hacia afuera):
- * 1. Centro: Información de la persona
- * 2. Anillo interior: Planetas posicionados por longitud eclíptica
- * 3. Anillo medio: Casas astrológicas (1-12) con cúspides reales
- * 4. Anillo exterior: Signos zodiacales (Aries-Piscis) FIJOS
+ * Radios (según PLAN_MAESTRO_RUEDA_ASTRO_SEEK.md):
+ * - inner: 0.32, aspects: 0.52, planets: 0.60, houseNum: 0.72
+ * - signsIn: 0.84, signsOut: 0.92, ticksIn: 0.93, ticksOut: 1.00
  */
 const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({ 
-  chart,
-  size = 600,
-  className = ''
+  data,
+  size = 640,
+  theme = 'violet',
+  mode = 'zodiacFixed',
+  planetLabels = 'none',
+  debug = false
 }) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Validar datos al montar
+  React.useEffect(() => {
+    try {
+      validateChartData(data);
+    } catch (error) {
+      console.error('[NatalChartWheel] Validation error:', error);
+    }
+  }, [data]);
   // ============================================
   // CONSTANTES DE DISEÑO
   // ============================================
@@ -35,10 +56,10 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
   const CENTER_X = React.useMemo(() => size / 2, [size]);
   const CENTER_Y = React.useMemo(() => size / 2, [size]);
   
-  // Radios de los círculos concéntricos (en porcentaje del tamaño)
-  const RADIUS_INNER = React.useMemo(() => size * 0.15, [size]);      // Centro (15%)
-  const RADIUS_PLANETS = React.useMemo(() => size * 0.25, [size]);    // Zona de planetas (25%)
-  const RADIUS_HOUSES = React.useMemo(() => size * 0.35, [size]);     // Líneas de casas (35%)
+  // Radios de los círculos concéntricos (CORREGIDO según Astro-Seek)
+  const RADIUS_INNER = React.useMemo(() => size * 0.15, [size]);       // Centro vacío (15%)
+  const RADIUS_PLANETS = React.useMemo(() => size * 0.25, [size]);     // Planetas CERCA del centro (25%)
+  const RADIUS_HOUSES = React.useMemo(() => size * 0.35, [size]);      // Números de casas MÁS AFUERA (35%)
   const RADIUS_SIGNS_INNER = React.useMemo(() => size * 0.40, [size]); // Borde interno signos (40%)
   const RADIUS_SIGNS_OUTER = React.useMemo(() => size * 0.48, [size]); // Borde externo signos (48%)
   
@@ -254,6 +275,60 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         />
         
         {/* ============================================ */}
+        {/* GRADUACIÓN PROFESIONAL (Estilo Astro-Seek) */}
+        {/* ============================================ */}
+        <g id="degree-ticks" opacity="0.7">
+          {/* Configuración visual de ticks */}
+          {(() => {
+            const TICK_COLOR = '#a78bfa';
+            const MINOR_LEN  = Math.max(3, size * 0.010);  // Tick cada 5°
+            const MAJOR_LEN  = Math.max(6, size * 0.020);  // Tick cada 10°
+            const TICK_W     = 0.6;
+            const TICK_BASE_OPAC = 0.5;
+            
+            // Radio base: borde EXTERNO de signos (hacia AFUERA como Astro-Seek)
+            const TICKS_R_BASE = RADIUS_SIGNS_OUTER;
+            
+            return (
+              <>
+                {/* Ticks cada 5° (72 ticks totales: 360/5 = 72) */}
+                {Array.from({ length: 72 }, (_, i) => {
+                  const absDeg = i * 5; // Solo cada 5°
+                  const degInSign = absDeg % 30; // Grado dentro del signo (0-29)
+                  
+                  // Determinar tipo de tick
+                  const is10 = degInSign % 10 === 0;
+                  
+                  const len = is10 ? MAJOR_LEN : MINOR_LEN;
+                  const opacity = TICK_BASE_OPAC * (is10 ? 1.3 : 1);
+                  
+                  const rad = absToRad(absDeg);
+                  
+                  // Tick hacia AFUERA desde el borde externo de signos (como Astro-Seek)
+                  const xInner = CENTER_X + TICKS_R_BASE * Math.cos(rad);
+                  const yInner = CENTER_Y - TICKS_R_BASE * Math.sin(rad);
+                  const xOuter = CENTER_X + (TICKS_R_BASE + len) * Math.cos(rad);
+                  const yOuter = CENTER_Y - (TICKS_R_BASE + len) * Math.sin(rad);
+                  
+                  return (
+                    <line
+                      key={`tick-${absDeg}`}
+                      x1={xInner}
+                      y1={yInner}
+                      x2={xOuter}
+                      y2={yOuter}
+                      stroke={TICK_COLOR}
+                      strokeWidth={is10 ? TICK_W * 1.4 : TICK_W}
+                      opacity={opacity}
+                    />
+                  );
+                })}
+              </>
+            );
+          })()}
+        </g>
+        
+        {/* ============================================ */}
         {/* FASE 2: SIGNOS ZODIACALES (Zodíaco Fijo) */}
         {/* ============================================ */}
         {zodiacSigns.map((sign, index) => {
@@ -305,13 +380,15 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         })}
         
         {/* ============================================ */}
-        {/* FASE 3: CASAS ASTROLÓGICAS */}
+        {/* FASE 3: CASAS ASTROLÓGICAS (Estilo Astro-Seek) */}
         {/* ============================================ */}
         {chart.data.houses.map((house) => {
           const cuspAbs = normalize(house.cusp); // Longitud eclíptica absoluta (0° Aries)
           const cuspRad = absToRad(cuspAbs);
           
-          // Línea de cúspide: desde el centro hasta el círculo de signos
+          // Línea de cúspide: desde RADIUS_INNER hasta RADIUS_SIGNS_INNER (NO hasta el centro)
+          const cuspInnerX = CENTER_X + RADIUS_INNER * Math.cos(cuspRad);
+          const cuspInnerY = CENTER_Y - RADIUS_INNER * Math.sin(cuspRad);
           const cuspOuterX = CENTER_X + RADIUS_SIGNS_INNER * Math.cos(cuspRad);
           const cuspOuterY = CENTER_Y - RADIUS_SIGNS_INNER * Math.sin(cuspRad);
           
@@ -320,19 +397,19 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           const isASC = house.number === 1; // Ascendente
           const isMC = house.number === 10; // Medio Cielo
           
-          // Color y grosor según tipo
+          // Color y grosor según tipo (más visible como Astro-Seek)
           let strokeColor = '#a78bfa';
-          let strokeWidth = 1;
-          let opacity = 0.5;
+          let strokeWidth = 1.5;
+          let opacity = 0.6;
           
           if (isASC || isMC) {
             strokeColor = '#fbbf24'; // Dorado para ASC y MC
-            strokeWidth = 3;
+            strokeWidth = 3.5;
             opacity = 1;
           } else if (isAngular) {
             strokeColor = '#c084fc';
-            strokeWidth = 2;
-            opacity = 0.7;
+            strokeWidth = 2.5;
+            opacity = 0.8;
           }
           
           // Calcular MIDPOINT robusto con wrap-around 0°/360°
@@ -341,17 +418,18 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           const span = deltaPos(cuspAbs, nextAbs);      // Ancho angular de la casa (siempre positivo)
           const midAbs = normalize(cuspAbs + span / 2);  // Punto medio absoluto
           
-          const numberRadius = RADIUS_HOUSES * 0.85;
+          // Números de casa ENTRE planetas y signos (como Astro-Seek)
+          const numberRadius = (RADIUS_PLANETS + RADIUS_SIGNS_INNER) / 2;
           const numberRad = absToRad(midAbs);
           const numberX = CENTER_X + numberRadius * Math.cos(numberRad);
           const numberY = CENTER_Y - numberRadius * Math.sin(numberRad);
           
           return (
             <g key={`house-${house.number}`}>
-              {/* Línea de cúspide */}
+              {/* Línea de cúspide (NO llega al centro) */}
               <line
-                x1={CENTER_X}
-                y1={CENTER_Y}
+                x1={cuspInnerX}
+                y1={cuspInnerY}
                 x2={cuspOuterX}
                 y2={cuspOuterY}
                 stroke={strokeColor}
@@ -359,19 +437,34 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
                 opacity={opacity}
               />
               
-              {/* Número de casa */}
-              <text
-                x={numberX}
-                y={numberY}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill="#e9d5ff"
-                fontSize={size < 450 ? "10" : "12"}
-                fontWeight={isAngular ? "bold" : "normal"}
-                opacity="0.9"
-              >
-                {house.number}
-              </text>
+              {/* Número de casa con recuadro (estilo Astro-Seek) */}
+              <g>
+                {/* Recuadro de fondo */}
+                <rect
+                  x={numberX - (size < 450 ? 7 : 9)}
+                  y={numberY - (size < 450 ? 7 : 9)}
+                  width={size < 450 ? 14 : 18}
+                  height={size < 450 ? 14 : 18}
+                  fill="#1a1a2e"
+                  stroke="#e9d5ff"
+                  strokeWidth="0.5"
+                  opacity="0.8"
+                  rx="2"
+                />
+                {/* Número */}
+                <text
+                  x={numberX}
+                  y={numberY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#e9d5ff"
+                  fontSize={size < 450 ? "9" : "11"}
+                  fontWeight={isAngular ? "bold" : "normal"}
+                  opacity="1"
+                >
+                  {house.number}
+                </text>
+              </g>
               
               {/* Etiqueta especial para ASC */}
               {isASC && (
@@ -406,7 +499,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         })}
         
         {/* ============================================ */}
-        {/* FASE 5: ASPECTOS (líneas entre planetas) */}
+        {/* FASE 5: ASPECTOS (Estilo Astro-Seek - muy sutiles) */}
         {/* ============================================ */}
         {chart.data.aspects && chart.data.aspects.map((aspect, index) => {
           // Encontrar las posiciones de los dos planetas
@@ -415,7 +508,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           
           if (!planet1 || !planet2) return null;
           
-          // Calcular coordenadas de ambos planetas (usando longitud eclíptica absoluta)
+          // Calcular coordenadas de ambos planetas (ahora en el anillo exterior)
           const p1Rad = absToRad(planet1.longitude);
           const p1X = CENTER_X + RADIUS_PLANETS * Math.cos(p1Rad);
           const p1Y = CENTER_Y - RADIUS_PLANETS * Math.sin(p1Rad);
@@ -424,7 +517,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           const p2X = CENTER_X + RADIUS_PLANETS * Math.cos(p2Rad);
           const p2Y = CENTER_Y - RADIUS_PLANETS * Math.sin(p2Rad);
           
-          // Colores según tipo de aspecto
+          // Colores según tipo de aspecto (más sutiles)
           const aspectColors: { [key: string]: string } = {
             'conjunction': '#FF0000',      // Rojo intenso
             'conjuncion': '#FF0000',
@@ -442,14 +535,14 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           
           // Opacidad según orbe (más cercano al exacto = más opaco)
           const maxOrb = 10; // Orbe máximo típico
-          const opacity = Math.max(0.2, 1 - (Math.abs(aspect.orb) / maxOrb));
+          const opacity = Math.max(0.15, 1 - (Math.abs(aspect.orb) / maxOrb));
           
-          // Grosor según importancia del aspecto
-          let strokeWidth = 1;
+          // Grosor más fino (estilo Astro-Seek)
+          let strokeWidth = 0.8;
           if (['conjunction', 'conjuncion', 'opposition', 'oposicion'].includes(aspect.type.toLowerCase())) {
-            strokeWidth = 2;
+            strokeWidth = 1.2;
           } else if (['trine', 'trigono', 'square', 'cuadratura'].includes(aspect.type.toLowerCase())) {
-            strokeWidth = 1.5;
+            strokeWidth = 1;
           }
           
           return (
@@ -461,37 +554,72 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
               y2={p2Y}
               stroke={color}
               strokeWidth={strokeWidth}
-              opacity={opacity * 0.4} // Reducir opacidad general para no saturar
+              opacity={opacity * 0.2} // MUY sutiles como Astro-Seek
               strokeDasharray={aspect.type.toLowerCase().includes('sextil') ? '5,3' : ''}
             />
           );
         })}
         
         {/* ============================================ */}
-        {/* FASE 4: PLANETAS */}
+        {/* FASE 4: PLANETAS con ANTI-COLISIÓN (Estilo Astro-Seek) */}
         {/* ============================================ */}
-        {chart.data.planets.map((planet) => {
-          // Longitud eclíptica absoluta (0° Aries)
-          const planetRad = absToRad(planet.longitude);
+        {(() => {
+          // Función de anti-colisión: ajusta radios para planetas muy cercanos
+          const planetsWithRadius = chart.data.planets.map((planet, index) => {
+            let adjustedRadius = RADIUS_PLANETS;
+            
+            // Buscar planetas cercanos (dentro de 10° de diferencia)
+            const nearbyPlanets = chart.data.planets.filter((other, otherIndex) => {
+              if (index === otherIndex) return false;
+              const diff = Math.abs(normalize(planet.longitude - other.longitude));
+              return diff < 10 || diff > 350; // Muy cerca o al otro lado del 0°
+            });
+            
+            // Si hay planetas cercanos, alternar radios para separarlos
+            if (nearbyPlanets.length > 0) {
+              const offset = (index % 3) * (size * 0.03); // Alternancia de radios
+              adjustedRadius = RADIUS_PLANETS + offset;
+            }
+            
+            return { ...planet, adjustedRadius };
+          });
           
-          // Posición del planeta en el círculo de planetas
-          const planetX = CENTER_X + RADIUS_PLANETS * Math.cos(planetRad);
-          const planetY = CENTER_Y - RADIUS_PLANETS * Math.sin(planetRad);
+          return planetsWithRadius.map((planet) => {
+            // Longitud eclíptica absoluta (0° Aries)
+            const planetRad = absToRad(planet.longitude);
+            
+            // Posición del planeta con radio ajustado (anti-colisión)
+            const planetX = CENTER_X + planet.adjustedRadius * Math.cos(planetRad);
+            const planetY = CENTER_Y - planet.adjustedRadius * Math.sin(planetRad);
           
           // Obtener símbolo y color
           const symbol = planetSymbols[planet.name] || '?';
           const color = planetColors[planet.name] || '#ffffff';
           
-          // Tamaño según jerarquía
+          // Calcular signo zodiacal donde está el planeta
+          const signIndex = Math.floor(planet.longitude / 30);
+          const signSymbol = zodiacSigns[signIndex]?.symbol || '';
+          
+          // Calcular grados y minutos DENTRO DEL SIGNO (0-29°)
+          const degreeInSign = planet.longitude % 30; // Grado dentro del signo
+          const degrees = Math.floor(degreeInSign);
+          const minutes = Math.floor((degreeInSign - degrees) * 60);
+          
+          // Tamaño según jerarquía (MÁS GRANDES como Astro-Seek)
           let fontSize = 14;
+          let degreeSize = 8;
           if (planet.name === 'Sol' || planet.name === 'Luna') {
-            fontSize = size < 450 ? 16 : 20;
+            fontSize = size < 450 ? 18 : 24;
+            degreeSize = size < 450 ? 9 : 10;
           } else if (['Mercurio', 'Venus', 'Marte'].includes(planet.name)) {
-            fontSize = size < 450 ? 14 : 18;
+            fontSize = size < 450 ? 16 : 20;
+            degreeSize = size < 450 ? 8 : 9;
           } else if (['Júpiter', 'Saturno'].includes(planet.name)) {
-            fontSize = size < 450 ? 12 : 16;
+            fontSize = size < 450 ? 14 : 18;
+            degreeSize = size < 450 ? 7 : 8;
           } else {
-            fontSize = size < 450 ? 10 : 14;
+            fontSize = size < 450 ? 12 : 16;
+            degreeSize = size < 450 ? 7 : 8;
           }
           
           // Filtro especial para Sol y Luna
@@ -518,24 +646,26 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
               >
                 {symbol}
                 {planet.retrograde && (
-                  <tspan fontSize={fontSize * 0.6} dy="-0.5em">℞</tspan>
+                  <tspan fontSize={fontSize * 0.5} dy="-0.5em">℞</tspan>
                 )}
               </text>
               
-              {/* Grado del planeta (opcional, pequeño) */}
+              {/* Información completa: Grado + minutos + signo (como Astro-Seek) */}
               <text
                 x={planetX}
-                y={planetY + (fontSize * 0.8)}
+                y={planetY + (fontSize * 0.9)}
                 textAnchor="middle"
                 fill={color}
-                fontSize={size < 450 ? "7" : "8"}
-                opacity="0.6"
+                fontSize={degreeSize}
+                opacity="0.8"
+                fontWeight="500"
               >
-                {Math.floor(planet.degree)}°
+                {degrees}° {signSymbol} {minutes}'
               </text>
             </g>
           );
-        })}
+        });
+        })()}
         
         {/* ============================================ */}
         {/* TEXTO CENTRAL - Información de la persona */}
