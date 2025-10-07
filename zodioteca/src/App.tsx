@@ -10,7 +10,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
-const NatalChartWheelDemo = lazy(() => import('./pages/NatalChartWheelDemo'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
@@ -68,15 +67,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Demo Rueda Astral */}
-      <Route path="/chart-wheel-demo" element={
-        <ProtectedRoute>
-          <Layout>
-            <NatalChartWheelDemo />
-          </Layout>
-        </ProtectedRoute>
-      } />
-      
+
       {/* Glosario */}
       <Route path="/glossary" element={
         <ProtectedRoute>

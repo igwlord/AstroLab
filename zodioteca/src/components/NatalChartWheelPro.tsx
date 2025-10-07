@@ -31,18 +31,23 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
   // RADIOS EXACTOS - Casas cerca del centro, Signos afuera (ORDEN NATURAL)
   const R_ASPECTS = 0.52 * R;      // Anillo de aspectos (centro)
-  const R_PLANETS = 0.60 * R;      // Anillo de planetas
+  const BASE_R = 0.66 * R;         // Radio base para planetas (según especificación)
+  const LANE_STEP = 0.03 * R;      // Separación entre carriles de planetas
   const R_HOUSES_INNER = 0.70 * R; // Inicio del anillo de casas (cerca del centro)
   const R_HOUSES_OUTER = 0.78 * R; // Fin del anillo de casas
-  const R_SIGNS_INNER = 0.86 * R;  // Signos van afuera (inicio)
-  const R_SIGNS_OUTER = 0.94 * R;  // Borde externo de signos (antes del borde)
+  const R_SIGNS_INNER = 0.82 * R;  // Signos van afuera (inicio) - MÁS ANCHO
+  const R_SIGNS_OUTER = 0.96 * R;  // Borde externo de signos (más cerca del borde) - MÁS ANCHO
+  const R_SIGN_SYMBOL = 0.89 * R;  // Radio para símbolos de signos (centrados en el nuevo ancho)
 
   // Longitudes de ticks
-  const LEN_TICK_1 = Math.max(2, 0.008 * R);
-  const LEN_TICK_5 = Math.max(3, 0.015 * R);
-  const LEN_TICK_10 = Math.max(4, 0.025 * R);
-
-  const R_SIGN_SYMBOL = (R_SIGNS_INNER + R_SIGNS_OUTER) / 2;
+  const LEN_TICK_1 = Math.max(2, 0.01 * R);   // 1° tick
+  const LEN_TICK_5 = Math.max(3, 0.015 * R);  // 5° tick
+  const LEN_TICK_10 = Math.max(4, 0.025 * R); // 10° tick (marca fuerte)
+  
+  // Parámetros de colisión de planetas
+  const MIN_ANG_SEP = 6;           // Separación mínima angular en grados
+  const MAX_CLUSTER_SPREAD = 8;    // Apertura total extra por cluster
+  // const GLYPH_SIZE = 20;        // Tamaño del glifo en px (reservado para bounding box collision)
 
   // Tamaños de texto
   const LABEL_SIZE = Math.max(8, Math.min(0.022 * size, 12));
@@ -222,16 +227,21 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const isAngular = [1, 4, 7, 10].includes(house.number);
       const isSuccedent = [2, 5, 8, 11].includes(house.number);
 
-      const strokeWidth = isAngular ? 2.4 : isSuccedent ? 1.6 : 1.1;
+      const strokeWidth = isAngular ? 3.0 : isSuccedent ? 2.0 : 1.5;
       const color = isAngular
         ? THEME.houseLines.angular
         : isSuccedent
         ? THEME.houseLines.succedent
         : THEME.houseLines.cadent;
 
-      // Línea de cúspide: atraviesa el anillo de casas y va hasta el borde externo de signos
-      const [x1, y1] = polar(cx, cy, R_HOUSES_INNER, rad);
-      const [x2, y2] = polar(cx, cy, R_SIGNS_OUTER, rad);
+      // Líneas de cúspide: TODAS van desde R_HOUSES_INNER hasta R_SIGNS_INNER
+      // - Ángulos (ASC/MC/DSC/IC): Más largas, atraviesan hasta el anillo de signos
+      // - Otras casas: Desde el anillo de casas hasta el inicio de signos
+      const [x1, y1] = polar(cx, cy, R_HOUSES_INNER, rad); // Todas desde el borde interno de casas
+      
+      const [x2, y2] = isAngular 
+        ? polar(cx, cy, R_SIGNS_OUTER, rad)  // Ángulos: atraviesan TODO el anillo de signos
+        : polar(cx, cy, R_SIGNS_INNER, rad); // Otras: hasta el inicio del anillo de signos
 
       lines.push(
         <line
@@ -242,7 +252,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           y2={y2}
           stroke={color}
           strokeWidth={strokeWidth}
-          opacity={isAngular ? 0.9 : 0.7}
+          opacity={isAngular ? 1.0 : 0.85}
           style={isAngular ? { filter: 'drop-shadow(0 0 2px rgba(212, 175, 55, 0.4))' } : {}}
         />
       );
@@ -395,69 +405,161 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   // ============================================
-  // 5. PLANETAS (con grados y minutos + ANTI-COLISIÓN estilo Astro-Seek)
+  // 5. PLANETAS (con algoritmo profesional de colisión)
   // ============================================
+  
+  // Utilidades para ángulos circulares
+  const wrap360 = (deg: number): number => ((deg % 360) + 360) % 360;
+  
+  const circularMean = (angles: number[]): number => {
+    const n = angles.length;
+    if (n === 0) return 0;
+    
+    // Convertir a coordenadas cartesianas, promediar y volver a polar
+    let sumX = 0, sumY = 0;
+    angles.forEach(a => {
+      const rad = (a * Math.PI) / 180;
+      sumX += Math.cos(rad);
+      sumY += Math.sin(rad);
+    });
+    const meanRad = Math.atan2(sumY / n, sumX / n);
+    return wrap360((meanRad * 180) / Math.PI);
+  };
+  
+  const spreadAngles = (angles: number[], spread: number): number[] => {
+    const n = angles.length;
+    if (n === 1) return angles;
+    
+    const c = circularMean(angles);
+    const half = spread / 2;
+    return angles.map((_, i) => {
+      const t = -half + (i * (spread / (n - 1)));
+      return wrap360(c + t);
+    });
+  };
+  
   const renderPlanets = () => {
     const planetGlyphs: React.ReactElement[] = [];
+    const leaderLines: React.ReactElement[] = [];
 
-    // PASO 1: Detectar planetas cercanos y asignar capas (como Astro-Seek)
-    interface PlanetWithLayer {
-      planet: typeof data.planets[0];
-      layer: number; // 0=interior, 1=medio, 2=exterior
-      radius: number;
+    // PASO 1: Preparar todos los cuerpos (planetas)
+    interface Body {
+      name: string;
+      lambdaDeg: number;
+    }
+    
+    const bodies: Body[] = data.planets.map(p => ({
+      name: p.name,
+      lambdaDeg: p.longitude
+    }));
+    
+    // Ordenar por longitud
+    bodies.sort((a, b) => a.lambdaDeg - b.lambdaDeg);
+
+    // PASO 2: Clusterizar por proximidad
+    const clusters: Body[][] = [];
+    let currentCluster: Body[] = [bodies[0]];
+    
+    for (let i = 1; i < bodies.length; i++) {
+      const prev = currentCluster[currentCluster.length - 1].lambdaDeg;
+      const here = bodies[i].lambdaDeg;
+      const d = Math.min(Math.abs(here - prev), 360 - Math.abs(here - prev));
+      
+      if (d < MIN_ANG_SEP) {
+        currentCluster.push(bodies[i]);
+      } else {
+        clusters.push(currentCluster);
+        currentCluster = [bodies[i]];
+      }
+    }
+    clusters.push(currentCluster);
+
+    // PASO 3: Layout de cada cluster
+    interface PlacedBody {
+      name: string;
+      lane: number;
+      thetaDrawDeg: number;
+      thetaTrueDeg: number;
+      x: number;
+      y: number;
+    }
+    
+    const placed: PlacedBody[] = [];
+    const laneOrder = [0, 1, -1, 2, -2, 3, -3, 4, -4]; // Carriles alternados
+    
+    for (const cluster of clusters) {
+      if (cluster.length === 1) {
+        // Solo un planeta, sin spread
+        const body = cluster[0];
+        const lane = 0;
+        const r = BASE_R + lane * LANE_STEP;
+        const θ = absToRad(body.lambdaDeg);
+        
+        placed.push({
+          name: body.name,
+          lane,
+          thetaDrawDeg: body.lambdaDeg,
+          thetaTrueDeg: body.lambdaDeg,
+          x: cx + r * Math.cos(θ),
+          y: cy - r * Math.sin(θ)
+        });
+      } else {
+        // Cluster con múltiples planetas
+        const thetas = spreadAngles(
+          cluster.map(b => b.lambdaDeg), 
+          MAX_CLUSTER_SPREAD
+        );
+        
+        for (let i = 0; i < cluster.length; i++) {
+          const body = cluster[i];
+          const lane = laneOrder[i] ?? 0;
+          const r = BASE_R + lane * LANE_STEP;
+          const θ = absToRad(thetas[i]);
+          
+          placed.push({
+            name: body.name,
+            lane,
+            thetaDrawDeg: thetas[i],
+            thetaTrueDeg: body.lambdaDeg,
+            x: cx + r * Math.cos(θ),
+            y: cy - r * Math.sin(θ)
+          });
+          
+          // Leader line si hubo spread angular
+          if (Math.abs(thetas[i] - body.lambdaDeg) > 0.5) {
+            const θTrue = absToRad(body.lambdaDeg);
+            const xTrue = cx + BASE_R * Math.cos(θTrue);
+            const yTrue = cy - BASE_R * Math.sin(θTrue);
+            
+            leaderLines.push(
+              <line
+                key={`leader-${body.name}`}
+                x1={cx + r * Math.cos(θ)}
+                y1={cy - r * Math.sin(θ)}
+                x2={xTrue}
+                y2={yTrue}
+                stroke={THEME.planets.label}
+                strokeWidth={0.5}
+                opacity={0.4}
+                strokeDasharray="2,2"
+              />
+            );
+          }
+        }
+      }
     }
 
-    const planetsWithLayers: PlanetWithLayer[] = [];
-    const sortedPlanets = [...data.planets].sort((a, b) => a.longitude - b.longitude);
-
-    sortedPlanets.forEach((planet, index) => {
-      // Calcular distancia angular con vecinos
-      const prev = sortedPlanets[(index - 1 + sortedPlanets.length) % sortedPlanets.length];
-      const next = sortedPlanets[(index + 1) % sortedPlanets.length];
+    // PASO 4: Renderizar planetas
+    placed.forEach(({ name, x, y }) => {
+      const planet = data.planets.find(p => p.name === name);
+      if (!planet) return;
       
-      const distPrev = Math.min(
-        Math.abs(planet.longitude - prev.longitude),
-        360 - Math.abs(planet.longitude - prev.longitude)
-      );
-      const distNext = Math.min(
-        Math.abs(planet.longitude - next.longitude),
-        360 - Math.abs(planet.longitude - next.longitude)
-      );
-
-      // Si está muy cerca de vecinos (< 12°), usar capas alternas
-      const COLLISION_THRESHOLD = 12;
-      let layer = 0;
-
-      if (distPrev < COLLISION_THRESHOLD || distNext < COLLISION_THRESHOLD) {
-        // Alternar capas para evitar superposición
-        layer = index % 3; // 0, 1, 2 rotando
-      }
-
-      // Radios para cada capa (como en Astro-Seek: 3 anillos concéntricos)
-      const layerRadii = [
-        R_PLANETS - 0.04 * R, // Capa interna
-        R_PLANETS,            // Capa media (default)
-        R_PLANETS + 0.04 * R, // Capa externa
-      ];
-
-      planetsWithLayers.push({
-        planet,
-        layer,
-        radius: layerRadii[layer],
-      });
-    });
-
-    // PASO 2: Renderizar planetas con sus capas asignadas
-    planetsWithLayers.forEach(({ planet, radius }) => {
-      const rad = absToRad(planet.longitude);
-      const [x, y] = polar(cx, cy, radius, rad);
-
-      const symbol = PLANET_SYMBOLS[planet.name] || '●';
+      const symbol = PLANET_SYMBOLS[name] || '●';
 
       // Glifo del planeta
       planetGlyphs.push(
         <text
-          key={`planet-${planet.name}`}
+          key={`planet-${name}`}
           x={x}
           y={y}
           fontSize={PLANET_SIZE}
@@ -482,7 +584,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
         planetGlyphs.push(
           <text
-            key={`planet-label-${planet.name}`}
+            key={`planet-label-${name}`}
             x={x}
             y={labelY}
             fontSize={PLANET_LABEL_SIZE}
@@ -502,7 +604,12 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       }
     });
 
-    return <g id="planets">{planetGlyphs}</g>;
+    return (
+      <g id="planets">
+        {leaderLines}
+        {planetGlyphs}
+      </g>
+    );
   };
 
   // ============================================
