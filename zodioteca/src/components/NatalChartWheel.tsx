@@ -10,17 +10,18 @@ interface NatalChartWheelProps {
 /**
  * NATAL CHART WHEEL - Representación gráfica de la carta natal
  * 
- * Sistema de coordenadas:
- * - 0° = Ascendente (9:00 posición, lado izquierdo)
- * - 90° = Medio Cielo (12:00 posición, arriba)
- * - 180° = Descendente (3:00 posición, lado derecho)
- * - 270° = Fondo del Cielo (6:00 posición, abajo)
+ * Sistema de coordenadas (ZODÍACO FIJO - convención Astro.com/tradicional):
+ * - 0° ARIES = 9:00 posición (lado izquierdo)
+ * - Zodíaco FIJO: Aries siempre a la izquierda, crece antihorario
+ * - Casas ROTAN según hora de nacimiento (longitudes eclípticas absolutas)
+ * - ASC (Casa 1) marca el horizonte este en el momento del nacimiento
+ * - MC (Casa 10) marca la culminación del meridiano
  * 
  * Anillos (desde el centro hacia afuera):
  * 1. Centro: Información de la persona
- * 2. Anillo interior: Planetas posicionados
- * 3. Anillo medio: Casas astrológicas (1-12)
- * 4. Anillo exterior: Signos zodiacales (Aries-Piscis)
+ * 2. Anillo interior: Planetas posicionados por longitud eclíptica
+ * 3. Anillo medio: Casas astrológicas (1-12) con cúspides reales
+ * 4. Anillo exterior: Signos zodiacales (Aries-Piscis) FIJOS
  */
 const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({ 
   chart,
@@ -46,15 +47,31 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
   // ============================================
   
   /**
-   * Convierte grados astrológicos a radianes
-   * En astrología: 0° = Ascendente (izquierda), aumenta en sentido antihorario
-   * En SVG: 0° = derecha, aumenta en sentido horario
+   * Normaliza grados al rango [0, 360)
    */
-  const astroToRadians = (astrologicalDegree: number): number => {
-    // Convertir de astrológico a matemático:
-    // - Astrológico 0° (Asc) = Matemático 180° (izquierda)
-    // - Rotar 180° y luego invertir dirección
-    const mathDegree = 180 - astrologicalDegree;
+  const normalize = (deg: number): number => ((deg % 360) + 360) % 360;
+  
+  /**
+   * Calcula diferencia angular positiva (ancho de arco desde "from" hasta "to")
+   * Siempre retorna valor positivo [0, 360)
+   */
+  const deltaPos = (from: number, to: number): number => normalize(to - from);
+  
+  /**
+   * Busca cúspide por número de casa (1-12)
+   * @returns Longitud eclíptica absoluta (0° Aries) o 0 si no existe
+   */
+  const getCusp = (houseNumber: number): number => 
+    chart.data.houses.find(h => h.number === houseNumber)?.cusp ?? 0;
+  
+  /**
+   * Convierte longitud eclíptica ABSOLUTA (0° Aries) a radianes para SVG
+   * Sistema: 0° Aries a la IZQUIERDA (9h), crece antihorario
+   * Compatible con Astro.com y convención clásica (zodíaco fijo)
+   */
+  const absToRad = (absoluteDegree: number): number => {
+    // 0° Aries absoluto = 180° matemático (izquierda en SVG)
+    const mathDegree = 180 - normalize(absoluteDegree);
     return (mathDegree * Math.PI) / 180;
   };
   
@@ -237,14 +254,14 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         />
         
         {/* ============================================ */}
-        {/* FASE 2: SIGNOS ZODIACALES */}
+        {/* FASE 2: SIGNOS ZODIACALES (Zodíaco Fijo) */}
         {/* ============================================ */}
         {zodiacSigns.map((sign, index) => {
-          const startDegree = index * 30; // Cada signo ocupa 30°
-          const midDegree = startDegree + 15; // Punto medio del signo
+          const startAbs = index * 30; // Cada signo ocupa 30° (0° Aries, 30° Tauro, ...)
+          const midAbs = startAbs + 15; // Punto medio del signo
           
           // Calcular posiciones para las líneas divisorias
-          const startRad = astroToRadians(startDegree);
+          const startRad = absToRad(startAbs);
           const innerX = CENTER_X + RADIUS_SIGNS_INNER * Math.cos(startRad);
           const innerY = CENTER_Y - RADIUS_SIGNS_INNER * Math.sin(startRad);
           const outerX = CENTER_X + RADIUS_SIGNS_OUTER * Math.cos(startRad);
@@ -252,7 +269,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           
           // Calcular posición del símbolo (en el medio del segmento)
           const symbolRadius = (RADIUS_SIGNS_INNER + RADIUS_SIGNS_OUTER) / 2;
-          const symbolRad = astroToRadians(midDegree);
+          const symbolRad = absToRad(midAbs);
           const symbolX = CENTER_X + symbolRadius * Math.cos(symbolRad);
           const symbolY = CENTER_Y - symbolRadius * Math.sin(symbolRad);
           
@@ -291,12 +308,10 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         {/* FASE 3: CASAS ASTROLÓGICAS */}
         {/* ============================================ */}
         {chart.data.houses.map((house) => {
-          const cuspDegree = house.cusp; // Grado 0-360 de la cúspide
-          const cuspRad = astroToRadians(cuspDegree);
+          const cuspAbs = normalize(house.cusp); // Longitud eclíptica absoluta (0° Aries)
+          const cuspRad = absToRad(cuspAbs);
           
           // Línea de cúspide: desde el centro hasta el círculo de signos
-          const cuspInnerX = CENTER_X;
-          const cuspInnerY = CENTER_Y;
           const cuspOuterX = CENTER_X + RADIUS_SIGNS_INNER * Math.cos(cuspRad);
           const cuspOuterY = CENTER_Y - RADIUS_SIGNS_INNER * Math.sin(cuspRad);
           
@@ -320,26 +335,14 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
             opacity = 0.7;
           }
           
-          // Calcular posición del número de casa (a mitad del radio)
+          // Calcular MIDPOINT robusto con wrap-around 0°/360°
+          const nextN = (house.number % 12) + 1;
+          const nextAbs = normalize(getCusp(nextN));
+          const span = deltaPos(cuspAbs, nextAbs);      // Ancho angular de la casa (siempre positivo)
+          const midAbs = normalize(cuspAbs + span / 2);  // Punto medio absoluto
+          
           const numberRadius = RADIUS_HOUSES * 0.85;
-          
-          // Calcular el grado medio entre esta cúspide y la siguiente
-          const nextHouse = chart.data.houses.find(h => h.number === (house.number % 12) + 1);
-          let midDegree = cuspDegree;
-          
-          if (nextHouse) {
-            let nextCusp = nextHouse.cusp;
-            // Manejar el caso donde cruzamos 0°/360°
-            if (nextCusp < cuspDegree) {
-              nextCusp += 360;
-            }
-            midDegree = (cuspDegree + nextCusp) / 2;
-            if (midDegree >= 360) {
-              midDegree -= 360;
-            }
-          }
-          
-          const numberRad = astroToRadians(midDegree);
+          const numberRad = absToRad(midAbs);
           const numberX = CENTER_X + numberRadius * Math.cos(numberRad);
           const numberY = CENTER_Y - numberRadius * Math.sin(numberRad);
           
@@ -347,8 +350,8 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
             <g key={`house-${house.number}`}>
               {/* Línea de cúspide */}
               <line
-                x1={cuspInnerX}
-                y1={cuspInnerY}
+                x1={CENTER_X}
+                y1={CENTER_Y}
                 x2={cuspOuterX}
                 y2={cuspOuterY}
                 stroke={strokeColor}
@@ -412,12 +415,12 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
           
           if (!planet1 || !planet2) return null;
           
-          // Calcular coordenadas de ambos planetas
-          const p1Rad = astroToRadians(planet1.longitude);
+          // Calcular coordenadas de ambos planetas (usando longitud eclíptica absoluta)
+          const p1Rad = absToRad(planet1.longitude);
           const p1X = CENTER_X + RADIUS_PLANETS * Math.cos(p1Rad);
           const p1Y = CENTER_Y - RADIUS_PLANETS * Math.sin(p1Rad);
           
-          const p2Rad = astroToRadians(planet2.longitude);
+          const p2Rad = absToRad(planet2.longitude);
           const p2X = CENTER_X + RADIUS_PLANETS * Math.cos(p2Rad);
           const p2Y = CENTER_Y - RADIUS_PLANETS * Math.sin(p2Rad);
           
@@ -468,8 +471,8 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = React.memo(({
         {/* FASE 4: PLANETAS */}
         {/* ============================================ */}
         {chart.data.planets.map((planet) => {
-          const planetDegree = planet.longitude; // Grado 0-360
-          const planetRad = astroToRadians(planetDegree);
+          // Longitud eclíptica absoluta (0° Aries)
+          const planetRad = absToRad(planet.longitude);
           
           // Posición del planeta en el círculo de planetas
           const planetX = CENTER_X + RADIUS_PLANETS * Math.cos(planetRad);
