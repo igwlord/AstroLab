@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import NatalChartForm from '../components/NatalChartForm';
+import NatalChartWheelPro from '../components/NatalChartWheelPro';
+import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
 import StatCard from '../components/StatCard';
@@ -352,6 +354,40 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* RUEDA DE CARTA NATAL - PRO (según rudea astro modelo.md) */}
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+            <NatalChartWheelPro 
+              data={adaptChartData({
+                id: crypto.randomUUID(),
+                data: {
+                  id: crypto.randomUUID(),
+                  personName: personName,
+                  birthData: {
+                    date: result.date.toISOString(),
+                    time: new Date(result.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                    location: result.location,
+                    latitude: result.latitude,
+                    longitude: result.longitude,
+                    timezone: result.timezone || 'UTC'
+                  },
+                  planets: result.planets,
+                  houses: result.houses,
+                  aspects: result.aspects || []
+                },
+                metadata: {
+                  createdAt: new Date().toISOString(),
+                  modifiedAt: new Date().toISOString(),
+                  syncedAt: null,
+                  source: 'local'
+                },
+                syncStatus: 'local-only'
+              })}
+              size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
+              showPlanetDegrees={true}
+              showDataTable={true}
+            />
           </div>
 
           {/* Trio Principal: SOL, LUNA, ASCENDENTE */}
