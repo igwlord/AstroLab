@@ -51,10 +51,10 @@ const DignitiesGrid: React.FC = () => {
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-1.5 sm:gap-2 flex-wrap px-2">
+      <div className="grid grid-cols-3 sm:flex gap-1.5 sm:gap-2 sm:flex-wrap px-2">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-base font-medium transition-all ${
             filter === 'all'
               ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white shadow-lg'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -64,7 +64,7 @@ const DignitiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('essential')}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-base font-medium transition-all ${
             filter === 'essential'
               ? 'bg-gradient-to-r from-yellow-600 to-amber-600 text-white shadow-lg'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -74,7 +74,7 @@ const DignitiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('accidental')}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-base font-medium transition-all ${
             filter === 'accidental'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'

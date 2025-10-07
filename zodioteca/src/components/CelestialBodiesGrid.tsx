@@ -44,10 +44,10 @@ const CelestialBodiesGrid: React.FC = () => {
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center px-2">
+      <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 sm:justify-center px-2">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'all'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -57,7 +57,7 @@ const CelestialBodiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('shadow')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'shadow'
               ? 'bg-gradient-to-r from-gray-900 to-red-900 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -67,7 +67,7 @@ const CelestialBodiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('healer')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'healer'
               ? 'bg-gradient-to-r from-purple-600 to-violet-700 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -77,7 +77,7 @@ const CelestialBodiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('centaur')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'centaur'
               ? 'bg-gradient-to-r from-amber-700 to-red-800 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -87,17 +87,17 @@ const CelestialBodiesGrid: React.FC = () => {
         </button>
         <button
           onClick={() => setFilter('transneptunian')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'transneptunian'
               ? 'bg-gradient-to-r from-indigo-800 to-purple-900 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          🌌 Transneptunianos ({CELESTIAL_BODIES.filter(b => b.category === 'transneptunian').length})
+          🌌 Transnept. ({CELESTIAL_BODIES.filter(b => b.category === 'transneptunian').length})
         </button>
         <button
           onClick={() => setFilter('comet')}
-          className={`px-4 py-2 rounded-full transition-all ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all ${
             filter === 'comet'
               ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg scale-105'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'

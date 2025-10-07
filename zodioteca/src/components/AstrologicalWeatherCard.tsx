@@ -89,7 +89,8 @@ ${weather.summary}
 
 ✨ Consejo: ${weather.advice}
 
-Descubre más en AstroLab`;
+✨ Descubre más en AstroLab
+🔗 astrolab-web.netlify.app`;
 
     // Intentar Web Share API (móvil)
     if (navigator.share) {
@@ -97,6 +98,7 @@ Descubre más en AstroLab`;
         await navigator.share({
           title: 'Clima Astrológico del Día',
           text: shareText,
+          url: 'https://astrolab-web.netlify.app/'
         });
         logger.log('✅ Compartido exitosamente');
       } catch (err) {
@@ -213,7 +215,7 @@ Descubre más en AstroLab`;
               Cielo de Hoy
             </h2>
             <p className="text-xs text-white/90 capitalize font-medium hidden sm:block">
-              {weather.date.split(',')[0]}
+              {weather.date}
             </p>
           </div>
         </div>
@@ -233,14 +235,39 @@ Descubre más en AstroLab`;
       {/* VISTA RESPONSIVA */}
       <div className="relative z-10 space-y-3 sm:space-y-4">
         
-        {/* MÓVIL: Vista Poética Minimalista - FORZANDO RECARGA */}
-        <div className="sm:hidden flex flex-col items-center space-y-4">
-          {/* Sol gigante de fondo */}
-          <div className="relative w-32 h-32 flex items-center justify-center">
-            <span className="text-8xl drop-shadow-[0_0_30px_rgba(251,191,36,0.6)] animate-pulse">☀️</span>
-            {/* Luna flotante superpuesta */}
-            <div className="absolute -bottom-2 -right-2">
-              <span className="text-5xl drop-shadow-[0_0_20px_rgba(147,197,253,0.6)]">{weather.moonPhase.emoji}</span>
+        {/* MÓVIL: Mini tarjetas de Sol y Luna */}
+        <div className="sm:hidden grid grid-cols-2 gap-2">
+          {/* Sol */}
+          <div className="bg-gradient-to-br from-yellow-400/30 to-orange-500/30 rounded-xl p-3 backdrop-blur-md border border-yellow-300/40 shadow-lg">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-2xl drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]">☀️</span>
+              <span className="text-xs font-extrabold text-yellow-100 tracking-wider">SOL</span>
+            </div>
+            <div className="text-base font-extrabold text-white drop-shadow-lg">
+              {weather.sun?.sign}
+            </div>
+            <div className="text-sm font-bold text-white/90">
+              {weather.sun?.degree.toFixed(0)}°
+            </div>
+            <div className="text-xs text-yellow-100/80 font-medium mt-1">
+              {getSignElement(weather.sun?.sign).emoji} {getSignElement(weather.sun?.sign).element}
+            </div>
+          </div>
+
+          {/* Luna */}
+          <div className="bg-gradient-to-br from-blue-400/30 to-purple-500/30 rounded-xl p-3 backdrop-blur-md border border-blue-300/40 shadow-lg">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-2xl drop-shadow-[0_0_8px_rgba(147,197,253,0.8)]">🌙</span>
+              <span className="text-xs font-extrabold text-blue-100 tracking-wider">LUNA</span>
+            </div>
+            <div className="text-base font-extrabold text-white drop-shadow-lg">
+              {weather.moon?.sign}
+            </div>
+            <div className="text-sm font-bold text-white/90">
+              {weather.moon?.degree.toFixed(0)}°
+            </div>
+            <div className="text-xs text-blue-100/80 font-medium mt-1">
+              {weather.moonPhase.emoji} {weather.moonPhase.name}
             </div>
           </div>
         </div>
