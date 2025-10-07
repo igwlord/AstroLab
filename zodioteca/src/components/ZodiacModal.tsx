@@ -91,26 +91,15 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
         {/* Header con gradiente del elemento */}
         <div className={`relative bg-gradient-to-r ${elementStyle.gradient} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>
           {/* Patrón de fondo */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
               backgroundSize: '20px 20px'
             }}></div>
           </div>
 
-          {/* Botón cerrar */}
-          <button
-            onClick={onClose}
-            className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 lg:w-14 lg:h-14 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm z-10 text-white touch-manipulation"
-            aria-label="Cerrar"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Contenido del header */}
-          <div className="relative z-10">
+          {/* Contenido del header - debe estar ANTES con z-index menor */}
+          <div className="relative z-[1] pr-12 sm:pr-14 md:pr-16">
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
               <div className="modal-icon-lg animate-bounce">{sign.symbol}</div>
               <div>
@@ -132,6 +121,37 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
               </span>
             </div>
           </div>
+
+          {/* Botón cerrar - DEBE ESTAR AL FINAL del header con z-index MÁS ALTO */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="group absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 active:bg-white/50 transition-all backdrop-blur-sm text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95"
+            aria-label="Cerrar modal"
+            style={{ 
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
+              minWidth: '48px',
+              minHeight: '48px',
+              zIndex: 9999,
+              pointerEvents: 'all',
+              cursor: 'pointer'
+            }}
+          >
+            <svg 
+              className="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-90 transition-transform duration-300 pointer-events-none" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth="2.5"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Contenido scrolleable */}

@@ -102,6 +102,7 @@ const HousesGrid: React.FC = () => {
         {filteredHouses.map((house) => (
           <button
             key={house.id}
+            data-id={house.number.toString()}
             onClick={() => handleHouseClick(house)}
             className={`
               group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6

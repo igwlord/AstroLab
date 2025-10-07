@@ -55,6 +55,7 @@ const ZodiacSignsGrid: React.FC = () => {
         {ZODIAC_SIGNS.map((sign) => (
           <button
             key={sign.id}
+            data-id={sign.id}
             onClick={() => handleSignClick(sign)}
             className={`
               group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6

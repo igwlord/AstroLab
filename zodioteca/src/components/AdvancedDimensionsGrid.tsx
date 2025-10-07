@@ -20,6 +20,7 @@ export default function AdvancedDimensionsGrid() {
         {ADVANCED_DIMENSIONS.map((dimension) => (
           <div
             key={dimension.id}
+            data-id={dimension.name.toLowerCase()}
             className={`relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-5 md:p-6
               bg-gradient-to-br ${dimension.gradient} text-white
               shadow-lg border-2 ${dimension.border}`}

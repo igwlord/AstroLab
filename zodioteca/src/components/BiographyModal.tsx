@@ -59,33 +59,48 @@ const BiographyModal: React.FC<BiographyModalProps> = ({ isOpen, onClose }) => {
         <div>
           {/* Header con efectos */}
           <div className="sticky top-0 z-10 bg-gradient-to-b from-purple-900 to-purple-900/95 backdrop-blur-md border-b border-purple-400/50 p-4 sm:p-6">
-            <div className="flex justify-between items-start">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="relative">
-                <span className="text-4xl sm:text-5xl md:text-6xl animate-float drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
-                  🌙
-                </span>
-                <span className="absolute -top-2 -right-2 text-xl sm:text-2xl animate-spin-slow">✨</span>
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0 pr-2">
+                <div className="relative flex-shrink-0">
+                  <span className="text-4xl sm:text-5xl md:text-6xl animate-float drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
+                    🌙
+                  </span>
+                  <span className="absolute -top-2 -right-2 text-xl sm:text-2xl animate-spin-slow">✨</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 tracking-wider drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
+                    ASTRO LAB
+                  </h2>
+                  <p className="text-xs sm:text-sm text-purple-300/90 italic tracking-wide mt-1">
+                    "Donde el cielo se convierte en guía"
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 tracking-wider drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
-                  ASTRO LAB
-                </h2>
-                <p className="text-xs sm:text-sm text-purple-300/90 italic tracking-wide mt-1">
-                  "Donde el cielo se convierte en guía"
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="group flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-purple-800/50 hover:bg-purple-700/70 active:bg-purple-600/80 border border-purple-400/30 transition-all duration-300 hover:scale-110 hover:rotate-90 active:scale-95 shadow-lg"
+                aria-label="Cerrar modal"
+                style={{ 
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  minWidth: '48px',
+                  minHeight: '48px',
+                  zIndex: 9999,
+                  pointerEvents: 'all',
+                  cursor: 'pointer'
+                }}
+              >
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-purple-200 group-hover:text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="group p-2 sm:p-3 rounded-full bg-purple-800/50 hover:bg-purple-700/70 border border-purple-400/30 transition-all duration-300 hover:scale-110 hover:rotate-90"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-200 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
-        </div>
 
         {/* Contenido de la biografía */}
         <div className="p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 bg-gradient-to-b from-black/40 via-purple-950/40 to-black/40">

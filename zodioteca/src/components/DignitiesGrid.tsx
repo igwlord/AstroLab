@@ -89,6 +89,7 @@ const DignitiesGrid: React.FC = () => {
         {filteredDignities.map((dignity) => (
           <button
             key={dignity.name}
+            data-id={dignity.name.toLowerCase()}
             onClick={() => setSelectedDignity(dignity)}
             className={`bg-gradient-to-br ${getDignityGradient(dignity.name)} ${
               dignity.name === 'Exaltación' ? 'text-gray-800' : 'text-white'

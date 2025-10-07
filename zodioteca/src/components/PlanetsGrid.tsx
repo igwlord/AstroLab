@@ -102,6 +102,7 @@ const PlanetsGrid: React.FC = () => {
         {filteredPlanets.map((planet) => (
           <button
             key={planet.id}
+            data-id={planet.name.toLowerCase()}
             onClick={() => handlePlanetClick(planet)}
             className={`
               group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6

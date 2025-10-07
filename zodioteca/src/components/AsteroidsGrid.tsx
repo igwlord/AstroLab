@@ -39,6 +39,7 @@ const AsteroidsGrid: React.FC = () => {
         {ASTEROIDS.map((asteroid) => (
           <button
             key={asteroid.name}
+            data-id={asteroid.name.toLowerCase()}
             onClick={() => setSelectedAsteroid(asteroid)}
             className={`bg-gradient-to-br ${getAsteroidGradient(asteroid.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >

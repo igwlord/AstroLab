@@ -14,8 +14,8 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getDailyAstrologicalWeather, clearWeatherCache, type DailyWeather } from '../services/dailyWeather';
-import { Share2, RefreshCw, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
+import { Share2, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 /**
@@ -44,7 +44,6 @@ export default function AstrologicalWeatherCard() {
   const [weather, setWeather] = useState<DailyWeather | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ===========================
@@ -59,34 +58,24 @@ export default function AstrologicalWeatherCard() {
   // FUNCIONES DE CARGA
   // ===========================
 
-  async function loadWeather(forceRefresh = false) {
+  async function loadWeather() {
     try {
       setError(null);
-      if (forceRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
-      }
+      setIsLoading(true);
 
-      const data = await getDailyAstrologicalWeather(forceRefresh);
+      const data = await getDailyAstrologicalWeather();
       setWeather(data);
     } catch (err) {
       logger.error('Error cargando clima astrológico:', err);
       setError('No se pudo cargar el clima astrológico. Por favor intenta de nuevo.');
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   }
 
   // ===========================
   // HANDLERS
   // ===========================
-
-  const handleRefresh = () => {
-    clearWeatherCache();
-    loadWeather(true);
-  };
 
   const handleShare = async () => {
     if (!weather) return;
@@ -167,7 +156,7 @@ Descubre más en AstroLab`;
               {error || 'Intenta nuevamente'}
             </p>
             <button
-              onClick={handleRefresh}
+              onClick={loadWeather}
               className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold transition-colors"
             >
               Reintentar
@@ -231,14 +220,6 @@ Descubre más en AstroLab`;
         
         {/* BOTONES - Solo en desktop */}
         <div className="hidden sm:flex items-center gap-1.5">
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
-            title="Actualizar"
-          >
-            <RefreshCw className={`w-4 h-4 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
           <button
             onClick={handleShare}
             className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -482,19 +463,11 @@ Descubre más en AstroLab`;
 
       {/* BOTONES DE ACCIÓN - Móvil abajo, Desktop arriba */}
       <div className="relative z-10 mt-4 pt-3 border-t border-white/30 space-y-2">
-        {/* Botones flotantes móvil */}
-        <div className="sm:hidden flex gap-2">
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-bold text-white transition-all duration-300 active:scale-95 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Actualizar</span>
-          </button>
+        {/* Botón compartir móvil */}
+        <div className="sm:hidden">
           <button
             onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-bold text-white transition-all duration-300 active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-bold text-white transition-all duration-300 active:scale-95"
           >
             <Share2 className="w-4 h-4" />
             <span>Compartir</span>

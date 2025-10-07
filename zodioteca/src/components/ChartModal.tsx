@@ -25,10 +25,25 @@ const ChartModal: FC<ChartModalProps> = ({ chart, onClose }) => {
             </p>
           </div>
           <button
-            onClick={onClose}
-            className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center hover:bg-white/30 active:bg-white/40 rounded-full transition-all hover:scale-110 active:scale-95 shadow-lg"
+            aria-label="Cerrar modal"
+            style={{ 
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
+              minWidth: '48px',
+              minHeight: '48px',
+              zIndex: 9999,
+              pointerEvents: 'all',
+              cursor: 'pointer'
+            }}
           >
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            <X className="w-6 h-6 sm:w-7 sm:h-7 pointer-events-none" />
           </button>
         </div>
 
@@ -171,7 +186,11 @@ const ChartModal: FC<ChartModalProps> = ({ chart, onClose }) => {
         <div className="bg-gray-50 p-2 sm:p-3 md:p-4 flex justify-end gap-2 sm:gap-3 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 active:bg-gray-400 transition-all hover:scale-105 active:scale-95 font-medium cursor-pointer shadow-sm"
+            style={{ 
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             Cerrar
           </button>

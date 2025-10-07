@@ -87,6 +87,7 @@ const MoonSignsGrid: React.FC = () => {
         {filteredMoonSigns.map((moonSign) => (
           <button
             key={moonSign.sign}
+            data-id={moonSign.sign.toLowerCase()}
             onClick={() => setSelectedMoonSign(moonSign)}
             className={`bg-gradient-to-br ${getElementColor(moonSign.element)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >

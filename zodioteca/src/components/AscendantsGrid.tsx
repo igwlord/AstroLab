@@ -43,6 +43,7 @@ const AscendantsGrid: React.FC = () => {
         {ASCENDANTS.map((ascendant) => (
           <button
             key={ascendant.sign}
+            data-id={ascendant.sign.toLowerCase()}
             onClick={() => setSelectedAscendant(ascendant)}
             className={`bg-gradient-to-br ${getSignColor(ascendant.sign)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >

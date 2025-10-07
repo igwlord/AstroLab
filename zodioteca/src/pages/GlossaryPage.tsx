@@ -17,7 +17,7 @@ import { DIGNITIES } from '../types/dignity';
 import { POLARIZATIONS } from '../types/polarization';
 import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
-import GlossarySearch from '../components/GlossarySearch';
+import GlossarySearch, { type SearchResult } from '../components/GlossarySearch';
 import GlossaryCategories from '../components/GlossaryCategories';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -67,6 +67,292 @@ const GlossaryPage: React.FC = () => {
 
     loadGlossary();
   }, []);
+
+  // Crear índice de búsqueda completo con todos los contenidos
+  const allSearchableContent = useMemo(() => {
+    const content: SearchResult[] = [];
+    
+    // Helper para obtener info de categoría
+    const getCategoryInfo = (categoryId: string) => {
+      const cat = GLOSSARY_CATEGORIES.find(c => c.id === categoryId);
+      return {
+        name: cat?.name || categoryId,
+        icon: cat?.icon || '📖'
+      };
+    };
+
+    // Indexar signos zodiacales
+    ZODIAC_SIGNS.forEach(sign => {
+      const catInfo = getCategoryInfo('signs');
+      content.push({
+        id: `sign-${sign.id}`,
+        title: sign.name,
+        category: 'signs',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: `${sign.element} • ${sign.modality} • ${sign.dateRange}`,
+        matchType: 'title'
+      });
+    });
+
+    // Indexar planetas
+    PLANETS.forEach(planet => {
+      const catInfo = getCategoryInfo('planets');
+      content.push({
+        id: `planet-${planet.name.toLowerCase()}`,
+        title: planet.name,
+        category: 'planets',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: planet.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar casas
+    HOUSES.forEach(house => {
+      const catInfo = getCategoryInfo('houses');
+      content.push({
+        id: `house-${house.number}`,
+        title: `Casa ${house.number}`,
+        category: 'houses',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: house.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar aspectos
+    ASPECTS.forEach(aspect => {
+      const catInfo = getCategoryInfo('aspects');
+      content.push({
+        id: `aspect-${aspect.name.toLowerCase()}`,
+        title: aspect.name,
+        category: 'aspects',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: `${aspect.angle}° • ${aspect.description.substring(0, 50)}...`,
+        matchType: 'title'
+      });
+    });
+
+    // Indexar lunas
+    MOON_SIGNS.forEach(moon => {
+      const catInfo = getCategoryInfo('lunar');
+      content.push({
+        id: `moon-${moon.sign.toLowerCase()}`,
+        title: `Luna en ${moon.sign}`,
+        category: 'lunar',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: moon.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar ascendentes
+    ASCENDANTS.forEach(asc => {
+      const catInfo = getCategoryInfo('ascendants');
+      content.push({
+        id: `ascendant-${asc.sign.toLowerCase()}`,
+        title: `Ascendente en ${asc.sign}`,
+        category: 'ascendants',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: asc.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar asteroides
+    ASTEROIDS.forEach(asteroid => {
+      const catInfo = getCategoryInfo('asteroids');
+      content.push({
+        id: `asteroid-${asteroid.name.toLowerCase()}`,
+        title: asteroid.name,
+        category: 'asteroids',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: asteroid.function.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar cuerpos celestes
+    CELESTIAL_BODIES.forEach(body => {
+      const catInfo = getCategoryInfo('celestial');
+      content.push({
+        id: `celestial-${body.name.toLowerCase()}`,
+        title: body.name,
+        category: 'celestial',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: body.astrology.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar configuraciones
+    CONFIGURATIONS.forEach(config => {
+      const catInfo = getCategoryInfo('configurations');
+      content.push({
+        id: `configuration-${config.name.toLowerCase()}`,
+        title: config.name,
+        category: 'configurations',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: config.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar técnicas relacionales
+    RELATIONAL_TECHNIQUES.forEach(tech => {
+      const catInfo = getCategoryInfo('relational');
+      content.push({
+        id: `relational-${tech.name.toLowerCase()}`,
+        title: tech.name,
+        category: 'relational',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: tech.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar dignidades
+    DIGNITIES.forEach(dignity => {
+      const catInfo = getCategoryInfo('dignities');
+      content.push({
+        id: `dignity-${dignity.name.toLowerCase()}`,
+        title: dignity.name,
+        category: 'dignities',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: dignity.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar polarizaciones
+    POLARIZATIONS.forEach(polar => {
+      const catInfo = getCategoryInfo('polarizations');
+      content.push({
+        id: `polarization-${polar.name.toLowerCase()}`,
+        title: polar.name,
+        category: 'polarizations',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: polar.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar dimensiones avanzadas
+    ADVANCED_DIMENSIONS.forEach(dim => {
+      const catInfo = getCategoryInfo('advanced');
+      content.push({
+        id: `advanced-${dim.name.toLowerCase()}`,
+        title: dim.name,
+        category: 'advanced',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: dim.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar entradas del glosario genérico
+    entries.forEach(entry => {
+      const catInfo = getCategoryInfo(entry.category);
+      content.push({
+        id: `entry-${entry.id}`,
+        title: entry.title,
+        category: entry.category,
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: entry.content.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    return content;
+  }, [entries]);
+
+  // Buscar en todo el contenido indexado
+  const searchResults = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+
+    const searchLower = searchTerm.toLowerCase().trim();
+    
+    return allSearchableContent
+      .filter(item => {
+        // Buscar en título
+        if (item.title.toLowerCase().includes(searchLower)) return true;
+        // Buscar en snippet/descripción
+        if (item.snippet?.toLowerCase().includes(searchLower)) return true;
+        return false;
+      })
+      .sort((a, b) => {
+        // Priorizar coincidencias exactas en el título
+        const aExact = a.title.toLowerCase() === searchLower;
+        const bExact = b.title.toLowerCase() === searchLower;
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+
+        // Priorizar coincidencias al inicio del título
+        const aStarts = a.title.toLowerCase().startsWith(searchLower);
+        const bStarts = b.title.toLowerCase().startsWith(searchLower);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        return 0;
+      })
+      .slice(0, 30); // Limitar a 30 resultados
+  }, [searchTerm, allSearchableContent]);
+
+  // Manejar clic en resultado de búsqueda
+  const handleSearchResultClick = (result: SearchResult) => {
+    // Extraer ID del resultado (después del primer guion)
+    const id = result.id.split('-').slice(1).join('-');
+    
+    // Cambiar a la categoría correspondiente
+    setSelectedCategory(result.category);
+    
+    // Limpiar búsqueda
+    setSearchTerm('');
+    
+    // Esperar a que se renderice la nueva categoría y luego buscar el elemento
+    const findAndClickElement = (attempts = 0) => {
+      const maxAttempts = 10;
+      
+      if (attempts >= maxAttempts) {
+        console.warn(`No se pudo encontrar el elemento con data-id="${id}"`);
+        return;
+      }
+      
+      const element = document.querySelector(`[data-id="${id}"]`) as HTMLElement;
+      
+      if (element) {
+        // Elemento encontrado, hacer scroll y clic
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          element.click();
+        }, 600);
+      } else {
+        // Elemento no encontrado, intentar de nuevo
+        setTimeout(() => {
+          findAndClickElement(attempts + 1);
+        }, 100);
+      }
+    };
+    
+    // Iniciar la búsqueda después de un breve delay para que cambie la categoría
+    setTimeout(() => {
+      findAndClickElement();
+    }, 100);
+  };
 
   // Filter and search entries
   const filteredEntries = useMemo(() => {
@@ -212,16 +498,16 @@ const GlossaryPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Search Bar - Full Width (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades o polarizaciones) */}
-      {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && (
-        <div className="mb-6">
-          <GlossarySearch
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            placeholder={t('glossary.search')}
-          />
-        </div>
-      )}
+      {/* Search Bar Global - Siempre visible y busca en todas las categorías */}
+      <div className="mb-6">
+        <GlossarySearch
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onResultClick={handleSearchResultClick}
+          searchResults={searchResults}
+          placeholder="Buscar en todo el glosario... (ej: ascendente, luna, marte)"
+        />
+      </div>
 
       {/* Categories - Hybrid Tabs Component */}
       <GlossaryCategories
