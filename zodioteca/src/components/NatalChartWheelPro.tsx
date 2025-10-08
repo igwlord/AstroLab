@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ChartData } from '../types/chartWheel';
-import { normalize, deltaPos, absToRad, polar, degMin, getSignIndex, getSignSymbol } from '../utils/chartGeometry';
+import { normalize, deltaPos, absToRad, polar, degMin } from '../utils/chartGeometry';
 
 /**
  * NatalChartWheelPro - Implementación EXACTA según rudea astro modelo.md
@@ -30,24 +30,19 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   // RADIOS EXACTOS - Casas cerca del centro, Signos afuera (ORDEN NATURAL)
-  const R_ASPECTS = 0.52 * R;      // Anillo de aspectos (centro)
-  const BASE_R = 0.66 * R;         // Radio base para planetas (según especificación)
-  const LANE_STEP = 0.03 * R;      // Separación entre carriles de planetas
-  const R_HOUSES_INNER = 0.70 * R; // Inicio del anillo de casas (cerca del centro)
-  const R_HOUSES_OUTER = 0.78 * R; // Fin del anillo de casas
-  const R_SIGNS_INNER = 0.82 * R;  // Signos van afuera (inicio) - MÁS ANCHO
-  const R_SIGNS_OUTER = 0.96 * R;  // Borde externo de signos (más cerca del borde) - MÁS ANCHO
-  const R_SIGN_SYMBOL = 0.89 * R;  // Radio para símbolos de signos (centrados en el nuevo ancho)
+  const R_ASPECTS = 0.40 * R;      // Anillo de aspectos (centro) - ACHICADO
+  const R_PLANETS = 0.55 * R;      // Anillo de planetas
+  const R_HOUSES_INNER = 0.65 * R; // Inicio del anillo de casas (cerca del centro)
+  const R_HOUSES_OUTER = 0.75 * R; // Fin del anillo de casas
+  const R_SIGNS_INNER = 0.80 * R;  // Signos van afuera (inicio) - AGRANDADO
+  const R_SIGNS_OUTER = 0.98 * R;  // Borde externo de signos (más cerca del borde) - AGRANDADO
 
   // Longitudes de ticks
-  const LEN_TICK_1 = Math.max(2, 0.01 * R);   // 1° tick
-  const LEN_TICK_5 = Math.max(3, 0.015 * R);  // 5° tick
-  const LEN_TICK_10 = Math.max(4, 0.025 * R); // 10° tick (marca fuerte)
-  
-  // Parámetros de colisión de planetas
-  const MIN_ANG_SEP = 6;           // Separación mínima angular en grados
-  const MAX_CLUSTER_SPREAD = 8;    // Apertura total extra por cluster
-  // const GLYPH_SIZE = 20;        // Tamaño del glifo en px (reservado para bounding box collision)
+  const LEN_TICK_1 = Math.max(2, 0.008 * R);
+  const LEN_TICK_5 = Math.max(3, 0.015 * R);
+  const LEN_TICK_10 = Math.max(4, 0.025 * R);
+
+  const R_SIGN_SYMBOL = (R_SIGNS_INNER + R_SIGNS_OUTER) / 2;
 
   // Tamaños de texto
   const LABEL_SIZE = Math.max(8, Math.min(0.022 * size, 12));
@@ -56,7 +51,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const PLANET_SIZE = Math.max(12, Math.min(0.026 * size, 22));
   const PLANET_LABEL_SIZE = Math.max(7, Math.min(0.018 * size, 12));
 
-  // Símbolos
+  // Símbolos - Estilo moderno bold (más parecidos a la imagen)
   const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
   const PLANET_SYMBOLS: Record<string, string> = {
     Sol: '☉',
@@ -191,12 +186,18 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           key={`sign-${i}`}
           x={x}
           y={y}
-          fontSize={SIGN_SIZE}
+          fontSize={SIGN_SIZE * 1.2}
           fill={THEME.signSymbols}
           textAnchor="middle"
           dominantBaseline="middle"
-          fontWeight="bold"
-          style={{ filter: 'drop-shadow(0 0 3px rgba(212, 175, 55, 0.5))' }}
+          fontWeight="900"
+          style={{ 
+            filter: 'drop-shadow(0 0 3px rgba(212, 175, 55, 0.5))',
+            fontFamily: 'Arial, sans-serif',
+            strokeWidth: '0.5px',
+            stroke: THEME.signSymbols,
+            paintOrder: 'stroke fill',
+          }}
         >
           {SIGN_SYMBOLS[i]}
         </text>
@@ -227,21 +228,16 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const isAngular = [1, 4, 7, 10].includes(house.number);
       const isSuccedent = [2, 5, 8, 11].includes(house.number);
 
-      const strokeWidth = isAngular ? 3.0 : isSuccedent ? 2.0 : 1.5;
+      const strokeWidth = isAngular ? 2.4 : isSuccedent ? 1.6 : 1.1;
       const color = isAngular
         ? THEME.houseLines.angular
         : isSuccedent
         ? THEME.houseLines.succedent
         : THEME.houseLines.cadent;
 
-      // Líneas de cúspide: TODAS van desde R_HOUSES_INNER hasta R_SIGNS_INNER
-      // - Ángulos (ASC/MC/DSC/IC): Más largas, atraviesan hasta el anillo de signos
-      // - Otras casas: Desde el anillo de casas hasta el inicio de signos
-      const [x1, y1] = polar(cx, cy, R_HOUSES_INNER, rad); // Todas desde el borde interno de casas
-      
-      const [x2, y2] = isAngular 
-        ? polar(cx, cy, R_SIGNS_OUTER, rad)  // Ángulos: atraviesan TODO el anillo de signos
-        : polar(cx, cy, R_SIGNS_INNER, rad); // Otras: hasta el inicio del anillo de signos
+      // Línea de cúspide: TODAS las líneas dentro del anillo de casas (HOUSES_INNER a HOUSES_OUTER)
+      const [x1, y1] = polar(cx, cy, R_HOUSES_INNER, rad);
+      const [x2, y2] = polar(cx, cy, R_HOUSES_OUTER, rad); 
 
       lines.push(
         <line
@@ -252,12 +248,12 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           y2={y2}
           stroke={color}
           strokeWidth={strokeWidth}
-          opacity={isAngular ? 1.0 : 0.85}
+          opacity={isAngular ? 0.9 : 0.7}
           style={isAngular ? { filter: 'drop-shadow(0 0 2px rgba(212, 175, 55, 0.4))' } : {}}
         />
       );
 
-      // Número de casa en midpoint (en el centro del anillo de casas, cerca del centro)
+      // Número de casa en midpoint (en el centro del anillo de casas, donde las flechas)
       const nextHouse = data.houses[(idx + 1) % 12];
       const span = deltaPos(cusp, nextHouse.cusp);
       const midDeg = normalize(cusp + span / 2);
@@ -280,9 +276,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         </text>
       );
 
-      // Etiquetas ASC/MC/DSC/IC (FUERA del borde externo, en el anillo de signos)
+      // Etiquetas ASC/MC/DSC/IC (MÁS ADENTRO - en el borde interior del anillo de signos)
       if (house.number === 1) {
-        const [xAsc, yAsc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
+        const [xAsc, yAsc] = polar(cx, cy, R_SIGNS_INNER - 0.02 * R, rad);
         axesLabels.push(
           <text
             key="asc-label"
@@ -300,7 +296,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 10) {
-        const [xMc, yMc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
+        const [xMc, yMc] = polar(cx, cy, R_SIGNS_INNER - 0.02 * R, rad);
         axesLabels.push(
           <text
             key="mc-label"
@@ -318,7 +314,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 7) {
-        const [xDsc, yDsc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
+        const [xDsc, yDsc] = polar(cx, cy, R_SIGNS_INNER - 0.02 * R, rad);
         axesLabels.push(
           <text
             key="dsc-label"
@@ -336,7 +332,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         );
       }
       if (house.number === 4) {
-        const [xIc, yIc] = polar(cx, cy, R_SIGNS_OUTER + 0.03 * R, rad);
+        const [xIc, yIc] = polar(cx, cy, R_SIGNS_INNER - 0.02 * R, rad);
         axesLabels.push(
           <text
             key="ic-label"
@@ -405,161 +401,69 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   // ============================================
-  // 5. PLANETAS (con algoritmo profesional de colisión)
+  // 5. PLANETAS (con grados y minutos + ANTI-COLISIÓN estilo Astro-Seek)
   // ============================================
-  
-  // Utilidades para ángulos circulares
-  const wrap360 = (deg: number): number => ((deg % 360) + 360) % 360;
-  
-  const circularMean = (angles: number[]): number => {
-    const n = angles.length;
-    if (n === 0) return 0;
-    
-    // Convertir a coordenadas cartesianas, promediar y volver a polar
-    let sumX = 0, sumY = 0;
-    angles.forEach(a => {
-      const rad = (a * Math.PI) / 180;
-      sumX += Math.cos(rad);
-      sumY += Math.sin(rad);
-    });
-    const meanRad = Math.atan2(sumY / n, sumX / n);
-    return wrap360((meanRad * 180) / Math.PI);
-  };
-  
-  const spreadAngles = (angles: number[], spread: number): number[] => {
-    const n = angles.length;
-    if (n === 1) return angles;
-    
-    const c = circularMean(angles);
-    const half = spread / 2;
-    return angles.map((_, i) => {
-      const t = -half + (i * (spread / (n - 1)));
-      return wrap360(c + t);
-    });
-  };
-  
   const renderPlanets = () => {
     const planetGlyphs: React.ReactElement[] = [];
-    const leaderLines: React.ReactElement[] = [];
 
-    // PASO 1: Preparar todos los cuerpos (planetas)
-    interface Body {
-      name: string;
-      lambdaDeg: number;
+    // PASO 1: Detectar planetas cercanos y asignar capas (como Astro-Seek)
+    interface PlanetWithLayer {
+      planet: typeof data.planets[0];
+      layer: number; // 0=interior, 1=medio, 2=exterior
+      radius: number;
     }
-    
-    const bodies: Body[] = data.planets.map(p => ({
-      name: p.name,
-      lambdaDeg: p.longitude
-    }));
-    
-    // Ordenar por longitud
-    bodies.sort((a, b) => a.lambdaDeg - b.lambdaDeg);
 
-    // PASO 2: Clusterizar por proximidad
-    const clusters: Body[][] = [];
-    let currentCluster: Body[] = [bodies[0]];
-    
-    for (let i = 1; i < bodies.length; i++) {
-      const prev = currentCluster[currentCluster.length - 1].lambdaDeg;
-      const here = bodies[i].lambdaDeg;
-      const d = Math.min(Math.abs(here - prev), 360 - Math.abs(here - prev));
+    const planetsWithLayers: PlanetWithLayer[] = [];
+    const sortedPlanets = [...data.planets].sort((a, b) => a.longitude - b.longitude);
+
+    sortedPlanets.forEach((planet, index) => {
+      // Calcular distancia angular con vecinos
+      const prev = sortedPlanets[(index - 1 + sortedPlanets.length) % sortedPlanets.length];
+      const next = sortedPlanets[(index + 1) % sortedPlanets.length];
       
-      if (d < MIN_ANG_SEP) {
-        currentCluster.push(bodies[i]);
-      } else {
-        clusters.push(currentCluster);
-        currentCluster = [bodies[i]];
-      }
-    }
-    clusters.push(currentCluster);
+      const distPrev = Math.min(
+        Math.abs(planet.longitude - prev.longitude),
+        360 - Math.abs(planet.longitude - prev.longitude)
+      );
+      const distNext = Math.min(
+        Math.abs(planet.longitude - next.longitude),
+        360 - Math.abs(planet.longitude - next.longitude)
+      );
 
-    // PASO 3: Layout de cada cluster
-    interface PlacedBody {
-      name: string;
-      lane: number;
-      thetaDrawDeg: number;
-      thetaTrueDeg: number;
-      x: number;
-      y: number;
-    }
-    
-    const placed: PlacedBody[] = [];
-    const laneOrder = [0, 1, -1, 2, -2, 3, -3, 4, -4]; // Carriles alternados
-    
-    for (const cluster of clusters) {
-      if (cluster.length === 1) {
-        // Solo un planeta, sin spread
-        const body = cluster[0];
-        const lane = 0;
-        const r = BASE_R + lane * LANE_STEP;
-        const θ = absToRad(body.lambdaDeg);
-        
-        placed.push({
-          name: body.name,
-          lane,
-          thetaDrawDeg: body.lambdaDeg,
-          thetaTrueDeg: body.lambdaDeg,
-          x: cx + r * Math.cos(θ),
-          y: cy - r * Math.sin(θ)
-        });
-      } else {
-        // Cluster con múltiples planetas
-        const thetas = spreadAngles(
-          cluster.map(b => b.lambdaDeg), 
-          MAX_CLUSTER_SPREAD
-        );
-        
-        for (let i = 0; i < cluster.length; i++) {
-          const body = cluster[i];
-          const lane = laneOrder[i] ?? 0;
-          const r = BASE_R + lane * LANE_STEP;
-          const θ = absToRad(thetas[i]);
-          
-          placed.push({
-            name: body.name,
-            lane,
-            thetaDrawDeg: thetas[i],
-            thetaTrueDeg: body.lambdaDeg,
-            x: cx + r * Math.cos(θ),
-            y: cy - r * Math.sin(θ)
-          });
-          
-          // Leader line si hubo spread angular
-          if (Math.abs(thetas[i] - body.lambdaDeg) > 0.5) {
-            const θTrue = absToRad(body.lambdaDeg);
-            const xTrue = cx + BASE_R * Math.cos(θTrue);
-            const yTrue = cy - BASE_R * Math.sin(θTrue);
-            
-            leaderLines.push(
-              <line
-                key={`leader-${body.name}`}
-                x1={cx + r * Math.cos(θ)}
-                y1={cy - r * Math.sin(θ)}
-                x2={xTrue}
-                y2={yTrue}
-                stroke={THEME.planets.label}
-                strokeWidth={0.5}
-                opacity={0.4}
-                strokeDasharray="2,2"
-              />
-            );
-          }
-        }
-      }
-    }
+      // Si está muy cerca de vecinos (< 12°), usar capas alternas
+      const COLLISION_THRESHOLD = 12;
+      let layer = 0;
 
-    // PASO 4: Renderizar planetas
-    placed.forEach(({ name, x, y }) => {
-      const planet = data.planets.find(p => p.name === name);
-      if (!planet) return;
-      
-      const symbol = PLANET_SYMBOLS[name] || '●';
+      if (distPrev < COLLISION_THRESHOLD || distNext < COLLISION_THRESHOLD) {
+        // Alternar capas para evitar superposición
+        layer = index % 3; // 0, 1, 2 rotando
+      }
+
+      // Radios para cada capa (como en Astro-Seek: 3 anillos concéntricos)
+      const layerRadii = [
+        R_PLANETS - 0.04 * R, // Capa interna
+        R_PLANETS,            // Capa media (default)
+        R_PLANETS + 0.04 * R, // Capa externa
+      ];
+
+      planetsWithLayers.push({
+        planet,
+        layer,
+        radius: layerRadii[layer],
+      });
+    });
+
+    // PASO 2: Renderizar planetas con sus capas asignadas
+    planetsWithLayers.forEach(({ planet, radius }) => {
+      const rad = absToRad(planet.longitude);
+      const [x, y] = polar(cx, cy, radius, rad);
+
+      const symbol = PLANET_SYMBOLS[planet.name] || '●';
 
       // Glifo del planeta
       planetGlyphs.push(
         <text
-          key={`planet-${name}`}
+          key={`planet-${planet.name}`}
           x={x}
           y={y}
           fontSize={PLANET_SIZE}
@@ -573,18 +477,16 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         </text>
       );
 
-      // Mostrar grados y minutos si está activado
+      // Mostrar grados y minutos si está activado (SIN símbolo de signo)
       if (showPlanetDegrees) {
         const { deg, min } = degMin(planet.longitude);
-        const signIdx = getSignIndex(planet.longitude);
-        const signSymbol = getSignSymbol(signIdx);
 
-        const label = `${deg}°${min.toString().padStart(2, '0')}′ ${signSymbol}`;
+        const label = `${deg}°${min.toString().padStart(2, '0')}′`;
         const labelY = y + PLANET_SIZE * 0.9;
 
         planetGlyphs.push(
           <text
-            key={`planet-label-${name}`}
+            key={`planet-label-${planet.name}`}
             x={x}
             y={labelY}
             fontSize={PLANET_LABEL_SIZE}
@@ -604,12 +506,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       }
     });
 
-    return (
-      <g id="planets">
-        {leaderLines}
-        {planetGlyphs}
-      </g>
-    );
+    return <g id="planets">{planetGlyphs}</g>;
   };
 
   // ============================================
@@ -632,63 +529,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       'sextil': '⚹',
     };
 
-    // Símbolos de puntos especiales
-    const SPECIAL_SYMBOLS: Record<string, string> = {
-      'Node': '☊',
-      'Nodo Norte': '☊',
-      'Lilith': '⚸',
-      'Chiron': '⚷',
-      'Fortune': '⊗',
-      'Fortuna': '⊗',
-      'Vertex': '⚹',
-      'ASC': 'AC',
-      'MC': 'MC',
-    };
-
-    // Combinar planetas + puntos especiales + ASC/MC
-    const allBodies: Array<{ name: string; longitude: number; house?: number }> = [
-      ...data.planets.map(p => ({ 
-        name: p.name, 
-        longitude: p.longitude,
-        house: data.houses.find(h => {
-          const nextHouse = data.houses.find(h2 => h2.number === (h.number % 12) + 1);
-          if (!nextHouse) return false;
-          const span = deltaPos(h.cusp, nextHouse.cusp);
-          const inHouse = deltaPos(h.cusp, p.longitude) < span;
-          return inHouse;
-        })?.number
-      }))
-    ];
-
-    // Agregar puntos especiales si existen
-    if (data.points) {
-      data.points.forEach(point => {
-        allBodies.push({ 
-          name: point.name, 
-          longitude: point.longitude,
-          house: data.houses.find(h => {
-            const nextHouse = data.houses.find(h2 => h2.number === (h.number % 12) + 1);
-            if (!nextHouse) return false;
-            const span = deltaPos(h.cusp, nextHouse.cusp);
-            const inHouse = deltaPos(h.cusp, point.longitude) < span;
-            return inHouse;
-          })?.number
-        });
-      });
-    }
-
-    // Agregar ASC (Casa 1) y MC (Casa 10)
-    const ascHouse = data.houses.find(h => h.number === 1);
-    const mcHouse = data.houses.find(h => h.number === 10);
-    
-    if (ascHouse) {
-      allBodies.push({ name: 'ASC', longitude: ascHouse.cusp, house: 1 });
-    }
-    if (mcHouse) {
-      allBodies.push({ name: 'MC', longitude: mcHouse.cusp, house: 10 });
-    }
-
-    const allNames = allBodies.map(b => b.name);
+    const planetNames = data.planets.map(p => p.name);
 
     return (
       <div 
@@ -717,13 +558,13 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
               borderSpacing: '2px',
             }}
           >
-            {/* Encabezado superior (planetas + puntos especiales horizontales) */}
+            {/* Encabezado superior (planetas horizontales) */}
             <thead>
               <tr>
-                <th style={{ width: '80px', height: '60px' }}></th>
-                {allNames.slice(0, -1).map((name) => (
+                <th style={{ width: '60px', height: '60px' }}></th>
+                {planetNames.slice(0, -1).map((planet) => (
                   <th
-                    key={name}
+                    key={planet}
                     style={{
                       backgroundColor: 'rgba(30, 20, 50, 0.8)',
                       border: '1px solid rgba(255, 215, 0, 0.4)',
@@ -737,47 +578,32 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                     }}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ fontSize: '18px', color: '#FFD700' }}>
-                        {PLANET_SYMBOLS[name] || SPECIAL_SYMBOLS[name] || '●'}
+                      <span style={{ fontSize: '20px', color: '#FFD700' }}>
+                        {PLANET_SYMBOLS[planet] || '●'}
                       </span>
-                      <span style={{ fontSize: '8px', color: '#D4AF37' }}>
-                        {name}
+                      <span style={{ fontSize: '9px', color: '#D4AF37' }}>
+                        {planet}
                       </span>
                     </div>
                   </th>
                 ))}
-                <th 
-                  style={{
-                    backgroundColor: 'rgba(30, 20, 50, 0.8)',
-                    border: '1px solid rgba(255, 215, 0, 0.4)',
-                    color: '#EDE6FF',
-                    width: '50px',
-                    textAlign: 'center',
-                    fontSize: '10px',
-                    padding: '8px',
-                    borderRadius: '4px',
-                  }}
-                >
-                  Casa
-                </th>
               </tr>
             </thead>
             
             {/* Cuerpo de la tabla (solo mitad inferior - forma de escalera) */}
             <tbody>
-              {allBodies.slice(1).map((body1, rowIndex) => {
-                const actualRowIndex = rowIndex + 1;
-                const { name: name1, house: house1 } = body1;
+              {planetNames.slice(1).map((planet1, rowIndex) => {
+                const actualRowIndex = rowIndex + 1; // +1 porque empezamos desde el segundo planeta
                 
                 return (
-                  <tr key={name1}>
-                    {/* Encabezado lateral (planeta/punto vertical) */}
+                  <tr key={planet1}>
+                    {/* Encabezado lateral (planeta vertical) */}
                     <td
                       style={{
                         backgroundColor: 'rgba(30, 20, 50, 0.8)',
                         border: '1px solid rgba(255, 215, 0, 0.4)',
                         color: '#EDE6FF',
-                        width: '80px',
+                        width: '60px',
                         height: '50px',
                         textAlign: 'center',
                         verticalAlign: 'middle',
@@ -786,21 +612,21 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '18px', color: '#FFD700' }}>
-                          {PLANET_SYMBOLS[name1] || SPECIAL_SYMBOLS[name1] || '●'}
+                        <span style={{ fontSize: '20px', color: '#FFD700' }}>
+                          {PLANET_SYMBOLS[planet1] || '●'}
                         </span>
-                        <span style={{ fontSize: '8px', color: '#D4AF37' }}>
-                          {name1}
+                        <span style={{ fontSize: '9px', color: '#D4AF37' }}>
+                          {planet1}
                         </span>
                       </div>
                     </td>
                     
                     {/* Celdas de aspectos (solo hasta la columna actual - forma triangular) */}
-                    {allNames.slice(0, actualRowIndex).map((name2) => {
-                      // Buscar si existe un aspecto entre estos dos cuerpos
+                    {planetNames.slice(0, actualRowIndex).map((planet2) => {
+                      // Buscar si existe un aspecto entre estos dos planetas
                       const aspect = data.aspects?.find(
-                        a => (a.planet1 === name1 && a.planet2 === name2) ||
-                             (a.planet1 === name2 && a.planet2 === name1)
+                        a => (a.planet1 === planet1 && a.planet2 === planet2) ||
+                             (a.planet1 === planet2 && a.planet2 === planet1)
                       );
                       
                       const aspectSymbol = aspect ? ASPECT_SYMBOLS[aspect.type.toLowerCase()] : null;
@@ -808,7 +634,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                       
                       return (
                         <td
-                          key={`${name1}-${name2}`}
+                          key={`${planet1}-${planet2}`}
                           style={{
                             backgroundColor: aspectSymbol 
                               ? `${color}25` 
@@ -858,25 +684,6 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                         </td>
                       );
                     })}
-                    
-                    {/* Columna de Casa */}
-                    <td
-                      style={{
-                        backgroundColor: 'rgba(30, 20, 50, 0.8)',
-                        border: '1px solid rgba(255, 215, 0, 0.4)',
-                        color: '#FFD700',
-                        width: '50px',
-                        height: '50px',
-                        textAlign: 'center',
-                        verticalAlign: 'middle',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {house1 || '-'}
-                    </td>
                   </tr>
                 );
               })}
