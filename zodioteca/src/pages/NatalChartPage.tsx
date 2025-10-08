@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import NatalChartForm from '../components/NatalChartForm';
 import NatalChartWheelPro from '../components/NatalChartWheelPro';
+import ChartDataTable from '../components/ChartDataTable';
 import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
@@ -362,44 +363,138 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           </div>
 
-          {/* RUEDA DE CARTA NATAL - PRO (según rudea astro modelo.md) */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-            <NatalChartWheelPro 
-              data={adaptChartData({
-                id: crypto.randomUUID(),
-                data: {
+          {/* RUEDA DE CARTA NATAL - PRO + TABLA DE DATOS (lado a lado en desktop) */}
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-3">
+            {/* Rueda - Más grande y prioritaria */}
+            <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+              <NatalChartWheelPro 
+                data={adaptChartData({
                   id: crypto.randomUUID(),
-                  personName: personName,
-                  birthData: {
-                    date: result.date.toISOString(),
-                    time: new Date(result.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                    location: result.location,
-                    latitude: result.latitude,
-                    longitude: result.longitude,
-                    timezone: result.timezone || 'UTC'
+                  data: {
+                    id: crypto.randomUUID(),
+                    personName: personName,
+                    birthData: {
+                      date: result.date.toISOString(),
+                      time: new Date(result.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                      location: result.location,
+                      latitude: result.latitude,
+                      longitude: result.longitude,
+                      timezone: result.timezone || 'UTC'
+                    },
+                    planets: result.planets,
+                    houses: result.houses,
+                    aspects: result.aspects || [],
+                    // 🆕 Incluir puntos avanzados
+                    asteroids: result.asteroids,
+                    sensitivePoints: result.sensitivePoints,
+                    lunarNodes: result.lunarNodes,
+                    arabicParts: result.arabicParts,
+                    advancedPoints: result.advancedPoints
                   },
-                  planets: result.planets,
-                  houses: result.houses,
-                  aspects: result.aspects || [],
-                  // 🆕 Incluir puntos avanzados
-                  asteroids: result.asteroids,
-                  sensitivePoints: result.sensitivePoints,
-                  lunarNodes: result.lunarNodes,
-                  arabicParts: result.arabicParts,
-                  advancedPoints: result.advancedPoints
-                },
-                metadata: {
-                  createdAt: new Date().toISOString(),
-                  modifiedAt: new Date().toISOString(),
-                  syncedAt: null,
-                  source: 'local'
-                },
-                syncStatus: 'local-only'
-              })}
-              size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
-              showPlanetDegrees={true}
-              showDataTable={true}
-            />
+                  metadata: {
+                    createdAt: new Date().toISOString(),
+                    modifiedAt: new Date().toISOString(),
+                    syncedAt: null,
+                    source: 'local'
+                  },
+                  syncStatus: 'local-only'
+                })}
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
+                showPlanetDegrees={true}
+                showDataTable={true}
+              />
+            </div>
+
+            {/* Tabla de datos compacta (solo desktop) - Estrecha y simple */}
+            <div className="hidden md:block md:w-[160px] lg:w-[180px] flex-shrink-0">
+              <ChartDataTable 
+                planets={[
+                  // Planetas principales
+                  ...result.planets.map(p => ({
+                    name: p.name,
+                    sign: p.sign,
+                    degree: p.degree,
+                    house: p.house,
+                    retrograde: p.retrograde
+                  })),
+                  // Nodo Norte solamente
+                  ...(result.lunarNodes || [])
+                    .filter(p => p.name === 'Nodo Norte')
+                    .map(p => ({
+                      name: p.name,
+                      sign: p.sign,
+                      degree: p.degree,
+                      house: p.house,
+                      retrograde: p.retrograde
+                    })),
+                  // Lilith (Mean o True) y Chiron
+                  ...(result.sensitivePoints || [])
+                    .filter(p => p.name === 'Chiron' || p.name.includes('Lilith'))
+                    .map(p => ({
+                      name: p.name === 'Chiron' ? 'Quirón' : 'Lilith',
+                      sign: p.sign,
+                      degree: p.degree,
+                      house: p.house,
+                      retrograde: p.retrograde
+                    })),
+                  // Parte de la Fortuna solamente
+                  ...(result.arabicParts || [])
+                    .filter(p => p.name === 'Parte de la Fortuna')
+                    .map(p => ({
+                      name: p.name,
+                      sign: p.sign,
+                      degree: p.degree,
+                      house: p.house,
+                      retrograde: false
+                    })),
+                  // Vértex solamente
+                  ...(result.advancedPoints || [])
+                    .filter(p => p.name === 'Vértex')
+                    .map(p => ({
+                      name: p.name,
+                      sign: p.sign || '',
+                      degree: p.degree || 0,
+                      house: p.house || 0,
+                      retrograde: false
+                    }))
+                ]}
+                houses={result.houses.map(h => ({
+                  number: h.number,
+                  sign: h.sign,
+                  degree: h.degree
+                }))}
+                elementStats={(() => {
+                  // Calcular elementos desde los planetas principales
+                  const elements = { fire: 0, earth: 0, air: 0, water: 0 };
+                  const fireSignos = ['Aries', 'Leo', 'Sagitario'];
+                  const earthSignos = ['Tauro', 'Virgo', 'Capricornio'];
+                  const airSignos = ['Géminis', 'Libra', 'Acuario'];
+                  const waterSignos = ['Cáncer', 'Escorpio', 'Piscis'];
+                  
+                  result.planets.forEach(p => {
+                    if (fireSignos.includes(p.sign)) elements.fire++;
+                    else if (earthSignos.includes(p.sign)) elements.earth++;
+                    else if (airSignos.includes(p.sign)) elements.air++;
+                    else if (waterSignos.includes(p.sign)) elements.water++;
+                  });
+                  
+                  return elements;
+                })()}
+                polarityStats={(() => {
+                  // Calcular polaridades desde los planetas principales
+                  const polarity = { masculine: 0, feminine: 0 };
+                  const masculineSignos = ['Aries', 'Géminis', 'Leo', 'Libra', 'Sagitario', 'Acuario'];
+                  const feminineSignos = ['Tauro', 'Cáncer', 'Virgo', 'Escorpio', 'Capricornio', 'Piscis'];
+                  
+                  result.planets.forEach(p => {
+                    if (masculineSignos.includes(p.sign)) polarity.masculine++;
+                    else if (feminineSignos.includes(p.sign)) polarity.feminine++;
+                  });
+                  
+                  return polarity;
+                })()}
+              />
+            </div>
           </div>
 
           {/* Trio Principal: SOL, LUNA, ASCENDENTE */}
