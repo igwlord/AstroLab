@@ -60,12 +60,12 @@ function calculateHouseForLongitude(longitude: number, houseCusps: number[]): nu
  * Determina si Chiron está retrógrado
  * Compara posiciones en fechas cercanas (±1 día)
  */
-function isChironRetrograde(date: Date): boolean {
+async function isChironRetrograde(date: Date): Promise<boolean> {
   const jd = dateToJulian(date);
-  const lon1 = calculateChironPrecise(jd - 1).longitude;
-  const lon2 = calculateChironPrecise(jd + 1).longitude;
+  const chiron1 = await calculateChironPrecise(jd - 1);
+  const chiron2 = await calculateChironPrecise(jd + 1);
   
-  let diff = lon2 - lon1;
+  let diff = chiron2.longitude - chiron1.longitude;
   if (diff > 180) diff -= 360;
   if (diff < -180) diff += 360;
   
@@ -73,18 +73,18 @@ function isChironRetrograde(date: Date): boolean {
 }
 
 /**
- * Calcula Chiron con Swiss Ephemeris
- * 🎯 Usa JPL Horizons orbital elements + Kepler equation
- * Precisión: ±0.01° (PERFECTA)
+ * Calcula Chiron con Swiss Ephemeris WASM
+ * 🎯 Usa Swiss Ephemeris oficial (SE_CHIRON = 15)
+ * Precisión: ±0.001° (MÁXIMA PRECISIÓN)
  */
 export async function calculateChiron(
   date: Date,
   houseCusps: number[]
 ): Promise<SensitivePoint> {
   const jd = dateToJulian(date);
-  const chiron = calculateChironPrecise(jd);
+  const chiron = await calculateChironPrecise(jd);
   const house = calculateHouseForLongitude(chiron.longitude, houseCusps);
-  const retrograde = isChironRetrograde(date);
+  const retrograde = await isChironRetrograde(date);
   
   return {
     name: 'Chiron',

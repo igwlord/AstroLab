@@ -33,6 +33,8 @@ export interface AstroSettings {
   showArabicParts: boolean;
   // 🆕 FASE 6: Análisis de Hemisferios
   showHemispheres: boolean;
+  // 🆕 FASE 7: Vértex y Anti-Vértex
+  showVertexAntiVertex: boolean;
 }
 
 interface SettingsState {
@@ -102,6 +104,7 @@ const defaultAstroSettings: AstroSettings = {
   showAllMinorAspects: true,
   showArabicParts: true, // 🆕 FASE 5 activado por defecto
   showHemispheres: true, // 🆕 FASE 6 activado por defecto
+  showVertexAntiVertex: true, // 🆕 FASE 7 activado por defecto
 };
 
 export const useSettingsStore = create<SettingsState>()(

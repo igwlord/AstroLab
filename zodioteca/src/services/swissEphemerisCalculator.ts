@@ -68,65 +68,45 @@ function longitudeToZodiac(longitude: number): { sign: string; degree: number } 
 }
 
 /**
- * Calcula posición de Chiron con precisión Swiss Ephemeris
+ * 🌟 Calcula posición de Chiron con precisión Swiss Ephemeris WASM
+ * 
+ * Usa Swiss Ephemeris para cálculo exacto de Quirón
+ * SE_CHIRON = 15 (Chiron/Quirón)
+ * 
+ * @param jd - Día Juliano (JD_UT - Universal Time)
+ * @returns Longitud eclíptica de Quirón en grados con signo
  */
-export function calculateChironPrecise(jd: number): { longitude: number; sign: string; degree: number } {
-  // Astronomia no tiene Chiron directamente, usamos aproximación mejorada
-  // Basado en elementos orbitales más precisos de JPL
-  
-  // Elementos orbitales de Chiron (actualizados JPL Horizons)
-  const a = 13.6981; // Semi-eje mayor (AU)
-  const e = 0.3794; // Excentricidad
-  const I = 6.9349 * Math.PI / 180; // Inclinación
-  const Omega = 209.3936 * Math.PI / 180; // Longitud nodo ascendente
-  const omega = 339.5184 * Math.PI / 180; // Argumento del perihelio
-  const M0 = 4.5855; // Anomalía media en J2000
-  const n = 0.01979 * Math.PI / 180; // Movimiento medio (°/día)
-  
-  // Anomalía media en la fecha
-  let M = M0 + n * (jd - 2451545.0);
-  M = ((M % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-  
-  // Resolver ecuación de Kepler para anomalía excéntrica
-  let E = M;
-  for (let i = 0; i < 15; i++) {
-    E = M + e * Math.sin(E);
+export async function calculateChironPrecise(jd: number): Promise<{ longitude: number; sign: string; degree: number }> {
+  try {
+    const swe = await initSwissEph();
+    
+    // Crear buffer para resultados (4 doubles: lon, lat, dist, speed)
+    const buffer = swe._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
+    
+    // SE_CHIRON = 15 (Quirón)
+    // SEFLG_SWIEPH = 2 (Swiss Ephemeris)
+    swe.ccall('swe_calc_ut', 'number', ['number', 'number', 'number', 'pointer'], [jd, 15, 2, buffer]);
+    
+    const result = new Float64Array(swe.HEAPF64.buffer, buffer, 4);
+    const longitude = result[0];
+    swe._free(buffer);
+    
+    if (!longitude && longitude !== 0) {
+      throw new Error('Swiss Ephemeris no pudo calcular Quirón');
+    }
+    
+    const zodiac = longitudeToZodiac(longitude);
+    
+    logger.log(`✅ Chiron calculado (Swiss Ephemeris SE_CHIRON): ${longitude.toFixed(6)}° = ${zodiac.sign} ${zodiac.degree.toFixed(2)}°`);
+    
+    return {
+      longitude,
+      ...zodiac
+    };
+  } catch (error) {
+    logger.error('❌ Error calculando Chiron con Swiss Ephemeris:', error);
+    throw error;
   }
-  
-  // Anomalía verdadera
-  const v = 2 * Math.atan2(
-    Math.sqrt(1 + e) * Math.sin(E / 2),
-    Math.sqrt(1 - e) * Math.cos(E / 2)
-  );
-  
-  // Argumento de latitud
-  const u = v + omega;
-  
-  // Radio vector
-  const r = a * (1 - e * Math.cos(E));
-  
-  // Coordenadas heliocéntricas en plano orbital
-  const xOrb = r * Math.cos(u);
-  const yOrb = r * Math.sin(u);
-  
-  // Rotación a eclíptica
-  const cosOmega = Math.cos(Omega);
-  const sinOmega = Math.sin(Omega);
-  const cosI = Math.cos(I);
-  
-  const xEcl = xOrb * cosOmega - yOrb * cosI * sinOmega;
-  const yEcl = xOrb * sinOmega + yOrb * cosI * cosOmega;
-  
-  // Longitud eclíptica
-  let lambda = Math.atan2(yEcl, xEcl) * 180 / Math.PI;
-  lambda = ((lambda % 360) + 360) % 360;
-  
-  const zodiac = longitudeToZodiac(lambda);
-  
-  return {
-    longitude: lambda,
-    ...zodiac
-  };
 }
 
 /**
@@ -285,6 +265,90 @@ export async function calculatePlacidusHouses(
     
   } catch (error) {
     logger.error('❌ Error calculando Placidus con Swiss Ephemeris:', error);
+    throw error;
+  }
+}
+
+/**
+ * 🌟 Calcula Vértex y Anti-Vértex usando Swiss Ephemeris WASM
+ * 
+ * El Vértex está en ascmc[3] del resultado de swe_houses
+ * Es el punto más preciso ya que Swiss Ephemeris usa algoritmos exactos
+ * 
+ * @param jdUT - Día Juliano en Universal Time (UT)
+ * @param latitude - Latitud geográfica en grados (N +, S -)
+ * @param longitude - Longitud geográfica en grados (E +, W -)
+ * @returns Vértex y Anti-Vértex con longitud, signo y grados
+ */
+export async function calculateVertexPrecise(
+  jdUT: number,
+  latitude: number,
+  longitude: number
+): Promise<{
+  vertex: { longitude: number; sign: string; degree: number };
+  antiVertex: { longitude: number; sign: string; degree: number };
+}> {
+  try {
+    const swe = await initSwissEph();
+    
+    // Crear buffers en memoria WASM
+    const cuspsBuffer = swe._malloc(13 * Float64Array.BYTES_PER_ELEMENT);
+    const ascmcBuffer = swe._malloc(10 * Float64Array.BYTES_PER_ELEMENT);
+    
+    try {
+      // Llamar a swe_houses con sistema Placidus
+      // hsys = 'P'.charCodeAt(0) = 80 (Placidus)
+      const retcode = swe.ccall(
+        'swe_houses',
+        'number',
+        ['number', 'number', 'number', 'number', 'pointer', 'pointer'],
+        [jdUT, latitude, longitude, 80, cuspsBuffer, ascmcBuffer]
+      );
+      
+      if (retcode < 0) {
+        throw new Error(`Swiss Ephemeris houses() failed with code ${retcode}`);
+      }
+      
+      // Leer ascmc buffer (10 doubles)
+      const ascmc = new Float64Array(swe.HEAPF64.buffer, ascmcBuffer, 10);
+      
+      // ascmc[0] = Ascendant
+      // ascmc[1] = MC
+      // ascmc[2] = ARMC
+      // ascmc[3] = Vertex ✨ ¡AQUÍ ESTÁ!
+      // ascmc[4] = Equatorial Ascendant
+      // ascmc[5] = Co-Ascendant (Koch)
+      // ascmc[6] = Co-Ascendant (Munkasey)
+      // ascmc[7] = Polar Ascendant
+      
+      const vertexLongitude = ascmc[3];
+      
+      // Anti-Vértex es siempre 180° opuesto
+      const antiVertexLongitude = (vertexLongitude + 180) % 360;
+      
+      const vertex = {
+        longitude: vertexLongitude,
+        ...longitudeToZodiac(vertexLongitude)
+      };
+      
+      const antiVertex = {
+        longitude: antiVertexLongitude,
+        ...longitudeToZodiac(antiVertexLongitude)
+      };
+      
+      logger.log(`✅ Vértex (Swiss Ephemeris): ${vertex.longitude.toFixed(6)}° = ${vertex.sign} ${vertex.degree.toFixed(2)}°`);
+      logger.log(`✅ Anti-Vértex: ${antiVertex.longitude.toFixed(6)}° = ${antiVertex.sign} ${antiVertex.degree.toFixed(2)}°`);
+      
+      return { vertex, antiVertex };
+      
+    } finally {
+      // Liberar memoria WASM
+      swe._free(cuspsBuffer);
+      swe._free(ascmcBuffer);
+    }
+    
+  } catch (error) {
+    logger.error('❌ Error calculando Vértex con Swiss Ephemeris:', error);
     throw error;
   }
 }

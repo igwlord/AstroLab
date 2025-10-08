@@ -23,7 +23,12 @@ export interface ChartData {
   planets: any[];
   houses: any[];
   aspects: any[];
-  // ... otros datos de la carta
+  // Datos avanzados opcionales
+  asteroids?: any[];
+  sensitivePoints?: any[];
+  lunarNodes?: any[];
+  arabicParts?: any[];
+  advancedPoints?: any[]; // Vértex, Anti-Vértex, etc.
 }
 
 export interface SavedChart {

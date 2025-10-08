@@ -1,0 +1,112 @@
+/* ============================================
+   ESTILOS DE IMPRESIÓN PARA ZODIOTECA
+   ============================================ */
+
+@media print {
+  /* ========== TEST: Si ves este comentario en DevTools, los estilos se cargan ========== */
+  
+  /* PÁGINA */
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  /* PRESERVAR COLORES */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* FONDO BÁSICO */
+  body,
+  html {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* OCULTAR NAVEGACIÓN Y CONTROLES */
+  nav,
+  header:has(button),
+  button,
+  footer {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* POSICIONAMIENTO */
+  .fixed,
+  [class*="fixed"] {
+    position: static !important;
+    transform: none !important;
+  }
+
+  /* PERMITIR SCROLL */
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-hidden,
+  [class*="overflow-"] {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* FONDOS OSCUROS A BLANCOS */
+  .bg-black,
+  .bg-opacity-70,
+  [class*="bg-slate-9"],
+  [class*="bg-gray-9"],
+  [class*="bg-purple-9"],
+  [class*="bg-violet-9"],
+  [class*="bg-indigo-9"],
+  [class*="bg-gradient"] {
+    background: white !important;
+    background-image: none !important;
+    background-color: white !important;
+  }
+
+  /* TEXTO VISIBLE */
+  *:not(svg *) {
+    color: #000 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+  }
+
+  /* QUITAR EFECTOS */
+  [class*="shadow"],
+  [class*="backdrop"] {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* MANTENER LAYOUTS */
+  .grid {
+    display: grid !important;
+  }
+
+  .flex {
+    display: flex !important;
+  }
+
+  /* SVG VISIBLE */
+  svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* EVITAR QUIEBRES */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+  }
+
+  .grid > * {
+    page-break-inside: avoid !important;
+  }
+
+  /* BORDES SUTILES */
+  [class*="border"] {
+    border-color: #999 !important;
+  }
+}

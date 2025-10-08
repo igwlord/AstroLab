@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Test de Validación - Carta Natal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .birth-data {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .data-item {
+      background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .data-item strong {
+      display: block;
+      color: #667eea;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .results-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .results-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .results-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .results-table tbody tr:hover {
+      background: #f8f9ff;
+    }
+    
+    .status-ok {
+      color: #10b981;
+      font-weight: bold;
+    }
+    
+    .status-warning {
+      color: #f59e0b;
+      font-weight: bold;
+    }
+    
+    .status-error {
+      color: #ef4444;
+      font-weight: bold;
+    }
+    
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .summary-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .summary-card h3 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 50px;
+      font-size: 1.5em;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .detail-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9ff;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .detail-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .badge-success {
+      background: #10b98120;
+      color: #10b981;
+    }
+    
+    .badge-warning {
+      background: #f59e0b20;
+      color: #f59e0b;
+    }
+    
+    .badge-retro {
+      background: #8b5cf620;
+      color: #8b5cf6;
+    }
+    
+    .error-message {
+      background: #fef2f2;
+      border: 2px solid #ef4444;
+      color: #dc2626;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .console-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Test de Validación</h1>
+      <p>Carta Natal - Buenos Aires, 16 Oct 1988</p>
+    </div>
+    
+    <div class="card">
+      <h2>📋 Datos de Nacimiento</h2>
+      <div class="birth-data">
+        <div class="data-item">
+          <strong>📅 Fecha</strong>
+          16 de octubre de 1988
+        </div>
+        <div class="data-item">
+          <strong>🕐 Hora Local</strong>
+          17:50 (-03:00)
+        </div>
+        <div class="data-item">
+          <strong>🌍 Hora UTC</strong>
+          20:50
+        </div>
+        <div class="data-item">
+          <strong>📍 Lugar</strong>
+          Buenos Aires, Argentina
+        </div>
+        <div class="data-item">
+          <strong>🧭 Coordenadas</strong>
+          34°36'S, 58°27'W
+        </div>
+        <div class="data-item">
+          <strong>🏠 Sistema de Casas</strong>
+          Placidus
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎯 Valores de Referencia (Carta Real)</h2>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Punto</th>
+            <th>Signo</th>
+            <th>Posición</th>
+            <th>Casa</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nodo Norte ☊</strong></td>
+            <td>Piscis</td>
+            <td>11°49'</td>
+            <td>12</td>
+            <td><span class="badge badge-retro">R</span></td>
+          </tr>
+          <tr>
+            <td><strong>Quirón ⚷</strong></td>
+            <td>Cáncer</td>
+            <td>7°10'</td>
+            <td>3</td>
+            <td><span class="badge badge-retro">R</span></td>
+          </tr>
+          <tr>
+            <td><strong>Parte Fortuna ⊕</strong></td>
+            <td>Géminis</td>
+            <td>17°10'</td>
+            <td>3</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><strong>Vértex Vx</strong></td>
+            <td>Libra</td>
+            <td>27°02'</td>
+            <td>7</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="card">
+      <h2>⚙️ Estado del Test</h2>
+      <div id="status" class="loading">
+        <div class="spinner"></div>
+        <p>Ejecutando cálculos avanzados...</p>
+      </div>
+    </div>
+    
+    <div id="results" style="display: none;">
+      <div class="card">
+        <h2>📊 Resultados de Comparación</h2>
+        <div id="comparison-table"></div>
+      </div>
+      
+      <div class="card">
+        <h2>📈 Análisis Detallado</h2>
+        <div id="detailed-analysis"></div>
+      </div>
+      
+      <div class="summary" id="summary"></div>
+      
+      <div class="card">
+        <h2>💻 Salida de Consola</h2>
+        <div id="console-output" class="console-output"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    // Capturar console.log para mostrar en la página
+    const consoleOutput = [];
+    const originalLog = console.log;
+    console.log = function(...args) {
+      consoleOutput.push(args.join(' '));
+      originalLog.apply(console, args);
+    };
+    
+    async function runTest() {
+      try {
+        const testModule = await import('./tests/testUserChart.ts');
+        const success = await testModule.default();
+        
+        // Mostrar resultados
+        displayResults(success);
+        
+      } catch (error) {
+        document.getElementById('status').innerHTML = `
+          <div class="error-message">
+            <h3>❌ Error ejecutando test</h3>
+            <p>${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `;
+        console.error('Error:', error);
+      }
+    }
+    
+    function displayResults(success) {
+      document.getElementById('status').style.display = 'none';
+      document.getElementById('results').style.display = 'block';
+      
+      // Mostrar salida de consola
+      document.getElementById('console-output').textContent = consoleOutput.join('\n');
+      
+      // Aquí se parsearían los resultados del test
+      // Por ahora mostramos un mensaje de éxito
+      document.getElementById('summary').innerHTML = `
+        <div class="summary-card">
+          <h3>${success ? '✅' : '⚠️'}</h3>
+          <p>Test ${success ? 'Completado' : 'Con Advertencias'}</p>
+        </div>
+      `;
+    }
+    
+    // Ejecutar test al cargar
+    runTest();
+  </script>
+</body>
+</html>

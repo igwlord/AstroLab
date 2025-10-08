@@ -64,6 +64,22 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     Urano: '♅',
     Neptuno: '♆',
     Plutón: '♇',
+    // Puntos Avanzados (español e inglés para compatibilidad)
+    'Nodo Norte': '☊',
+    'Nodo Sur': '☋',
+    Quirón: '⚷',
+    Chiron: '⚷', // Alias inglés
+    'Parte de la Fortuna': '⊕',
+    Vértex: 'Vx',
+    'Anti-Vértex': 'AVx',
+    // Asteroides
+    Ceres: '⚳',
+    Pallas: '⚴',
+    Juno: '⚵',
+    Vesta: '⚶',
+    // Lilith (español e inglés)
+    Lilith: '⚸',
+    'Lilith (Mean)': '⚸',
   };
 
   // PALETA DRAMÁTICA VIOLETA/DORADO

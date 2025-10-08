@@ -60,6 +60,7 @@ export interface NatalChart {
   sensitivePoints?: SensitivePoint[]; // 🆕 Chiron & Lilith
   lunarNodes?: LunarNode[]; // 🆕 Nodos Lunares (Norte y Sur)
   hemispheres?: HemispheresResult; // 🆕 Análisis de Hemisferios (FASE 6)
+  advancedPoints?: Array<{ name: string; longitude: number; sign?: string; degree?: number; house?: number }>; // 🆕 Vértex, Anti-Vértex (FASE 7)
   houses: HousePosition[];
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
@@ -363,8 +364,125 @@ export async function calculateNatalChart(
     }
   }
 
-  // Calcular aspectos
-  const aspects = calculateAspects(planets);
+  // 🆕 Calcular puntos avanzados adicionales (Vértex, validación de otros puntos)
+  // Este cálculo complementa los puntos ya calculados arriba
+  let advancedPoints: Array<{ name: string; longitude: number; sign?: string; degree?: number; house?: number }> | undefined;
+  if (settings.showVertexAntiVertex) {
+    try {
+      const { calculateAdvancedChart } = await import('./advancedAstroCalculator');
+      
+      // Convertir fecha a Día Juliano usando dateToJulian que ya tenemos
+      const julianDay = dateToJulian(birthDate);
+      
+      const houseCusps = houses.map(h => h.cusp);
+      const sunPlanet = planets.find(p => p.name === 'Sol');
+      const moonPlanet = planets.find(p => p.name === 'Luna');
+      
+      const advancedData = await calculateAdvancedChart(
+        {
+          julianDay,
+          latitude,
+          longitude,
+          houseCusps,
+          ascendantLongitude: houseCusps[0],
+          sunLongitude: sunPlanet?.longitude,
+          moonLongitude: moonPlanet?.longitude,
+        },
+        {
+          calculateAsteroids: false, // Ya calculados arriba
+          calculateChiron: false,     // Ya calculado arriba
+          calculateMidheaven: false,  // Ya calculado arriba
+          calculatePartOfFortune: false, // Ya calculado en arabicParts
+          calculateNodes: false,      // Ya calculados arriba
+          calculateVertex: true,      // ✅ Calcular Vértex
+        }
+      );
+      
+      // Convertir puntos avanzados al formato esperado
+      advancedPoints = [];
+      if (advancedData.specialPoints.vertex) {
+        advancedPoints.push({
+          name: 'Vértex',
+          longitude: advancedData.specialPoints.vertex.longitude,
+          sign: advancedData.specialPoints.vertex.sign,
+          degree: advancedData.specialPoints.vertex.degree,
+          house: advancedData.specialPoints.vertex.house,
+        });
+      }
+      if (advancedData.specialPoints.antiVertex) {
+        advancedPoints.push({
+          name: 'Anti-Vértex',
+          longitude: advancedData.specialPoints.antiVertex.longitude,
+          sign: advancedData.specialPoints.antiVertex.sign,
+          degree: advancedData.specialPoints.antiVertex.degree,
+          house: advancedData.specialPoints.antiVertex.house,
+        });
+      }
+      
+      logger.log('✅ Puntos avanzados calculados (Vértex):', advancedPoints.length);
+    } catch (error) {
+      logger.error('❌ Error calculando puntos avanzados:', error);
+      advancedPoints = undefined;
+    }
+  }
+
+  // 🎯 Calcular aspectos SOLO con puntos seleccionados
+  // INCLUIR: Planetas principales + Quirón + Lilith + Parte de la Fortuna + Vértex
+  // EXCLUIR: Asteroides, Nodos, Anti-Vértex, otras partes árabes
+  const allPoints: PlanetPosition[] = [...planets];
+  
+  // ❌ NO agregar asteroides (Ceres, Pallas, Juno, Vesta)
+  // if (asteroids) { ... }
+  
+  // ✅ Agregar puntos sensibles (Quirón, Lilith) - SÍ incluir
+  if (sensitivePoints) {
+    sensitivePoints.forEach(sp => {
+      allPoints.push({
+        name: sp.name,
+        longitude: sp.longitude,
+        sign: sp.sign,
+        degree: sp.degree,
+        house: sp.house,
+        retrograde: sp.retrograde
+      });
+    });
+  }
+  
+  // ❌ NO agregar nodos lunares (Nodo Norte, Nodo Sur)
+  // if (lunarNodes) { ... }
+  
+  // ✅ Agregar SOLO Parte de la Fortuna (filtrar otras partes árabes)
+  if (arabicParts) {
+    const fortuna = arabicParts.find(ap => ap.name === 'Parte de la Fortuna');
+    if (fortuna) {
+      allPoints.push({
+        name: fortuna.name,
+        longitude: fortuna.longitude,
+        sign: fortuna.sign,
+        degree: fortuna.degree,
+        house: fortuna.house,
+        retrograde: false
+      });
+    }
+  }
+  
+  // ✅ Agregar SOLO Vértex (NO Anti-Vértex)
+  if (advancedPoints) {
+    const vertex = advancedPoints.find(ap => ap.name === 'Vértex');
+    if (vertex) {
+      allPoints.push({
+        name: vertex.name,
+        longitude: vertex.longitude,
+        sign: vertex.sign || '',
+        degree: vertex.degree || 0,
+        house: vertex.house || 0,
+        retrograde: false
+      });
+    }
+  }
+  
+  // Calcular aspectos con TODOS los puntos
+  const aspects = calculateAspects(allPoints);
 
   return {
     date: birthDate,
@@ -378,6 +496,7 @@ export async function calculateNatalChart(
     lunarNodes, // 🆕 Incluir Nodos Lunares
     arabicParts, // 🆕 Incluir Partes Árabes (FASE 5)
     hemispheres, // 🆕 Incluir Análisis de Hemisferios (FASE 6)
+    advancedPoints, // 🆕 Incluir Vértex y Anti-Vértex (FASE 7)
     houses,
     ascendant,
     midheaven,

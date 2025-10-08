@@ -119,7 +119,7 @@ export default function ChartSectionFilter() {
 
   return (
     <nav 
-      className="sticky top-0 z-50 bg-gradient-to-r from-purple-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-b-2 border-purple-300 dark:border-purple-700 shadow-lg backdrop-blur-sm"
+      className="print:hidden sticky top-0 z-50 bg-gradient-to-r from-purple-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-b-2 border-purple-300 dark:border-purple-700 shadow-lg backdrop-blur-sm"
       role="navigation"
       aria-label="Filtro de secciones de carta natal"
     >

@@ -732,51 +732,137 @@ html.dark .bg-cyan-500 {
 
 /* Estilos para impresión de la rueda natal */
 @media print {
-  /* Ocultar todo excepto la rueda */
-  body > *:not(.natal-chart-wheel-pro) {
-    display: none !important;
+  /* ==================== CONFIGURACIÓN DE PÁGINA ==================== */
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
   }
 
-  /* Ocultar navegación y otros elementos */
-  nav, header, footer, .no-print {
-    display: none !important;
-  }
-
-  /* Asegurar que la rueda use toda la página */
-  .natal-chart-wheel-pro {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 20px !important;
-    page-break-inside: avoid;
-  }
-
-  /* Centrar el SVG en la página */
-  .natal-chart-wheel-pro svg {
-    display: block !important;
-    margin: 0 auto !important;
-    max-width: 90% !important;
-    height: auto !important;
-  }
-
-  /* Mantener la tabla de datos visible */
-  .natal-chart-wheel-pro > div:not(svg) {
-    display: block !important;
-    page-break-inside: avoid;
-    margin-top: 20px !important;
-  }
-
-  /* Ajustes de color para impresión */
+  /* Preservar colores exactos */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color-adjust: exact !important;
   }
 
-  /* Fondo blanco para impresión si es necesario */
-  @page {
-    size: auto;
-    margin: 10mm;
+  /* ==================== ESTRUCTURA BÁSICA ==================== */
+  body {
+    background: white !important;
+    color: #000 !important;
+  }
+
+  /* Convertir elementos fixed en static para impresión */
+  .fixed {
+    position: static !important;
+  }
+
+  /* Permitir que todo el contenido sea visible */
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-hidden,
+  .max-h-\[95vh\],
+  .max-h-\[90vh\] {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* ==================== OCULTAR ELEMENTOS INTERACTIVOS ==================== */
+  nav,
+  button,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* ==================== FONDOS Y COLORES PARA LEGIBILIDAD ==================== */
+  /* Convertir fondos oscuros a blancos */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r,
+  .bg-black,
+  [class*="bg-slate-9"],
+  [class*="bg-gray-9"],
+  [class*="bg-purple-9"],
+  [class*="bg-violet-9"],
+  [class*="bg-indigo-9"],
+  [class*="from-slate"],
+  [class*="from-purple-9"],
+  [class*="via-purple-9"],
+  [class*="via-violet-9"],
+  [class*="to-slate"],
+  [class*="to-purple-9"],
+  [class*="to-indigo-9"] {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  /* Texto: priorizar legibilidad */
+  * {
+    color: #000 !important;
+  }
+
+  /* Excepciones: mantener colores para categorización visual */
+  .text-yellow-300,
+  .text-yellow-400,
+  .text-blue-300,
+  .text-blue-400,
+  .text-purple-300,
+  .text-purple-400 {
+    color: #333 !important;
+  }
+
+  /* ==================== REMOVER EFECTOS VISUALES ==================== */
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  [class*="backdrop-blur"] {
+    backdrop-filter: none !important;
+  }
+
+  /* ==================== BORDES Y SEPARADORES ==================== */
+  [class*="border"] {
+    border-color: #ccc !important;
+  }
+
+  /* ==================== LAYOUTS (mantener estructura) ==================== */
+  .grid {
+    display: grid !important;
+  }
+
+  .flex {
+    display: flex !important;
+  }
+
+  /* ==================== CONTENIDO ESPECÍFICO ==================== */
+  /* SVG y gráficos */
+  svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Tablas */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  td, th {
+    border: 1px solid #999 !important;
+    padding: 4px 8px !important;
+  }
+
+  /* ==================== CONTROL DE SALTOS DE PÁGINA ==================== */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .grid > div,
+  [class*="rounded"] {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* ==================== ESPACIADO PARA IMPRESIÓN ==================== */
+  .print-content > div {
+    margin-bottom: 1em !important;
   }
 }

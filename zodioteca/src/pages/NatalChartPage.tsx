@@ -154,6 +154,12 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           planets: result.planets,
           houses: result.houses,
           aspects: result.aspects,
+          // 🆕 Incluir puntos avanzados al guardar
+          asteroids: result.asteroids,
+          sensitivePoints: result.sensitivePoints,
+          lunarNodes: result.lunarNodes,
+          arabicParts: result.arabicParts,
+          advancedPoints: result.advancedPoints,
         },
         personName
       );
@@ -247,16 +253,16 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
   };
 
   return (
-    <div className="py-2 sm:py-4 md:py-8">
+    <div className="py-2 sm:py-4 md:py-8 print:py-0">
       {showForm ? (
         <NatalChartForm 
           onSubmit={handleSubmit}
         />
       ) : result && (
-        <div ref={chartRef} className="max-w-6xl mx-auto px-2 sm:px-3 md:px-6 space-y-2 sm:space-y-3 md:space-y-6">
+        <div ref={chartRef} className="print-content max-w-6xl mx-auto px-2 sm:px-3 md:px-6 space-y-2 sm:space-y-3 md:space-y-6 print:px-2 print:space-y-4">
           {/* Banner de generación de PDF */}
           {isGeneratingPDF && (
-            <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+            <div className="print:hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
               <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3">
                 <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -290,7 +296,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   📍 {result.location}
                 </p>
               </div>
-              <div className="flex gap-1.5 sm:gap-2 md:gap-3 justify-end shrink-0">
+              <div className="print:hidden flex gap-1.5 sm:gap-2 md:gap-3 justify-end shrink-0">
                 <button
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF}
@@ -374,7 +380,13 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   },
                   planets: result.planets,
                   houses: result.houses,
-                  aspects: result.aspects || []
+                  aspects: result.aspects || [],
+                  // 🆕 Incluir puntos avanzados
+                  asteroids: result.asteroids,
+                  sensitivePoints: result.sensitivePoints,
+                  lunarNodes: result.lunarNodes,
+                  arabicParts: result.arabicParts,
+                  advancedPoints: result.advancedPoints
                 },
                 metadata: {
                   createdAt: new Date().toISOString(),
