@@ -14,7 +14,6 @@ const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const TestUserChart = lazy(() => import('./pages/TestUserChart'));
 
 // ============================================
 // RUTAS PROTEGIDAS
@@ -103,11 +102,6 @@ function AppRoutes() {
             <SettingsPage />
           </Layout>
         </ProtectedRoute>
-      } />
-      
-      {/* Test Chart - Validación */}
-      <Route path="/test-chart" element={
-        <TestUserChart />
       } />
       
       {/* Ruta raíz - redirige al login */}

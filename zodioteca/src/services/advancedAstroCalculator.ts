@@ -79,8 +79,8 @@ async function calculateAsteroid(
       // Leer resultados del buffer
       const result = new Float64Array(sweModule.HEAPF64.buffer, buffer, 4);
       const longitude = result[0];  // Longitud eclíptica
-      const latitude = result[1];   // Latitud eclíptica
-      const distance = result[2];   // Distancia en AU
+      // const latitude = result[1];   // Latitud eclíptica (no usada)
+      // const distance = result[2];   // Distancia en AU (no usada)
       const speed = result[3];      // Velocidad en longitud (°/día)
       
       // Determinar si está retrógrado (velocidad negativa)
@@ -666,7 +666,8 @@ function determineHouse(
 
 /**
  * Normaliza un ángulo al rango 0-360
+ * (función helper no usada actualmente)
  */
-function normalizeAngle(angle: number): number {
-  return ((angle % 360) + 360) % 360;
-}
+// function normalizeAngle(angle: number): number {
+//   return ((angle % 360) + 360) % 360;
+// }
