@@ -1965,6 +1965,32 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                 {/* Lista de aspectos */}
                 <div className="space-y-1.5 sm:space-y-2">
                   {result.aspects.map((aspect, idx) => {
+                    // Mapeo de nombres a símbolos para móviles
+                    const planetSymbols: Record<string, string> = {
+                      'Sol': '☉',
+                      'Luna': '☽',
+                      'Mercurio': '☿',
+                      'Venus': '♀',
+                      'Marte': '♂',
+                      'Júpiter': '♃',
+                      'Saturno': '♄',
+                      'Urano': '♅',
+                      'Neptuno': '♆',
+                      'Plutón': '♇',
+                      'Quirón': '⚷',
+                      'Lilith': '⚸',
+                      'Nodo Norte': '☊',
+                      'Nodo Sur': '☋',
+                      'Parte Fortuna': '⊕',
+                      'Vértex': 'Vx',
+                      'Ceres': '⚳',
+                      'Pallas': '⚴',
+                      'Juno': '⚵',
+                      'Vesta': '⚶'
+                    };
+                    
+                    const getSymbol = (name: string) => planetSymbols[name] || name.substring(0, 2);
+                    
                     // Determinar colores según naturaleza
                     let aspectStyles;
                     if (aspect.nature === 'armonico') {
@@ -1993,31 +2019,63 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     return (
                       <div 
                         key={idx} 
-                        className={`${aspectStyles.bg} rounded-md sm:rounded-lg p-2 sm:p-3 border-2 ${aspectStyles.border} hover:shadow-lg transition-all hover:scale-[1.01]`}
+                        className={`${aspectStyles.bg} rounded-lg p-2 sm:p-3 border ${aspectStyles.border} hover:shadow-lg transition-all`}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 md:gap-3">
-                          {/* Planetas y símbolo */}
-                          <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                            <span className="text-[10px] sm:text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
-                              {aspect.planet1}
+                        {/* Layout móvil (< sm): Diseño vertical de 2 filas */}
+                        <div className="sm:hidden space-y-1">
+                          {/* Fila 1: Planetas con aspecto centrado */}
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                              {getSymbol(aspect.planet1)}
                             </span>
-                            <span className={`text-base sm:text-lg md:text-xl font-black ${aspectStyles.text} shrink-0`}>
+                            <span className={`text-xl font-black ${aspectStyles.text}`}>
                               {aspect.symbol || '•'}
                             </span>
-                            <span className="text-[10px] sm:text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
+                            <span className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                              {getSymbol(aspect.planet2)}
+                            </span>
+                          </div>
+                          
+                          {/* Fila 2: Datos compactos centrados */}
+                          <div className="flex items-center justify-center gap-2 text-[10px]">
+                            <span className={`px-2 py-0.5 ${aspectStyles.badge} rounded-full font-bold`}>
+                              {aspect.type}
+                            </span>
+                            <span className="text-gray-600 dark:text-gray-400 font-mono font-bold">
+                              {aspect.orb.toFixed(1)}°
+                            </span>
+                            {aspect.exactness !== undefined && (
+                              <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-bold">
+                                {aspect.exactness.toFixed(0)}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Layout desktop (>= sm): Horizontal */}
+                        <div className="hidden sm:flex sm:items-center gap-2 md:gap-3">
+                          {/* Planetas y símbolo */}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
+                              {aspect.planet1}
+                            </span>
+                            <span className={`text-lg md:text-xl font-black ${aspectStyles.text} shrink-0`}>
+                              {aspect.symbol || '•'}
+                            </span>
+                            <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
                               {aspect.planet2}
                             </span>
                           </div>
                           
                           {/* Info del aspecto */}
-                          <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-xs flex-wrap">
-                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 ${aspectStyles.badge} rounded-full font-bold whitespace-nowrap`}>
+                          <div className="flex items-center gap-2 text-xs flex-wrap">
+                            <span className={`px-2 py-1 ${aspectStyles.badge} rounded-full font-bold whitespace-nowrap`}>
                               {aspect.type}
                             </span>
                             
                             {/* Categoría */}
                             {aspect.category && (
-                              <span className="hidden sm:inline px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full font-semibold">
+                              <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full font-semibold">
                                 {aspect.category === 'mayor' ? 'Mayor' : 'Menor'}
                               </span>
                             )}
@@ -2029,7 +2087,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                             
                             {/* Exactitud */}
                             {aspect.exactness !== undefined && (
-                              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-bold">
+                              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-bold">
                                 {aspect.exactness.toFixed(0)}%
                               </span>
                             )}

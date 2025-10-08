@@ -36,13 +36,8 @@ export const useI18n = () => {
       return saved;
     }
     
-    // Detectar idioma del navegador
-    const browserLang = navigator.language.split('-')[0];
-    if (translations[browserLang]) {
-      return browserLang;
-    }
-    
-    return 'es'; // Por defecto español
+    // SIEMPRE usar español - ignorar idioma del navegador
+    return 'es';
   });
   
   const [currentTranslations, setCurrentTranslations] = useState<Translations>(translations[language]);
@@ -89,13 +84,7 @@ export const useDetectLanguage = () => {
       return saved;
     }
 
-    // Luego verificar el idioma del navegador
-    const browserLang = navigator.language.split('-')[0];
-    if (translations[browserLang]) {
-      return browserLang;
-    }
-
-    // Por defecto español
+    // SIEMPRE usar español por defecto
     return 'es';
   }, []);
 

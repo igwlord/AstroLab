@@ -834,30 +834,74 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
       </div>
 
       {/* Configuración Avanzada (Acordeón) */}
-      <div className="bg-white/80 dark:bg-purple-950/40 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-purple-200/50 dark:border-purple-500/30 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border-2 border-purple-200 dark:border-purple-700/50 overflow-hidden transition-all duration-300">
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full px-4 py-3 sm:px-5 sm:py-4 md:px-6 flex justify-between items-center bg-gradient-to-r from-purple-100/80 to-indigo-100/80 dark:from-purple-900/50 dark:to-indigo-900/50 hover:from-purple-200/80 hover:to-indigo-200/80 dark:hover:from-purple-800/60 dark:hover:to-indigo-800/60 transition-colors backdrop-blur-sm"
+          className={`w-full px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3 transition-all duration-300 ${
+            showAdvanced 
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-700 dark:to-indigo-700' 
+              : 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 hover:from-purple-100 hover:to-indigo-100 dark:hover:from-gray-700 dark:hover:to-gray-800'
+          }`}
         >
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-purple-200">⚙️ Configuración Avanzada</h2>
-          <span className="text-xl sm:text-2xl text-purple-700 dark:text-purple-300">{showAdvanced ? '▼' : '▶'}</span>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-xl transition-all duration-300 ${
+              showAdvanced 
+                ? 'bg-white/20 shadow-lg' 
+                : 'bg-purple-200 dark:bg-purple-900/50'
+            }`}>
+              <span className="text-xl sm:text-2xl">{showAdvanced ? '⚙️' : '🔧'}</span>
+            </div>
+            <div className="text-left">
+              <h2 className={`text-base sm:text-lg md:text-xl font-bold transition-colors ${
+                showAdvanced 
+                  ? 'text-white' 
+                  : 'text-purple-900 dark:text-purple-200'
+              }`}>
+                Configuración Avanzada
+              </h2>
+              <p className={`text-xs sm:text-sm transition-colors ${
+                showAdvanced 
+                  ? 'text-purple-100' 
+                  : 'text-purple-600 dark:text-purple-400'
+              }`}>
+                {showAdvanced ? 'Ocultar opciones' : 'Personaliza tu cálculo'}
+              </p>
+            </div>
+          </div>
+          <div className={`flex items-center gap-2 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : 'rotate-0'}`}>
+            <svg 
+              className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
+                showAdvanced 
+                  ? 'text-white' 
+                  : 'text-purple-600 dark:text-purple-400'
+              }`} 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </button>
 
         {showAdvanced && (
-          <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6 bg-gradient-to-b from-purple-50/50 to-indigo-50/50 dark:from-purple-950/20 dark:to-indigo-950/20">
+          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 bg-gradient-to-b from-gray-50 to-purple-50/30 dark:from-gray-900 dark:to-purple-950/20">
             {/* Sistema de Casas */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Sistema de Casas
-              </label>
+            <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">🏠</span>
+                <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                  Sistema de Casas
+                </label>
+              </div>
               <select
                 value={formData.settings.houseSystem}
                 onChange={(e) => updateField('settings', {
                   ...formData.settings,
                   houseSystem: e.target.value as 'Placidus' | 'WholeSign' | 'Koch' | 'Equal'
                 })}
-                className="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 text-sm sm:text-base border-2 border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white transition-all"
               >
                 <option value="Placidus">Placidus (más usado)</option>
                 <option value="WholeSign">Signos Enteros (tradicional)</option>
@@ -867,13 +911,16 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
             </div>
 
             {/* Asteroides */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
-                Asteroides
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">☄️</span>
+                <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                  Asteroides
+                </label>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Object.entries(formData.settings.asteroids).map(([key, value]) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                  <label key={key} className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={value}
@@ -881,22 +928,25 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         asteroids: { ...formData.settings.asteroids, [key]: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer transition-all"
                     />
-                    <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm capitalize">{key}</span>
+                    <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm capitalize group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{key}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* Aspectos */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
-                Aspectos
-              </label>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+            <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">⚡</span>
+                <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                  Aspectos
+                </label>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
                 {Object.entries(formData.settings.aspects).map(([key, value]) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                  <label key={key} className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={value}
@@ -904,16 +954,17 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         aspects: { ...formData.settings.aspects, [key]: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer transition-all"
                     />
-                    <span className="text-gray-700 dark:text-gray-300 capitalize">{key}</span>
+                    <span className="text-gray-700 dark:text-gray-300 capitalize group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{key}</span>
                   </label>
                 ))}
               </div>
 
-              <div>
-                <label htmlFor="aspectOrbs" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Orbe de aspectos: {formData.settings.aspectOrbs}°
+              <div className="bg-purple-50 dark:bg-gray-900/50 p-4 rounded-lg border border-purple-200 dark:border-purple-700/30">
+                <label htmlFor="aspectOrbs" className="flex items-center justify-between text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
+                  <span>Orbe de aspectos</span>
+                  <span className="text-lg font-bold text-purple-600 dark:text-purple-400">{formData.settings.aspectOrbs}°</span>
                 </label>
                 <input
                   id="aspectOrbs"
@@ -925,19 +976,26 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                     ...formData.settings,
                     aspectOrbs: parseInt(e.target.value)
                   })}
-                  className="w-full"
+                  className="w-full h-2 bg-purple-200 dark:bg-purple-900 rounded-lg appearance-none cursor-pointer accent-purple-600"
                 />
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span>1°</span>
+                  <span>10°</span>
+                </div>
               </div>
             </div>
 
             {/* Lilith & Nodos */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Lilith
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">🌑</span>
+                  <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                    Lilith
+                  </label>
+                </div>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={formData.settings.lilith.mean}
@@ -945,11 +1003,11 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         lilith: { ...formData.settings.lilith, mean: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
                     />
-                    <span className="text-gray-700 dark:text-gray-300">Mean (Promedio)</span>
+                    <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Mean (Promedio)</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={formData.settings.lilith.true}
@@ -957,19 +1015,22 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         lilith: { ...formData.settings.lilith, true: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
                     />
-                    <span className="text-gray-700 dark:text-gray-300">True (Verdadera)</span>
+                    <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">True (Verdadera)</span>
                   </label>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Nodos Lunares
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
+              <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">☊</span>
+                  <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                    Nodos Lunares
+                  </label>
+                </div>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={formData.settings.nodes.mean}
@@ -977,11 +1038,11 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         nodes: { ...formData.settings.nodes, mean: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
                     />
-                    <span className="text-gray-700 dark:text-gray-300">Mean (Promedio)</span>
+                    <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Mean (Promedio)</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={formData.settings.nodes.true}
@@ -989,54 +1050,62 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                         ...formData.settings,
                         nodes: { ...formData.settings.nodes, true: e.target.checked }
                       })}
-                      className="w-4 h-4 text-purple-600 rounded"
+                      className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
                     />
-                    <span className="text-gray-700 dark:text-gray-300">True (Verdaderos)</span>
+                    <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">True (Verdaderos)</span>
                   </label>
                 </div>
               </div>
             </div>
 
             {/* Opciones adicionales */}
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.settings.polarizations}
-                  onChange={(e) => updateField('settings', {
-                    ...formData.settings,
-                    polarizations: e.target.checked
-                  })}
-                  className="w-4 h-4 text-purple-600 rounded"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Polarizaciones</span>
-              </label>
+            <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-700/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">✨</span>
+                <label className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+                  Opciones Adicionales
+                </label>
+              </div>
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.settings.polarizations}
+                    onChange={(e) => updateField('settings', {
+                      ...formData.settings,
+                      polarizations: e.target.checked
+                    })}
+                    className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Polarizaciones</span>
+                </label>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.settings.arabicParts}
-                  onChange={(e) => updateField('settings', {
-                    ...formData.settings,
-                    arabicParts: e.target.checked
-                  })}
-                  className="w-4 h-4 text-purple-600 rounded"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Partes Árabes</span>
-              </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.settings.arabicParts}
+                    onChange={(e) => updateField('settings', {
+                      ...formData.settings,
+                      arabicParts: e.target.checked
+                    })}
+                    className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Partes Árabes</span>
+                </label>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.settings.parallelDeclinations}
-                  onChange={(e) => updateField('settings', {
-                    ...formData.settings,
-                    parallelDeclinations: e.target.checked
-                  })}
-                  className="w-4 h-4 text-purple-600 rounded"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Declinaciones Paralelas</span>
-              </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.settings.parallelDeclinations}
+                    onChange={(e) => updateField('settings', {
+                      ...formData.settings,
+                      parallelDeclinations: e.target.checked
+                    })}
+                    className="w-5 h-5 text-purple-600 rounded-md focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Declinaciones Paralelas</span>
+                </label>
+              </div>
             </div>
           </div>
         )}
