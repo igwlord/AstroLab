@@ -19,12 +19,13 @@ interface NatalChartWheelProProps {
 
 const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   data,
-  size = 640,
+  size = 1100,
   showPlanetDegrees = true,
   showDataTable = true,
   displayOptions,
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
+  const [aspectsLevel, setAspectsLevel] = React.useState<'basic' | 'standard' | 'complete'>('standard');
   
   const cx = size / 2;
   const cy = size / 2;
@@ -114,11 +115,15 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       label: '#d4af37', // Dorado
     },
     aspects: {
-      conjunction: '#9d8df1', // Violeta medio
-      opposition: '#ff6b9d', // Rosa
-      square: '#ff6b9d', // Rosa
-      trine: '#4ec9ff', // Cyan
-      sextil: '#7ee8fa', // Cyan claro
+      conjunction: '#8B5CF6', // Púrpura
+      opposition: '#EF4444', // Rojo
+      square: '#F59E0B', // Naranja
+      trine: '#10B981', // Verde
+      sextil: '#3B82F6', // Azul
+      semisextile: '#6366F1', // Índigo
+      quincunx: '#EAB308', // Amarillo
+      semisquare: '#F97316', // Naranja claro
+      sesquisquare: '#F43F5E', // Rosa
     },
     table: {
       bg: 'rgba(26, 26, 46, 0.95)',
@@ -128,6 +133,53 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   const ASPECT_COLORS: Record<string, string> = THEME.aspects;
+
+  // Configuración de aspectos: grosor, nivel y estilo
+  interface AspectConfig {
+    color: string;
+    width: number;
+    level: 'basic' | 'standard' | 'complete';
+    dashArray?: string;
+    opacity: number;
+  }
+
+  const ASPECT_CONFIG: Record<string, AspectConfig> = {
+    Conjunction: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
+    conjunction: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
+    Conjunción: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
+    
+    Opposition: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
+    opposition: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
+    Oposición: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
+    
+    Square: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
+    square: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
+    Cuadratura: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
+    
+    Trine: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
+    trine: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
+    Trígono: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
+    
+    Sextile: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
+    sextile: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
+    Sextil: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
+    
+    'Semi-square': { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    semisquare: { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    Semicuadratura: { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    
+    Sesquisquare: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    sesquisquare: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    Sesquicuadratura: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
+    
+    'Semi-sextile': { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+    semisextile: { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+    Semisextil: { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+    
+    Quincunx: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+    quincunx: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+    Quincuncio: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
+  };
 
   // ============================================
   // 1. CORONA DE TICKS (360 grados) - APUNTAN HACIA ADENTRO
@@ -391,6 +443,14 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     const aspectLines: React.ReactElement[] = [];
 
     data.aspects.forEach((aspect, idx) => {
+      // Obtener configuración del aspecto
+      const config = ASPECT_CONFIG[aspect.type];
+      if (!config) return; // Si no está configurado, no lo mostramos
+
+      // Filtrar por nivel seleccionado
+      if (aspectsLevel === 'basic' && config.level !== 'basic') return;
+      if (aspectsLevel === 'standard' && config.level === 'complete') return;
+
       const p1 = data.planets.find((p) => p.name === aspect.planet1);
       const p2 = data.planets.find((p) => p.name === aspect.planet2);
 
@@ -402,8 +462,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const [x1, y1] = polar(cx, cy, R_ASPECTS, rad1);
       const [x2, y2] = polar(cx, cy, R_ASPECTS, rad2);
 
-      const color = ASPECT_COLORS[aspect.type] || '#B6B6C9';
-      const opacity = Math.max(0.15, Math.min(1 - Math.abs(aspect.orb) / 10, 0.6));
+      // Ajustar opacidad basada en orbe (aspectos más exactos = más visibles)
+      const orbFactor = Math.max(0, 1 - Math.abs(aspect.orb) / 8);
+      const finalOpacity = config.opacity * (0.5 + orbFactor * 0.5);
 
       aspectLines.push(
         <line
@@ -412,10 +473,15 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           y1={y1}
           x2={x2}
           y2={y2}
-          stroke={color}
-          strokeWidth={0.8}
-          opacity={opacity}
-        />
+          stroke={config.color}
+          strokeWidth={config.width}
+          strokeDasharray={config.dashArray}
+          opacity={finalOpacity}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <title>{aspect.type} {aspect.planet1}-{aspect.planet2} (orbe: {Math.abs(aspect.orb).toFixed(1)}°)</title>
+        </line>
       );
     });
 
@@ -798,23 +864,138 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           </button>
         </div>
 
-        {/* SVG centrado - clickeable en móvil */}
-        <div 
-          className="flex justify-center w-full cursor-pointer md:cursor-default"
-          onClick={() => {
-            if (window.innerWidth < 768) {
-              setIsZoomModalOpen(true);
-            }
-          }}
-        >
-          <svg
-            width={size}
-            height={size}
-            viewBox={`0 0 ${size} ${size}`}
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ background: 'transparent' }}
-            className="max-w-full h-auto"
+        {/* Control de niveles de aspectos */}
+        <div className="flex gap-2 mb-4 flex-wrap justify-center print:hidden">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+            Aspectos:
+          </span>
+          <button
+            onClick={() => setAspectsLevel('basic')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              aspectsLevel === 'basic'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
           >
+            📊 Básico
+          </button>
+          <button
+            onClick={() => setAspectsLevel('standard')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              aspectsLevel === 'standard'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            📈 Estándar
+          </button>
+          <button
+            onClick={() => setAspectsLevel('complete')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              aspectsLevel === 'complete'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            🔬 Completo
+          </button>
+        </div>
+
+        {/* Contenedor con leyenda y rueda */}
+        <div className="flex gap-6 justify-center items-start w-full flex-col lg:flex-row">
+          {/* Leyenda de aspectos - Solo visible en desktop */}
+          <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-xl p-4 shadow-lg border border-purple-200 dark:border-purple-700 min-w-[220px]">
+            <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+              <span>🎨</span>
+              Colores de Aspectos
+            </h4>
+            
+            {/* Aspectos Básicos */}
+            <div className="space-y-2 mb-3">
+              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Básicos</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.conjunction }}></div>
+                <span className="text-xs text-gray-700 dark:text-gray-300">Conjunción</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.opposition }}></div>
+                <span className="text-xs text-gray-700 dark:text-gray-300">Oposición</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.square }}></div>
+                <span className="text-xs text-gray-700 dark:text-gray-300">Cuadratura</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.trine }}></div>
+                <span className="text-xs text-gray-700 dark:text-gray-300">Trígono</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.sextil }}></div>
+                <span className="text-xs text-gray-700 dark:text-gray-300">Sextil</span>
+              </div>
+            </div>
+
+            {/* Aspectos Estándar */}
+            {(aspectsLevel === 'standard' || aspectsLevel === 'complete') && (
+              <div className="space-y-2 mb-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Estándar</p>
+                <div className="flex items-center gap-2">
+                  <svg width="32" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.semisquare} strokeWidth="2" strokeDasharray="3,2" />
+                  </svg>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Semicuadratura</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg width="32" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.sesquisquare} strokeWidth="2" strokeDasharray="3,2" />
+                  </svg>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Sesquicuadratura</span>
+                </div>
+              </div>
+            )}
+
+            {/* Aspectos Completos */}
+            {aspectsLevel === 'complete' && (
+              <div className="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Menores</p>
+                <div className="flex items-center gap-2">
+                  <svg width="32" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.semisextile} strokeWidth="2" strokeDasharray="2,3" />
+                  </svg>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Semisextil</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg width="32" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.quincunx} strokeWidth="2" strokeDasharray="2,3" />
+                  </svg>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Quincuncio</span>
+                </div>
+              </div>
+            )}
+
+            {/* Nota sobre grosor */}
+            <div className="mt-4 p-2 bg-purple-50 dark:bg-purple-900/20 rounded text-[10px] text-gray-600 dark:text-gray-400">
+              💡 Líneas más gruesas = aspectos más importantes
+            </div>
+          </div>
+
+          {/* SVG centrado - clickeable en móvil */}
+          <div 
+            className="flex justify-center w-full cursor-pointer md:cursor-default"
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                setIsZoomModalOpen(true);
+              }
+            }}
+          >
+            <svg
+              width={size}
+              height={size}
+              viewBox={`0 0 ${size} ${size}`}
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ background: 'transparent' }}
+              className="max-w-full h-auto"
+            >
             {/* Fondo degradado violeta */}
             <defs>
               <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
@@ -844,6 +1025,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             {renderAspects()}
             {renderPlanets()}
           </svg>
+        </div>
         </div>
 
         {renderAspectsGrid()}
