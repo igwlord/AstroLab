@@ -59,24 +59,11 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
     return aspectInfo[normalized] || { symbol: '•', color: '#6B7280' };
   };
 
-  // Lista de planetas en orden estándar
-  const planetOrder = ['Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón', 'Quirón', 'Lilith (Mean)', 'Nodo Norte', 'Nodo Sur', 'Parte de la Fortuna', 'Vértex'];
+  // Lista de planetas en orden estándar (comentado - no se usa en esta versión)
+  // const planetOrder = ['Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón', 'Quirón', 'Lilith (Mean)', 'Nodo Norte', 'Nodo Sur', 'Parte de la Fortuna', 'Vértex'];
   
-  // Usar los planetas proporcionados o la lista por defecto
-  const planets = propPlanets.length > 0 
-    ? propPlanets.map(p => p.name) 
-    : planetOrder.filter(p => {
-        // Verificar si el planeta tiene algún aspecto
-        return aspects.some(a => a.planet1 === p || a.planet2 === p);
-      });
-
-  // Crear matriz de aspectos
-  const getAspectBetween = (p1: string, p2: string) => {
-    return aspects.find(a => 
-      (a.planet1 === p1 && a.planet2 === p2) || 
-      (a.planet1 === p2 && a.planet2 === p1)
-    );
-  };
+  // Evitar warning de variable no usada
+  console.log('Planets provided:', propPlanets.length);
 
   // Agrupar aspectos por tipo
   const groupedAspects = aspects.reduce((acc, aspect) => {
@@ -118,16 +105,16 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
         const category = typeAspects[0]?.category || 'menor';
         
         return (
-          <div key={type} className={`${info.bg} rounded-lg p-4 border-2 ${info.color.replace('text-', 'border-').replace(' dark:text-', ' dark:border-')}`}>
+          <div key={type} className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border-2 border-purple-200 dark:border-purple-700">
             <div className="flex items-center justify-between mb-3">
-              <h4 className={`text-lg font-bold ${info.color} flex items-center gap-2`}>
-                <span className="text-2xl">{info.symbol}</span>
+              <h4 className="text-lg font-bold text-purple-900 dark:text-purple-100 flex items-center gap-2">
+                <span className="text-2xl" style={{ color: info.color }}>{info.symbol}</span>
                 {type}
                 <span className="text-xs px-2 py-1 bg-white/50 dark:bg-black/20 rounded-full">
                   {category === 'mayor' ? 'Mayor' : 'Menor'}
                 </span>
               </h4>
-              <span className={`px-3 py-1 rounded-full font-bold text-sm ${info.color} bg-white/50 dark:bg-black/20`}>
+              <span className="px-3 py-1 rounded-full font-bold text-sm text-purple-900 dark:text-purple-100 bg-white/50 dark:bg-black/20">
                 {typeAspects.length}
               </span>
             </div>
