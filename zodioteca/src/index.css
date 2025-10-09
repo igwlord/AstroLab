@@ -735,6 +735,28 @@ html.dark .bg-cyan-500 {
   backface-visibility: hidden;
 }
 
+/* Animación de brillo dorado sutil */
+@keyframes golden-shimmer {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(251, 191, 36, 0.3),
+      0 0 40px rgba(251, 191, 36, 0.15),
+      0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(251, 191, 36, 0.5),
+      0 0 60px rgba(251, 191, 36, 0.25),
+      0 0 80px rgba(251, 191, 36, 0.1),
+      0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.animate-golden-shimmer {
+  animation: golden-shimmer 3s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
 /* Estilos para impresión de la rueda natal */
 @media print {
   /* ==================== CONFIGURACIÓN DE PÁGINA ==================== */

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { createGlossaryParser, GlossaryParser } from '../utils/parseGlossary';
 import type { GlossaryEntry } from '../types/glossary';
@@ -38,6 +39,7 @@ const PolarizationsGrid = lazy(() => import('../components/PolarizationsGrid'));
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
+  const [searchParams] = useSearchParams();
   const [parser, setParser] = useState<GlossaryParser | null>(null);
   const [entries, setEntries] = useState<GlossaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,14 @@ const GlossaryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('signs');
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+
+  // Set initial category from URL query params
+  useEffect(() => {
+    const categoryParam = searchParams.get('categoria');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   // Load glossary on mount
   useEffect(() => {

@@ -21,6 +21,7 @@ import { saveChartLocal } from '../services/chartStorage';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Save, Check } from 'lucide-react';
+import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 // Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
 const getSignOffset = (sign: string): number => {
@@ -2137,6 +2138,10 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     
                     const getSymbol = (name: string) => planetSymbols[name] || name.substring(0, 2);
                     
+                    // Obtener símbolo estandarizado del aspecto
+                    const normalizedKey = normalizeAspectKey(aspect.type);
+                    const standardSymbol = normalizedKey ? getAspectUI(normalizedKey).symbol : aspect.symbol;
+                    
                     // Determinar colores según naturaleza
                     let aspectStyles;
                     if (aspect.nature === 'armonico') {
@@ -2175,7 +2180,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                               {getSymbol(aspect.planet1)}
                             </span>
                             <span className={`text-xl font-black ${aspectStyles.text}`}>
-                              {aspect.symbol || '•'}
+                              {standardSymbol || '•'}
                             </span>
                             <span className="text-lg font-bold text-gray-700 dark:text-gray-300">
                               {getSymbol(aspect.planet2)}
@@ -2206,7 +2211,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                               {aspect.planet1}
                             </span>
                             <span className={`text-lg md:text-xl font-black ${aspectStyles.text} shrink-0`}>
-                              {aspect.symbol || '•'}
+                              {standardSymbol || '•'}
                             </span>
                             <span className="text-xs md:text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
                               {aspect.planet2}

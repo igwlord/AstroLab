@@ -1,10 +1,13 @@
 import React from 'react';
 import type { ChartData } from '../types/chartWheel';
 import { normalize, deltaPos, absToRad, polar, degMin } from '../utils/chartGeometry';
+import { useThemeStore } from '../store/useTheme';
+import { normalizeAspectKey, getAspectStyle, ASPECTS_STANDARD, getAspectUI } from '../constants/aspectsStandard';
 
 /**
  * NatalChartWheelPro - Implementación EXACTA según rudea astro modelo.md
  * Replica pixel-perfect la geometría de Astro-Seek
+ * Soporta modo claro con fondo pastel
  */
 
 import type { DisplayOptions } from '../types/natalForm';
@@ -26,15 +29,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
   const [aspectsLevel, setAspectsLevel] = React.useState<'basic' | 'standard' | 'complete'>('standard');
+  const { isDark } = useThemeStore();
   
   const cx = size / 2;
   const cy = size / 2;
   const R = size / 2;
-
-  // Función para imprimir/exportar a PDF
-  const handlePrintPDF = () => {
-    window.print();
-  };
 
   // RADIOS EXACTOS - Casas cerca del centro, Signos afuera (ORDEN NATURAL)
   const R_ASPECTS = 0.40 * R;      // Anillo de aspectos (centro) - ACHICADO
@@ -91,30 +90,31 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
   // PALETA DRAMÁTICA VIOLETA/DORADO
   const THEME = {
-    background: 'radial-gradient(circle, #1a1a2e 0%, #0a0a18 100%)',
-    ticks: '#d4af37', // Dorado
+    background: isDark ? 'radial-gradient(circle, #1a1a2e 0%, #0a0a18 100%)' : 'radial-gradient(circle, #FFF8F5 0%, #FFE5D9 100%)',
+    ticks: isDark ? '#d4af37' : '#9333EA', // Dorado (oscuro) / Púrpura (claro)
     ticksOpacity: [0.3, 0.5, 0.7], // 1°, 5°, 10°
-    degLabels: '#f4e5b8', // Dorado claro
-    signDividers: '#8b7355', // Dorado oscuro
-    signSymbols: '#ffd700', // Dorado brillante
+    degLabels: isDark ? '#f4e5b8' : '#4B5563', // Dorado claro (oscuro) / Gris oscuro (claro)
+    signDividers: isDark ? '#8b7355' : '#7C3AED', // Dorado oscuro / Púrpura
+    signSymbols: isDark ? '#ffd700' : '#7C3AED', // Dorado brillante / Púrpura
     houseLines: {
-      angular: '#d4af37', // Dorado para angulares
-      succedent: '#b8962e', // Dorado medio
-      cadent: '#8b7355', // Dorado oscuro
+      angular: isDark ? '#d4af37' : '#9333EA', // Dorado / Púrpura
+      succedent: isDark ? '#b8962e' : '#A855F7', // Dorado medio / Púrpura claro
+      cadent: isDark ? '#8b7355' : '#C084FC', // Dorado oscuro / Púrpura muy claro
     },
     houseNumbers: {
-      fill: '#ffd700',
-      bg: 'rgba(26, 26, 46, 0.95)',
+      fill: isDark ? '#ffd700' : '#7C3AED',
+      bg: isDark ? 'rgba(26, 26, 46, 0.95)' : 'rgba(255, 255, 255, 0.95)',
     },
     axes: {
-      color: '#ffd700',
-      labelColor: '#f4e5b8',
+      color: isDark ? '#ffd700' : '#9333EA',
+      labelColor: isDark ? '#f4e5b8' : '#1F2937',
     },
     planets: {
-      glyph: '#e6d5ff', // Violeta claro
-      label: '#d4af37', // Dorado
+      glyph: isDark ? '#e6d5ff' : '#6B21A8', // Violeta claro / Púrpura oscuro
+      label: isDark ? '#d4af37' : '#4B5563', // Dorado / Gris oscuro
     },
     aspects: {
+      // Los colores de aspectos se mantienen iguales en ambos modos (ya son distintivos)
       conjunction: '#8B5CF6', // Púrpura
       opposition: '#EF4444', // Rojo
       square: '#F59E0B', // Naranja
@@ -126,60 +126,15 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       sesquisquare: '#F43F5E', // Rosa
     },
     table: {
-      bg: 'rgba(26, 26, 46, 0.95)',
-      text: '#f4e5b8',
-      accent: '#d4af37',
+      bg: isDark ? 'rgba(26, 26, 46, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      text: isDark ? '#f4e5b8' : '#1F2937',
+      accent: isDark ? '#d4af37' : '#9333EA',
     },
   };
 
-  const ASPECT_COLORS: Record<string, string> = THEME.aspects;
+  // const ASPECT_COLORS: Record<string, string> = THEME.aspects; // replaced by standard
 
-  // Configuración de aspectos: grosor, nivel y estilo
-  interface AspectConfig {
-    color: string;
-    width: number;
-    level: 'basic' | 'standard' | 'complete';
-    dashArray?: string;
-    opacity: number;
-  }
-
-  const ASPECT_CONFIG: Record<string, AspectConfig> = {
-    Conjunction: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
-    conjunction: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
-    Conjunción: { color: THEME.aspects.conjunction, width: 2, level: 'basic', opacity: 0.8 },
-    
-    Opposition: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
-    opposition: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
-    Oposición: { color: THEME.aspects.opposition, width: 2, level: 'basic', opacity: 0.8 },
-    
-    Square: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
-    square: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
-    Cuadratura: { color: THEME.aspects.square, width: 1.5, level: 'basic', opacity: 0.7 },
-    
-    Trine: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
-    trine: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
-    Trígono: { color: THEME.aspects.trine, width: 1.5, level: 'basic', opacity: 0.7 },
-    
-    Sextile: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
-    sextile: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
-    Sextil: { color: THEME.aspects.sextil, width: 1.2, level: 'basic', opacity: 0.6 },
-    
-    'Semi-square': { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    semisquare: { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    Semicuadratura: { color: THEME.aspects.semisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    
-    Sesquisquare: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    sesquisquare: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    Sesquicuadratura: { color: THEME.aspects.sesquisquare, width: 0.8, level: 'standard', dashArray: '3,2', opacity: 0.5 },
-    
-    'Semi-sextile': { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-    semisextile: { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-    Semisextil: { color: THEME.aspects.semisextile, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-    
-    Quincunx: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-    quincunx: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-    Quincuncio: { color: THEME.aspects.quincunx, width: 0.8, level: 'complete', dashArray: '2,3', opacity: 0.4 },
-  };
+  // (AspectConfig legacy eliminado; ahora usamos estilos del estándar centralizado)
 
   // ============================================
   // 1. CORONA DE TICKS (360 grados) - APUNTAN HACIA ADENTRO
@@ -443,13 +398,12 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     const aspectLines: React.ReactElement[] = [];
 
     data.aspects.forEach((aspect, idx) => {
-      // Obtener configuración del aspecto
-      const config = ASPECT_CONFIG[aspect.type];
-      if (!config) return; // Si no está configurado, no lo mostramos
+      // Obtener configuración desde el estándar centralizado
+      const key = normalizeAspectKey(aspect.type);
+      if (!key) return;
+      const cfg = getAspectStyle(key);
 
-      // Filtrar por nivel seleccionado
-      if (aspectsLevel === 'basic' && config.level !== 'basic') return;
-      if (aspectsLevel === 'standard' && config.level === 'complete') return;
+  // (sin filtro por niveles por ahora; se puede mapear por kind major/minor si se desea)
 
       const p1 = data.planets.find((p) => p.name === aspect.planet1);
       const p2 = data.planets.find((p) => p.name === aspect.planet2);
@@ -464,7 +418,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
       // Ajustar opacidad basada en orbe (aspectos más exactos = más visibles)
       const orbFactor = Math.max(0, 1 - Math.abs(aspect.orb) / 8);
-      const finalOpacity = config.opacity * (0.5 + orbFactor * 0.5);
+      const finalOpacity = cfg.opacity * (0.5 + orbFactor * 0.5);
 
       aspectLines.push(
         <line
@@ -473,9 +427,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           y1={y1}
           x2={x2}
           y2={y2}
-          stroke={config.color}
-          strokeWidth={config.width}
-          strokeDasharray={config.dashArray}
+          stroke={cfg.color}
+          strokeWidth={cfg.strokeWidth}
+          strokeDasharray={cfg.dashArray}
           opacity={finalOpacity}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -630,19 +584,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const renderAspectsGrid = () => {
     if (!showDataTable || !data.aspects || data.aspects.length === 0) return null;
 
-    // Símbolos de aspectos
-    const ASPECT_SYMBOLS: Record<string, string> = {
-      'conjunction': '☌',
-      'conjuncion': '☌',
-      'opposition': '☍',
-      'oposicion': '☍',
-      'trine': '△',
-      'trigono': '△',
-      'square': '□',
-      'cuadratura': '□',
-      'sextile': '⚹',
-      'sextil': '⚹',
-    };
+    // Símbolos de aspectos se obtienen inline vía getAspectUI(normalizeAspectKey(...))
 
     const planetNames = data.planets.map(p => p.name);
 
@@ -744,8 +686,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                              (a.planet1 === planet2 && a.planet2 === planet1)
                       );
                       
-                      const aspectSymbol = aspect ? ASPECT_SYMBOLS[aspect.type.toLowerCase()] : null;
-                      const color = aspect ? ASPECT_COLORS[aspect.type] : '#A38BFF';
+                      const k = aspect ? normalizeAspectKey(aspect.type) : null;
+                      const aspectSymbol = k ? getAspectUI(k).symbol : null;
+                      const color = k ? getAspectUI(k).color : '#A38BFF';
                       
                       return (
                         <td
@@ -815,23 +758,23 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           }}
         >
           <div className="flex items-center gap-2">
-            <span className="text-2xl" style={{ color: ASPECT_COLORS.conjunction, textShadow: `0 0 8px ${ASPECT_COLORS.conjunction}80` }}>☌</span>
+            <span className="text-2xl" style={{ color: ASPECTS_STANDARD.conjunction.color, textShadow: `0 0 8px ${ASPECTS_STANDARD.conjunction.color}80` }}>☌</span>
             <span style={{ color: '#EDE6FF' }}>Conjunción</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl" style={{ color: ASPECT_COLORS.opposition, textShadow: `0 0 8px ${ASPECT_COLORS.opposition}80` }}>☍</span>
+            <span className="text-2xl" style={{ color: ASPECTS_STANDARD.opposition.color, textShadow: `0 0 8px ${ASPECTS_STANDARD.opposition.color}80` }}>☍</span>
             <span style={{ color: '#EDE6FF' }}>Oposición</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl" style={{ color: ASPECT_COLORS.trine, textShadow: `0 0 8px ${ASPECT_COLORS.trine}80` }}>△</span>
+            <span className="text-2xl" style={{ color: ASPECTS_STANDARD.trine.color, textShadow: `0 0 8px ${ASPECTS_STANDARD.trine.color}80` }}>△</span>
             <span style={{ color: '#EDE6FF' }}>Trígono</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl" style={{ color: ASPECT_COLORS.square, textShadow: `0 0 8px ${ASPECT_COLORS.square}80` }}>□</span>
+            <span className="text-2xl" style={{ color: ASPECTS_STANDARD.square.color, textShadow: `0 0 8px ${ASPECTS_STANDARD.square.color}80` }}>□</span>
             <span style={{ color: '#EDE6FF' }}>Cuadratura</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl" style={{ color: ASPECT_COLORS.sextil, textShadow: `0 0 8px ${ASPECT_COLORS.sextil}80` }}>⚹</span>
+            <span className="text-2xl" style={{ color: ASPECTS_STANDARD.sextile.color, textShadow: `0 0 8px ${ASPECTS_STANDARD.sextile.color}80` }}>✶</span>
             <span style={{ color: '#EDE6FF' }}>Sextil</span>
           </div>
         </div>
@@ -842,29 +785,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   return (
     <>
       <div className="natal-chart-wheel-pro flex flex-col items-center">
-        {/* Botones de acción */}
-        <div className="flex gap-2 mb-4 flex-wrap justify-center">
-          <button
-            onClick={handlePrintPDF}
-            className="px-4 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 print:hidden"
-            style={{
-              background: 'linear-gradient(135deg, #d4af37 0%, #f4e5b8 100%)',
-              color: '#1a1a2e',
-              border: '2px solid #d4af37',
-            }}
-          >
-            📄 Imprimir PDF
-          </button>
-          
-          <button
-            onClick={() => setIsZoomModalOpen(true)}
-            className="md:hidden px-4 py-2 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 print:hidden bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
-          >
-            🔍 Ver en grande
-          </button>
-        </div>
-
-        {/* Control de niveles de aspectos */}
+        {/* Control de niveles de aspectos - Movido arriba */}
         <div className="flex gap-2 mb-4 flex-wrap justify-center print:hidden">
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
             Aspectos:
@@ -899,12 +820,20 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           >
             🔬 Completo
           </button>
+          
+          {/* Botón de zoom móvil */}
+          <button
+            onClick={() => setIsZoomModalOpen(true)}
+            className="md:hidden px-3 py-1.5 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
+          >
+            🔍 Ver en grande
+          </button>
         </div>
 
         {/* Contenedor con leyenda y rueda */}
         <div className="flex gap-6 justify-center items-start w-full flex-col lg:flex-row">
           {/* Leyenda de aspectos - Solo visible en desktop */}
-          <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-xl p-4 shadow-lg border border-purple-200 dark:border-purple-700 min-w-[220px]">
+          <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-xl p-4 shadow-lg border border-purple-300 dark:border-purple-700 min-w-[220px]">
             <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
               <span>🎨</span>
               Colores de Aspectos
@@ -912,71 +841,81 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             
             {/* Aspectos Básicos */}
             <div className="space-y-2 mb-3">
-              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Básicos</p>
+              <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Básicos</p>
               <div className="flex items-center gap-2">
+                <span className="text-sm opacity-60" style={{ color: THEME.aspects.conjunction }}>☌</span>
                 <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.conjunction }}></div>
-                <span className="text-xs text-gray-700 dark:text-gray-300">Conjunción</span>
+                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Conjunción</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.opposition }}></div>
-                <span className="text-xs text-gray-700 dark:text-gray-300">Oposición</span>
+                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.opposition.color }}>☍</span>
+                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.opposition.color }}></div>
+                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Oposición</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.square }}></div>
-                <span className="text-xs text-gray-700 dark:text-gray-300">Cuadratura</span>
+                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.square.color }}>□</span>
+                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.square.color }}></div>
+                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Cuadratura</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.trine }}></div>
-                <span className="text-xs text-gray-700 dark:text-gray-300">Trígono</span>
+                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.trine.color }}>△</span>
+                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.trine.color }}></div>
+                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Trígono</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.sextil }}></div>
-                <span className="text-xs text-gray-700 dark:text-gray-300">Sextil</span>
+                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.sextile.color }}>✶</span>
+                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.sextile.color }}></div>
+                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Sextil</span>
               </div>
             </div>
 
             {/* Aspectos Estándar */}
             {(aspectsLevel === 'standard' || aspectsLevel === 'complete') && (
-              <div className="space-y-2 mb-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Estándar</p>
+              <div className="space-y-2 mb-3 pt-3 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Estándar</p>
                 <div className="flex items-center gap-2">
+                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.semisquare.color }}>∠</span>
                   <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.semisquare} strokeWidth="2" strokeDasharray="3,2" />
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.semisquare.color} strokeWidth="2" strokeDasharray="3,2" />
                   </svg>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Semicuadratura</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.sesquisquare} strokeWidth="2" strokeDasharray="3,2" />
-                  </svg>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Sesquicuadratura</span>
+                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Semicuadratura</span>
                 </div>
               </div>
             )}
 
             {/* Aspectos Completos */}
             {aspectsLevel === 'complete' && (
-              <div className="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Menores</p>
+              <div className="space-y-2 pt-3 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Menores</p>
                 <div className="flex items-center gap-2">
+                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.semisextile.color }}>⚺</span>
                   <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.semisextile} strokeWidth="2" strokeDasharray="2,3" />
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.semisextile.color} strokeWidth="2" strokeDasharray="2,3" />
                   </svg>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Semisextil</span>
+                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Semisextil</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.quincunx.color }}>⚻</span>
                   <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={THEME.aspects.quincunx} strokeWidth="2" strokeDasharray="2,3" />
+                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.quincunx.color} strokeWidth="2" strokeDasharray="2,3" />
                   </svg>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Quincuncio</span>
+                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Quincuncio</span>
                 </div>
               </div>
             )}
 
             {/* Nota sobre grosor */}
-            <div className="mt-4 p-2 bg-purple-50 dark:bg-purple-900/20 rounded text-[10px] text-gray-600 dark:text-gray-400">
+            <div className="mt-4 p-2 bg-purple-100 dark:bg-purple-900/20 rounded text-[10px] text-gray-800 dark:text-gray-400 font-medium">
               💡 Líneas más gruesas = aspectos más importantes
             </div>
+            
+            {/* Link al glosario */}
+            <a 
+              href="/glossary?categoria=aspects" 
+              className="mt-2 block text-center text-[10px] text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 font-semibold underline transition-colors"
+            >
+              📖 Leer más sobre aspectos
+            </a>
           </div>
 
           {/* SVG centrado - clickeable en móvil */}
@@ -996,11 +935,22 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
               style={{ background: 'transparent' }}
               className="max-w-full h-auto"
             >
-            {/* Fondo degradado violeta */}
+            {/* Fondo degradado - modo oscuro (violeta) / modo claro (pastel) */}
             <defs>
               <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#1a1a2e" />
-                <stop offset="100%" stopColor="#0a0a18" />
+                {isDark ? (
+                  <>
+                    <stop offset="0%" stopColor="#1a1a2e" />
+                    <stop offset="100%" stopColor="#0a0a18" />
+                  </>
+                ) : (
+                  <>
+                    <stop offset="0%" stopColor="#FFF8F5" />
+                    <stop offset="30%" stopColor="#FFE5D9" />
+                    <stop offset="70%" stopColor="#D4F1F4" />
+                    <stop offset="100%" stopColor="#F8E6F1" />
+                  </>
+                )}
               </radialGradient>
             </defs>
             <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
@@ -1058,8 +1008,19 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
               >
                 <defs>
                   <radialGradient id="bg-gradient-zoom" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#1a1a2e" />
-                    <stop offset="100%" stopColor="#0a0a18" />
+                    {isDark ? (
+                      <>
+                        <stop offset="0%" stopColor="#1a1a2e" />
+                        <stop offset="100%" stopColor="#0a0a18" />
+                      </>
+                    ) : (
+                      <>
+                        <stop offset="0%" stopColor="#FFF8F5" />
+                        <stop offset="30%" stopColor="#FFE5D9" />
+                        <stop offset="70%" stopColor="#D4F1F4" />
+                        <stop offset="100%" stopColor="#F8E6F1" />
+                      </>
+                    )}
                   </radialGradient>
                 </defs>
                 <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient-zoom)" />

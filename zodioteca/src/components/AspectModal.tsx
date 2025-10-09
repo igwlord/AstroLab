@@ -2,6 +2,7 @@ import React from 'react';
 import type { Aspect } from '../types/aspect';
 import StandardModal from './StandardModal';
 import FrequencyBadge from './FrequencyBadge';
+import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 interface AspectModalProps {
   aspect: Aspect | null;
@@ -11,6 +12,10 @@ interface AspectModalProps {
 
 const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) => {
   if (!isOpen || !aspect) return null;
+
+  const normalizedKey = normalizeAspectKey(aspect.name);
+  const standardAspect = normalizedKey ? getAspectUI(normalizedKey) : null;
+  const displaySymbol = standardAspect?.symbol || aspect.symbol;
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
@@ -49,7 +54,7 @@ const AspectModal: React.FC<AspectModalProps> = ({ aspect, isOpen, onClose }) =>
       onClose={onClose}
       title={aspect.name}
       subtitle={aspect.angle}
-      icon={aspect.symbol}
+      icon={displaySymbol}
       gradientColors={styles.gradient}
     >
       <div className={`${styles.bg} modal-content`}>

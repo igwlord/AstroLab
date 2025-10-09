@@ -5,6 +5,7 @@
 
 import { X } from 'lucide-react';
 import type { DailyWeather } from '../services/dailyWeather';
+import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 interface WeatherDetailsModalProps {
   weather: DailyWeather;
@@ -133,11 +134,14 @@ export default function WeatherDetailsModal({ weather, isOpen, onClose }: Weathe
                     'sextil': 'abren oportunidades'
                   };
                   
+                  const normalizedKey = normalizeAspectKey(aspect.type);
+                  const standardSymbol = normalizedKey ? getAspectUI(normalizedKey).symbol : aspect.symbol;
+                  
                   return (
                     <div key={index} className="bg-white/10 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm sm:text-base font-bold text-white">
-                          {aspect.planet1} {aspect.symbol || '•'} {aspect.planet2}
+                          {aspect.planet1} {standardSymbol || '•'} {aspect.planet2}
                         </span>
                         <span className="text-xs text-white/60">
                           (orbe {aspect.orb.toFixed(1)}°)

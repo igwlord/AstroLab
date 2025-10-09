@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 interface Aspect {
   planet1: string;
@@ -38,22 +39,13 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects }) => {
     'Vértex': 'Vx'
   };
 
-  // Símbolos y colores de aspectos
-  const aspectInfo: Record<string, { symbol: string; color: string }> = {
-    'conjuncion': { symbol: '☌', color: '#8B5CF6' }, // purple
-    'oposicion': { symbol: '☍', color: '#EF4444' }, // red
-    'trigono': { symbol: '△', color: '#10B981' }, // green
-    'cuadratura': { symbol: '□', color: '#F59E0B' }, // orange  
-    'sextil': { symbol: '⚹', color: '#3B82F6' }, // blue
-    'semisextil': { symbol: '⚺', color: '#6366F1' }, // indigo
-    'quincuncio': { symbol: '⚻', color: '#EAB308' }, // yellow
-    'semicuadratura': { symbol: '∠', color: '#F59E0B' }, // amber
-    'sesquicuadratura': { symbol: '⚼', color: '#F43F5E' } // rose
-  };
-
+  // Símbolos y colores de aspectos desde el estándar centralizado
   const getAspectInfo = (type: string) => {
-    const normalized = type.toLowerCase().replace(/\s+/g, '');
-    return aspectInfo[normalized] || { symbol: '•', color: '#6B7280' };
+    const key = normalizeAspectKey(type);
+    if (key) {
+      return getAspectUI(key);
+    }
+    return { symbol: '•', color: '#6B7280' };
   };
 
   // Lista de planetas en orden estándar (solo los principales)
@@ -184,19 +176,22 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects }) => {
       <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
         <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3">🔑 Leyenda de Aspectos</h4>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-          {Object.entries(aspectInfo).map(([key, value]) => (
-            <div key={key} className="flex items-center gap-2">
-              <span 
-                className="text-2xl font-bold"
-                style={{ color: value.color }}
-              >
-                {value.symbol}
-              </span>
-              <span className="text-xs text-gray-700 dark:text-gray-300 capitalize">
-                {key}
-              </span>
-            </div>
-          ))}
+          {['Conjunción', 'Oposición', 'Cuadratura', 'Trígono', 'Sextil', 'Semisextil', 'Semicuadratura', 'Quincuncio'].map((name) => {
+            const info = getAspectInfo(name);
+            return (
+              <div key={name} className="flex items-center gap-2">
+                <span 
+                  className="text-2xl font-bold"
+                  style={{ color: info.color }}
+                >
+                  {info.symbol}
+                </span>
+                <span className="text-xs text-gray-700 dark:text-gray-300">
+                  {name}
+                </span>
+              </div>
+            );
+          })}
         </div>
         <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700 text-[10px] text-gray-600 dark:text-gray-400 text-center">
           <strong>Orbe:</strong> Desviación del ángulo exacto. Más cerca de 0° = aspecto más fuerte
@@ -261,19 +256,22 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects }) => {
               <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
                 <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3">🔑 Leyenda de Aspectos</h4>
                 <div className="grid grid-cols-3 gap-3">
-                  {Object.entries(aspectInfo).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      <span 
-                        className="text-2xl font-bold"
-                        style={{ color: value.color }}
-                      >
-                        {value.symbol}
-                      </span>
-                      <span className="text-xs text-gray-700 dark:text-gray-300 capitalize">
-                        {key}
-                      </span>
-                    </div>
-                  ))}
+                  {['Conjunción', 'Oposición', 'Cuadratura', 'Trígono', 'Sextil', 'Semisextil', 'Semicuadratura', 'Quincuncio'].map((name) => {
+                    const info = getAspectInfo(name);
+                    return (
+                      <div key={name} className="flex items-center gap-2">
+                        <span 
+                          className="text-2xl font-bold"
+                          style={{ color: info.color }}
+                        >
+                          {info.symbol}
+                        </span>
+                        <span className="text-xs text-gray-700 dark:text-gray-300">
+                          {name}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

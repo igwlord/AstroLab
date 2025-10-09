@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ASPECTS } from '../types/aspect';
 import type { Aspect } from '../types/aspect';
 import AspectModal from './AspectModal';
+import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 const AspectsGrid: React.FC = () => {
   const [selectedAspect, setSelectedAspect] = useState<Aspect | null>(null);
@@ -105,25 +106,33 @@ const AspectsGrid: React.FC = () => {
           >
             Todos
           </button>
-          {ASPECTS.map((aspect) => (
-            <button
-              key={aspect.name}
-              onClick={() => setSpecificAspect(specificAspect === aspect.name ? null : aspect.name)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
-                specificAspect === aspect.name
-                  ? 'shadow-lg scale-105 ring-2 ring-offset-2 ring-purple-500'
-                  : 'hover:scale-105'
-              }`}
-              style={{
-                backgroundColor: specificAspect === aspect.name ? aspect.color : `${aspect.color}40`,
-                color: specificAspect === aspect.name ? '#ffffff' : aspect.color,
-                border: `2px solid ${aspect.color}`
-              }}
-            >
-              <span className="text-base">{aspect.symbol}</span>
-              <span>{aspect.name}</span>
-            </button>
-          ))}
+          {ASPECTS.map((aspect) => {
+            const normalizedKey = normalizeAspectKey(aspect.name);
+            if (!normalizedKey) return null;
+            
+            const standardAspect = getAspectUI(normalizedKey);
+            const hexColor = standardAspect.color;
+            
+            return (
+              <button
+                key={aspect.name}
+                onClick={() => setSpecificAspect(specificAspect === aspect.name ? null : aspect.name)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  specificAspect === aspect.name
+                    ? 'shadow-lg scale-105 ring-2 ring-offset-2 ring-purple-500'
+                    : 'hover:scale-105'
+                }`}
+                style={{
+                  backgroundColor: specificAspect === aspect.name ? hexColor : `${hexColor}40`,
+                  color: specificAspect === aspect.name ? '#ffffff' : hexColor,
+                  border: `2px solid ${hexColor}`
+                }}
+              >
+                <span className="text-base">{standardAspect.symbol}</span>
+                <span>{aspect.name}</span>
+              </button>
+            );
+          })}
         </div>
         <p className="text-xs text-gray-600 dark:text-gray-400 text-center mt-2">
           💡 Toca un aspecto para filtrar solo ese tipo
@@ -132,23 +141,28 @@ const AspectsGrid: React.FC = () => {
 
       {/* Grid de Aspectos */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-        {filteredAspects.map((aspect) => (
-          <button
-            key={aspect.name}
-            data-id={aspect.name.toLowerCase()}
-            onClick={() => setSelectedAspect(aspect)}
-            className={`bg-gradient-to-br ${getCategoryColor(aspect.category)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
-          >
-            <span className="text-4xl sm:text-5xl md:text-6xl">{aspect.symbol}</span>
-            <div className="text-center">
-              <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">{aspect.name}</h3>
-              <p className="text-[10px] sm:text-xs md:text-sm opacity-90">{aspect.angle}</p>
-              <span className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full mt-1 sm:mt-2 inline-block">
-                {getCategoryName(aspect.category)}
-              </span>
-            </div>
-          </button>
-        ))}
+        {filteredAspects.map((aspect) => {
+          const normalizedKey = normalizeAspectKey(aspect.name);
+          const standardSymbol = normalizedKey ? getAspectUI(normalizedKey).symbol : aspect.symbol;
+          
+          return (
+            <button
+              key={aspect.name}
+              data-id={aspect.name.toLowerCase()}
+              onClick={() => setSelectedAspect(aspect)}
+              className={`bg-gradient-to-br ${getCategoryColor(aspect.category)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            >
+              <span className="text-4xl sm:text-5xl md:text-6xl">{standardSymbol}</span>
+              <div className="text-center">
+                <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">{aspect.name}</h3>
+                <p className="text-[10px] sm:text-xs md:text-sm opacity-90">{aspect.angle}</p>
+                <span className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full mt-1 sm:mt-2 inline-block">
+                  {getCategoryName(aspect.category)}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Leyenda */}

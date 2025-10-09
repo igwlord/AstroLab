@@ -37,7 +37,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => <
 function AppRoutes() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-gray-900 dark:to-purple-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFE5D9] to-[#F8E6F1] dark:from-gray-900 dark:to-purple-900">
         <LoadingSpinner />
       </div>
     }>
