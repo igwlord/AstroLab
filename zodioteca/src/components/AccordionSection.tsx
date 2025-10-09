@@ -20,7 +20,11 @@ export default function AccordionSection({ title, icon, count, children, default
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 sm:p-4 md:p-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 hover:from-purple-100 hover:to-indigo-100 dark:hover:bg-purple-900/20 transition-colors"
+        className={`w-full flex items-center justify-between p-3 sm:p-4 md:p-6 transition-colors ${
+          isOpen 
+            ? 'bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40' 
+            : 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 hover:from-purple-100 hover:to-indigo-100 dark:hover:bg-purple-900/20'
+        }`}
       >
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-xl sm:text-2xl md:text-3xl">{icon}</span>

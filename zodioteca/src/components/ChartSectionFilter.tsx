@@ -41,10 +41,10 @@ export default function ChartSectionFilter() {
     },
     { 
       id: 'basic', 
-      label: 'Básico', 
+      label: 'Principal', 
       icon: '⭐', 
       keywords: ['Planetas', 'Casas', 'Ascendente'],
-      ariaLabel: 'Filtrar información básica: Planetas, Casas y Ascendente'
+      ariaLabel: 'Filtrar información principal: Planetas, Casas y Ascendente'
     },
     { 
       id: 'aspects', 
@@ -62,10 +62,10 @@ export default function ChartSectionFilter() {
     },
     { 
       id: 'deep', 
-      label: 'Profundo', 
+      label: 'Avanzado', 
       icon: '🔮', 
       keywords: ['Puntos Sensibles', 'Asteroides', 'Partes Árabes'],
-      ariaLabel: 'Filtrar información profunda: Puntos sensibles, Asteroides y Partes Árabes'
+      ariaLabel: 'Filtrar información avanzada: Puntos sensibles, Asteroides y Partes Árabes'
     },
     { 
       id: 'synthesis', 
@@ -153,33 +153,33 @@ export default function ChartSectionFilter() {
                   aria-pressed={isActive}
                   className={`
                     flex flex-col items-center justify-center
-                    px-4 py-3 sm:px-6 sm:py-4
-                    rounded-xl sm:rounded-2xl
+                    px-2 py-2 sm:px-6 sm:py-4
+                    rounded-lg sm:rounded-2xl
                     font-semibold text-xs sm:text-sm
                     transition-all duration-300 ease-out
                     whitespace-nowrap
-                    min-w-[80px] sm:min-w-[100px]
+                    min-w-[60px] sm:min-w-[100px]
                     focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
                     ${isActive 
-                      ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xl scale-110 sm:scale-125 -translate-y-1' 
+                      ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xl scale-105 sm:scale-125 -translate-y-0.5 sm:-translate-y-1' 
                       : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700 hover:scale-105 shadow-md'
                     }
                   `}
                 >
                   {/* Icono decorativo */}
-                  <span className="text-2xl sm:text-3xl mb-1" aria-hidden="true">
+                  <span className="text-lg sm:text-3xl mb-0.5 sm:mb-1" aria-hidden="true">
                     {filter.icon}
                   </span>
                   
                   {/* Label visible */}
-                  <span className="text-[10px] sm:text-xs font-bold">
+                  <span className="text-[9px] sm:text-xs font-bold">
                     {filter.label}
                   </span>
                   
                   {/* Indicador visual de estado activo */}
                   {isActive && (
                     <span 
-                      className="mt-1 w-8 h-1 bg-white rounded-full" 
+                      className="mt-0.5 sm:mt-1 w-6 sm:w-8 h-0.5 sm:h-1 bg-white rounded-full" 
                       aria-hidden="true"
                     />
                   )}

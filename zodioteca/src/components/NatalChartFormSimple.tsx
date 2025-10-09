@@ -8,7 +8,7 @@
  * - Diseño moderno coherente con AstroLab
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DateTime } from 'luxon';
 import Fuse from 'fuse.js';
 import { Search, MapPin, Settings, X } from 'lucide-react';
@@ -21,39 +21,128 @@ const MONTHS_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
+// Clave para localStorage
+const FORM_STORAGE_KEY = 'astrolab_last_natal_form';
+
+// Cargar datos guardados del localStorage
+const loadSavedFormData = (): Partial<FormValue> | null => {
+  try {
+    const saved = localStorage.getItem(FORM_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (error) {
+    console.error('Error loading saved form data:', error);
+  }
+  return null;
+};
+
+// Guardar datos en localStorage
+const saveFormData = (data: FormValue) => {
+  try {
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving form data:', error);
+  }
+};
+
 export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: NatalChartFormProps) {
   // ===========================
-  // ESTADO DEL FORMULARIO
+  // ESTADO DEL FORMULARIO CON PERSISTENCIA
   // ===========================
-  const [formData, setFormData] = useState<FormValue>({
-    name: defaultValues?.name || '',
-    surname: defaultValues?.surname,
-    gender: defaultValues?.gender,
-    isSelf: defaultValues?.isSelf ?? true,
-    birth: defaultValues?.birth || {
-      day: 1,
-      month: 1,
-      year: 2000,
-      time: undefined,
-      timeAccuracy: 'exact',
-    },
-    location: defaultValues?.location || {
-      countryCode: '',
-      region: undefined,
-      city: undefined,
-      neighborhood: undefined,
-      lat: undefined,
-      lon: undefined,
-      tzId: undefined,
-    },
-    settings: defaultValues?.settings || DEFAULT_SETTINGS,
+  const [formData, setFormData] = useState<FormValue>(() => {
+    // Intentar cargar datos guardados
+    const savedData = loadSavedFormData();
+    
+    if (savedData) {
+      // Usar datos guardados si existen
+      return {
+        name: savedData.name || '',
+        surname: savedData.surname,
+        gender: savedData.gender,
+        isSelf: savedData.isSelf ?? true,
+        birth: savedData.birth || {
+          day: 1,
+          month: 1,
+          year: 2000,
+          time: undefined,
+          timeAccuracy: 'exact',
+        },
+        location: savedData.location || {
+          countryCode: '',
+          region: undefined,
+          city: undefined,
+          neighborhood: undefined,
+          lat: undefined,
+          lon: undefined,
+          tzId: undefined,
+        },
+        settings: savedData.settings || DEFAULT_SETTINGS,
+      };
+    }
+    
+    // Si no hay datos guardados, usar valores por defecto
+    return {
+      name: defaultValues?.name || '',
+      surname: defaultValues?.surname,
+      gender: defaultValues?.gender,
+      isSelf: defaultValues?.isSelf ?? true,
+      birth: defaultValues?.birth || {
+        day: 1,
+        month: 1,
+        year: 2000,
+        time: undefined,
+        timeAccuracy: 'exact',
+      },
+      location: defaultValues?.location || {
+        countryCode: '',
+        region: undefined,
+        city: undefined,
+        neighborhood: undefined,
+        lat: undefined,
+        lon: undefined,
+        tzId: undefined,
+      },
+      settings: defaultValues?.settings || DEFAULT_SETTINGS,
+    };
   });
+
+  // Guardar automáticamente cuando cambian los datos
+  useEffect(() => {
+    saveFormData(formData);
+  }, [formData]);
 
   // ===========================
   // BÚSQUEDA DE CIUDADES
   // ===========================
-  const [cityQuery, setCityQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [cityQuery, setCityQuery] = useState(() => {
+    // Restaurar el texto de búsqueda si hay ciudad guardada
+    const savedData = loadSavedFormData();
+    if (savedData?.location && savedData.location.city && savedData.location.countryCode) {
+      const city = CITIES_DB.find(c => 
+        c.name === savedData.location!.city && 
+        c.countryCode === savedData.location!.countryCode
+      );
+      if (city) {
+        return `${city.name}, ${city.country}`;
+      }
+    }
+    return '';
+  });
+  
+  const [selectedCity, setSelectedCity] = useState<CityData | null>(() => {
+    // Restaurar ciudad seleccionada
+    const savedData = loadSavedFormData();
+    if (savedData?.location && savedData.location.city && savedData.location.countryCode) {
+      const city = CITIES_DB.find(c => 
+        c.name === savedData.location!.city && 
+        c.countryCode === savedData.location!.countryCode
+      );
+      return city || null;
+    }
+    return null;
+  });
+  
   const [showCityResults, setShowCityResults] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 

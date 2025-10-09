@@ -24,6 +24,8 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   showDataTable = true,
   displayOptions,
 }) => {
+  const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
+  
   const cx = size / 2;
   const cy = size / 2;
   const R = size / 2;
@@ -772,62 +774,137 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   };
 
   return (
-    <div className="natal-chart-wheel-pro flex flex-col items-center">
-      {/* Botón de imprimir PDF */}
-      <button
-        onClick={handlePrintPDF}
-        className="mb-4 px-6 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 print:hidden"
-        style={{
-          background: 'linear-gradient(135deg, #d4af37 0%, #f4e5b8 100%)',
-          color: '#1a1a2e',
-          border: '2px solid #d4af37',
-        }}
-      >
-        📄 Imprimir PDF
-      </button>
+    <>
+      <div className="natal-chart-wheel-pro flex flex-col items-center">
+        {/* Botones de acción */}
+        <div className="flex gap-2 mb-4 flex-wrap justify-center">
+          <button
+            onClick={handlePrintPDF}
+            className="px-4 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 print:hidden"
+            style={{
+              background: 'linear-gradient(135deg, #d4af37 0%, #f4e5b8 100%)',
+              color: '#1a1a2e',
+              border: '2px solid #d4af37',
+            }}
+          >
+            📄 Imprimir PDF
+          </button>
+          
+          <button
+            onClick={() => setIsZoomModalOpen(true)}
+            className="md:hidden px-4 py-2 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 print:hidden bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
+          >
+            🔍 Ver en grande
+          </button>
+        </div>
 
-      {/* SVG centrado */}
-      <div className="flex justify-center w-full">
-        <svg
-          width={size}
-          height={size}
-          viewBox={`0 0 ${size} ${size}`}
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ background: 'transparent' }}
+        {/* SVG centrado - clickeable en móvil */}
+        <div 
+          className="flex justify-center w-full cursor-pointer md:cursor-default"
+          onClick={() => {
+            if (window.innerWidth < 768) {
+              setIsZoomModalOpen(true);
+            }
+          }}
         >
-          {/* Fondo degradado violeta */}
-          <defs>
-            <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#1a1a2e" />
-              <stop offset="100%" stopColor="#0a0a18" />
-            </radialGradient>
-          </defs>
-          <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ background: 'transparent' }}
+            className="max-w-full h-auto"
+          >
+            {/* Fondo degradado violeta */}
+            <defs>
+              <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#1a1a2e" />
+                <stop offset="100%" stopColor="#0a0a18" />
+              </radialGradient>
+            </defs>
+            <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
 
-          {/* Círculos concéntricos principales - SOLO los necesarios */}
-          <g id="structure-circles">
-            {/* Círculo de aspectos (centro) */}
-            <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
-            
-            {/* Anillo de CASAS (cerca del centro) */}
-            <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-            <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-            
-            {/* Anillo de SIGNOS (exterior) */}
-            <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-            <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-          </g>
+            {/* Círculos concéntricos principales - SOLO los necesarios */}
+            <g id="structure-circles">
+              {/* Círculo de aspectos (centro) */}
+              <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
+              
+              {/* Anillo de CASAS (cerca del centro) */}
+              <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+              <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+              
+              {/* Anillo de SIGNOS (exterior) */}
+              <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+              <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+            </g>
 
-          {renderTicks()}
-          {renderSigns()}
-          {renderHouses()}
-          {renderAspects()}
-          {renderPlanets()}
-        </svg>
+            {renderTicks()}
+            {renderSigns()}
+            {renderHouses()}
+            {renderAspects()}
+            {renderPlanets()}
+          </svg>
+        </div>
+
+        {renderAspectsGrid()}
       </div>
 
-      {renderAspectsGrid()}
-    </div>
+      {/* Modal de Zoom para móviles */}
+      {isZoomModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setIsZoomModalOpen(false)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            <button
+              onClick={() => setIsZoomModalOpen(false)}
+              className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 backdrop-blur-sm transition-all"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="overflow-auto max-h-full max-w-full" onClick={(e) => e.stopPropagation()}>
+              <svg
+                width={800}
+                height={800}
+                viewBox={`0 0 ${size} ${size}`}
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ background: 'transparent' }}
+                className="min-w-[600px]"
+              >
+                <defs>
+                  <radialGradient id="bg-gradient-zoom" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#1a1a2e" />
+                    <stop offset="100%" stopColor="#0a0a18" />
+                  </radialGradient>
+                </defs>
+                <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient-zoom)" />
+
+                <g id="structure-circles">
+                  <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
+                  <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                  <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                  <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                  <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                </g>
+
+                {renderTicks()}
+                {renderSigns()}
+                {renderHouses()}
+                {renderAspects()}
+                {renderPlanets()}
+              </svg>
+            </div>
+            
+            <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/70 text-sm">
+              Pellizca para hacer zoom • Arrastra para mover
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

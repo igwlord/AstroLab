@@ -2,6 +2,10 @@ import { useState, useRef } from 'react';
 import NatalChartFormSimple from '../components/NatalChartFormSimple';
 import NatalChartWheelPro from '../components/NatalChartWheelPro';
 import ChartDataTable from '../components/ChartDataTable';
+import ChartViewTabs from '../components/ChartViewTabs';
+import AspectsTableGrid from '../components/AspectsTableGrid';
+import PositionsTable from '../components/PositionsTable';
+import DominancesTable from '../components/DominancesTable';
 import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
@@ -18,6 +22,13 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Save, Check } from 'lucide-react';
 
+// Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
+const getSignOffset = (sign: string): number => {
+  const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+  const index = signs.indexOf(sign);
+  return index >= 0 ? index * 30 : 0;
+};
+
 export default function NatalChartPage() {
   const [result, setResult] = useState<NatalChart | null>(null);
   const [statistics, setStatistics] = useState<ChartStatistics | null>(null);
@@ -27,6 +38,7 @@ export default function NatalChartPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'positions' | 'dominances'>('chart');
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (formData: FormValue) => {
@@ -368,11 +380,19 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           </div>
 
-          {/* RUEDA DE CARTA NATAL - PRO + TABLA DE DATOS (lado a lado en desktop) */}
-          <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-3">
-            {/* Rueda - Más grande y prioritaria */}
-            <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-              <NatalChartWheelPro 
+          {/* TABS PARA VISTAS DE LA CARTA */}
+          <ChartViewTabs 
+            activeTab={activeChartTab}
+            onTabChange={setActiveChartTab}
+            aspectsCount={result.aspects?.length || 0}
+          />
+
+          {/* CONTENIDO SEGÚN TAB ACTIVO */}
+          {activeChartTab === 'chart' && (
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-3">
+              {/* Rueda - Más grande y prioritaria */}
+              <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+                <NatalChartWheelPro 
                 data={adaptChartData({
                   id: crypto.randomUUID(),
                   data: {
@@ -406,7 +426,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                 })}
                 size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
                 showPlanetDegrees={true}
-                showDataTable={true}
+                showDataTable={false}
                 displayOptions={displayOptions}
               />
             </div>
@@ -500,8 +520,33 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   return polarity;
                 })()}
               />
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* TAB: ASPECTOS */}
+          {activeChartTab === 'aspects' && (
+            <AspectsTableGrid aspects={result.aspects || []} />
+          )}
+
+          {/* TAB: POSICIONES */}
+          {activeChartTab === 'positions' && (
+            <PositionsTable 
+              planets={result.planets.map(p => ({
+                ...p,
+                ecliptic: p.degree + getSignOffset(p.sign),
+                latitude: 0,
+                speed: 0
+              }))}
+              ascendant={result.ascendant}
+              midheaven={result.midheaven}
+            />
+          )}
+
+          {/* TAB: DOMINANCIAS */}
+          {activeChartTab === 'dominances' && (
+            <DominancesTable planets={result.planets} />
+          )}
 
           {/* Trio Principal: SOL, LUNA, ASCENDENTE */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2 md:gap-4 lg:gap-6">
