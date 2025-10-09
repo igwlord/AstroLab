@@ -87,7 +87,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     
     const offset = timezoneOffsets[location.tzId || 'UTC'] || 0;
     const birthDateUTC = new Date(
-      Date.UTC(birth.year, birth.month - 1, birth.day, hour - offset, minute, 0)
+      Date.UTC(birth.year, birth.month, birth.day, hour - offset, minute, 0)
     );
 
     // Determinar el nombre de la ubicación
