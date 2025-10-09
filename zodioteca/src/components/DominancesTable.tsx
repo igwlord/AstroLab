@@ -1,4 +1,5 @@
 import React from 'react';
+import SignatureFlipCard from './SignatureFlipCard';
 
 interface Planet {
   name: string;
@@ -282,91 +283,14 @@ const DominancesTable: React.FC<DominancesTableProps> = ({ planets }) => {
         </div>
       </div>
 
-      {/* Firma Astrológica - REDISEÑADA */}
-      <div className="pt-4 border-t-2 border-purple-300 dark:border-purple-600">
-        <div className="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-yellow-900/30 dark:via-amber-900/30 dark:to-orange-900/30 rounded-xl sm:rounded-2xl p-3 sm:p-6 border-2 sm:border-4 border-amber-300 dark:border-amber-600 shadow-xl">
-          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <span className="text-2xl sm:text-4xl">✨</span>
-            <h4 className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400">
-              Firma Astrológica
-            </h4>
-            <span className="text-2xl sm:text-4xl">✨</span>
-          </div>
-
-          {/* Signo Resultante */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 mb-3 sm:mb-4 border-2 border-amber-200 dark:border-amber-700 shadow-lg">
-            <div className="text-center">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 font-semibold uppercase tracking-wider">
-                Tu Signo Dominante
-              </p>
-              <div className="flex items-center justify-center gap-2 sm:gap-4">
-                <span className="text-4xl sm:text-6xl">{signSymbols[getSignatureSign(modalities[0].name, elementDominance[0].name)] || '♌'}</span>
-                <div>
-                  <p className="text-2xl sm:text-4xl font-black text-amber-700 dark:text-amber-300">
-                    {getSignatureSign(modalities[0].name, elementDominance[0].name)}
-                  </p>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {modalities[0].name} + {elementDominance[0].name}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Elementos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-            {/* Elemento Dominante */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg sm:rounded-xl p-2 sm:p-4 border-2 border-red-200 dark:border-red-700">
-              <div className="flex items-center gap-1 sm:gap-2 mb-2">
-                <span className="text-lg sm:text-2xl">{elementSymbols[elementDominance[0].name] || '🔥'}</span>
-                <h5 className="text-xs sm:text-sm font-bold text-red-900 dark:text-red-100 uppercase">Elemento</h5>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1">
-                {elementDominance.map((el, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[10px] sm:text-xs">
-                    <span className="flex items-center gap-0.5 sm:gap-1">
-                      <span className="text-xs sm:text-base">{elementSymbols[el.name]}</span>
-                      <span className={idx === 0 ? 'font-bold text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'}>
-                        {el.name}
-                      </span>
-                    </span>
-                    <span className={idx === 0 ? 'font-bold text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-400'}>
-                      {el.points}pts ({el.percentage.toFixed(0)}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Modalidad Dominante */}
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg sm:rounded-xl p-2 sm:p-4 border-2 border-purple-200 dark:border-purple-700">
-              <div className="flex items-center gap-1 sm:gap-2 mb-2">
-                <span className="text-lg sm:text-2xl">⚡</span>
-                <h5 className="text-xs sm:text-sm font-bold text-purple-900 dark:text-purple-100 uppercase">Modalidad</h5>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1">
-                {modalities.map((mod, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[10px] sm:text-xs">
-                    <span className={idx === 0 ? 'font-bold text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400'}>
-                      {mod.name}
-                    </span>
-                    <span className={idx === 0 ? 'font-bold text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400'}>
-                      {mod.count}pl ({mod.percentage.toFixed(0)}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Descripción */}
-          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-amber-100/50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-700">
-            <p className="text-[10px] sm:text-xs text-center text-gray-700 dark:text-gray-300 italic">
-              La firma astrológica combina el <strong>elemento dominante</strong> con la <strong>modalidad dominante</strong> para revelar tu arquetipo esencial
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Firma Astrológica - FLIP CARD */}
+      <SignatureFlipCard
+        signatureSign={getSignatureSign(modalities[0].name, elementDominance[0].name)}
+        modality={modalities[0].name}
+        element={elementDominance[0].name}
+        elementDominance={elementDominance}
+        modalities={modalities}
+      />
 
       {/* Grid de Modalidades y Polaridades */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-purple-200 dark:border-purple-700">

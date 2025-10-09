@@ -1,17 +1,19 @@
 import React from 'react';
 
 interface ChartViewTabsProps {
-  activeTab: 'chart' | 'aspects' | 'positions' | 'dominances';
-  onTabChange: (tab: 'chart' | 'aspects' | 'positions' | 'dominances') => void;
+  activeTab: 'chart' | 'aspects' | 'positions' | 'dominances' | 'polarizations';
+  onTabChange: (tab: 'chart' | 'aspects' | 'positions' | 'dominances' | 'polarizations') => void;
   aspectsCount?: number;
+  polarizationsCount?: number;
 }
 
-const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, aspectsCount = 0 }) => {
+const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, aspectsCount = 0, polarizationsCount = 0 }) => {
   const tabs = [
     { id: 'chart' as const, label: 'Carta Natal', icon: '🎯' },
     { id: 'aspects' as const, label: 'Aspectos', icon: '⚡', count: aspectsCount },
     { id: 'positions' as const, label: 'Posiciones', icon: '📍' },
-    { id: 'dominances' as const, label: 'Dominancias', icon: '👑' }
+    { id: 'dominances' as const, label: 'Dominancias', icon: '👑' },
+    { id: 'polarizations' as const, label: 'Polarizaciones', icon: '⚖️', count: polarizationsCount }
   ];
 
   return (

@@ -6,6 +6,7 @@ import ChartViewTabs from '../components/ChartViewTabs';
 import AspectsTableGrid from '../components/AspectsTableGrid';
 import PositionsTable from '../components/PositionsTable';
 import DominancesTable from '../components/DominancesTable';
+import PolarizationsChartView from '../components/PolarizationsChartView';
 import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
@@ -18,6 +19,7 @@ import type { ChartStatistics } from '../types/chartStatistics';
 import { verifyChart, printVerificationReport, exportChartToText } from '../utils/verifyCalculations';
 import { logger } from '../utils/logger';
 import { saveChartLocal } from '../services/chartStorage';
+import { detectPolarizations } from '../utils/polarizationDetector';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Save, Check } from 'lucide-react';
@@ -39,7 +41,7 @@ export default function NatalChartPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
-  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'positions' | 'dominances'>('chart');
+  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'positions' | 'dominances' | 'polarizations'>('chart');
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (formData: FormValue) => {
@@ -386,6 +388,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             activeTab={activeChartTab}
             onTabChange={setActiveChartTab}
             aspectsCount={result.aspects?.length || 0}
+            polarizationsCount={detectPolarizations(result).length}
           />
 
           {/* CONTENIDO SEGÚN TAB ACTIVO */}
@@ -547,6 +550,11 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {/* TAB: DOMINANCIAS */}
           {activeChartTab === 'dominances' && (
             <DominancesTable planets={result.planets} />
+          )}
+
+          {/* TAB: POLARIZACIONES */}
+          {activeChartTab === 'polarizations' && (
+            <PolarizationsChartView chart={result} />
           )}
 
           {/* Trio Principal: SOL, LUNA, ASCENDENTE */}

@@ -71,20 +71,113 @@ const PolarizationModal: React.FC<PolarizationModalProps> = ({ polarization, isO
           {/* Integración */}
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-500">
             <h3 className="text-lg font-semibold mb-2 text-green-800 dark:text-green-300">
-              ⚖️ Integración
+              ⚖️ Camino de Integración
             </h3>
             <p className="text-gray-700 dark:text-gray-300">
               {polarization.integration}
             </p>
           </div>
 
+          {/* Ejercicios Prácticos */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-700">
+            <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-300 flex items-center gap-2">
+              🧘‍♀️ Ejercicio de Integración Holística
+            </h3>
+            <div className="space-y-3">
+              <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">
+                  🎯 Práctica Diaria (5-10 min)
+                </h4>
+                <ol className="text-sm text-gray-700 dark:text-gray-300 space-y-2 ml-4 list-decimal">
+                  <li>
+                    <strong>Reconocimiento:</strong> Identifica cuándo esta energía se activa en tu día. 
+                    ¿En qué situaciones aparece la sombra?
+                  </li>
+                  <li>
+                    <strong>Pausa consciente:</strong> Antes de reaccionar desde el patrón polarizado, 
+                    respira profundamente 3 veces.
+                  </li>
+                  <li>
+                    <strong>Elección consciente:</strong> Pregúntate: "¿Qué haría la energía opuesta/complementaria aquí?"
+                  </li>
+                </ol>
+              </div>
+              
+              <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">
+                  🌬️ Respiración Balanceadora
+                </h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  • <strong>Inhala</strong> visualizando el color de esta energía polarizada<br/>
+                  • <strong>Retén</strong> el aire 3 segundos sintiendo la integración<br/>
+                  • <strong>Exhala</strong> visualizando luz dorada de equilibrio<br/>
+                  • Repite 7 veces, preferiblemente por la mañana
+                </p>
+              </div>
+
+              <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">
+                  📝 Journaling de Integración
+                </h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Escribe cada noche: <em>"¿Dónde vi esta energía hoy? ¿Cómo la expresé? 
+                  ¿Qué aprendí?"</em> Esto desarrolla consciencia y acelera la integración.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Geometría Sagrada y Trabajo de 21 Días */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-lg border-2 border-indigo-300 dark:border-indigo-700">
+            <h3 className="text-lg font-semibold mb-3 text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
+              💎 Geometría Sagrada para tu Integración
+            </h3>
+            
+            <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-lg mb-3">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-4xl">{polarization.symbol}</span>
+                <div>
+                  <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+                    {polarization.sacredGeometry || polarization.name}
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {polarization.geometryPurpose || 'Integración holística'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-500">
+                <h5 className="font-semibold text-sm text-yellow-900 dark:text-yellow-200 mb-2">
+                  📅 Práctica de 21 Días
+                </h5>
+                <ol className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 space-y-2 ml-4 list-decimal">
+                  <li>
+                    <strong>Busca la forma</strong> de esta geometría sagrada (puedes buscar en internet 
+                    "{polarization.sacredGeometry || polarization.name} geometría sagrada")
+                  </li>
+                  <li>
+                    <strong>Imprímela</strong> en papel o tenla como imagen en tu dispositivo
+                  </li>
+                  <li>
+                    <strong>Durante 21 días:</strong> Medita 5-10 minutos diarios contemplando la geometría. 
+                    Visualízala rodeando tu cuerpo mientras respiras profundamente.
+                  </li>
+                  <li>
+                    <strong>Combínala con la frecuencia:</strong> {polarization.frequency} Hz 
+                    (disponible en la sección "Frecuencias" de la app)
+                  </li>
+                  <li>
+                    <strong>Observa los cambios:</strong> Registra en un diario cómo te sientes y qué situaciones 
+                    cambian en tu vida relacionadas con esta polarización.
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
           {/* Propiedades Holísticas */}
           <div className="modal-grid">
             <div className="space-y-3">
-              <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300">🎨 Color:</span>
-                <p className="text-gray-600 dark:text-gray-400">{polarization.color}</p>
-              </div>
               <div>
                 <span className="font-semibold text-gray-700 dark:text-gray-300">🧘 Chakra:</span>
                 <p className="text-gray-600 dark:text-gray-400">{polarization.chakra}</p>

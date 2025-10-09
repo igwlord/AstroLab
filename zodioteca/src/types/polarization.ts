@@ -9,6 +9,8 @@ export interface Polarization {
   chakra: string;
   frequency: number | string;
   category: 'type' | 'example';
+  sacredGeometry?: string;
+  geometryPurpose?: string;
 }
 
 export const POLARIZATIONS: Polarization[] = [
