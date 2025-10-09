@@ -164,6 +164,11 @@ body {
   backface-visibility: hidden;
 }
 
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
 /* ============================================
    DARK THEME - Dramatic Purples, Blues & Gold
    ============================================ */

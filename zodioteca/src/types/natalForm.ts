@@ -3,8 +3,17 @@
  * Basado en especificaciones de astro.com
  */
 
+export type DisplayOptions = {
+  fortuna: boolean;
+  vertex: boolean;
+  chiron: boolean;
+  lilithTrue: boolean; // True Lilith
+  nodesTrue: boolean; // True Nodes
+};
+
 export type ExtraOptions = {
   houseSystem: 'Placidus' | 'WholeSign' | 'Koch' | 'Equal';
+  display: DisplayOptions; // Nuevo: opciones de visualización en la rueda
   asteroids: {
     ceres: boolean;
     pallas: boolean;
@@ -66,6 +75,13 @@ export type NatalChartFormProps = {
 
 export const DEFAULT_SETTINGS: ExtraOptions = {
   houseSystem: 'Placidus',
+  display: {
+    fortuna: true,
+    vertex: true,
+    chiron: true,
+    lilithTrue: true,
+    nodesTrue: true,
+  },
   asteroids: {
     ceres: false,
     pallas: false,

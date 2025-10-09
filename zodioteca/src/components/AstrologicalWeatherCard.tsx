@@ -15,7 +15,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
-import { Share2, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Share2, BookOpen } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 /**
@@ -43,7 +43,6 @@ function getSignElement(sign: string | undefined): { element: string; emoji: str
 export default function AstrologicalWeatherCard() {
   const [weather, setWeather] = useState<DailyWeather | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ===========================
@@ -92,29 +91,30 @@ ${weather.summary}
 ✨ Descubre más en AstroLab
 🔗 astrolab-web.netlify.app`;
 
-    // Intentar Web Share API (móvil)
+    // 1️⃣ SIEMPRE copiar primero al portapapeles (todos los navegadores)
+    try {
+      await navigator.clipboard.writeText(shareText);
+      logger.log('✅ Mensaje completo copiado al portapapeles');
+    } catch (err) {
+      logger.error('Error copiando al portapapeles:', err);
+    }
+
+    // 2️⃣ Si está disponible Web Share API (Chrome/móviles)
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Clima Astrológico del Día',
-          text: shareText,
-          url: 'https://astrolab-web.netlify.app/'
+          text: shareText // Mensaje completo (el link ya está incluido al final)
         });
-        logger.log('✅ Compartido exitosamente');
+        logger.log('✅ Compartido exitosamente vía Web Share API');
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           logger.error('Error compartiendo:', err);
         }
       }
     } else {
-      // Fallback: Copiar al clipboard
-      try {
-        await navigator.clipboard.writeText(shareText);
-        alert('✅ Copiado al portapapeles');
-      } catch (err) {
-        logger.error('Error copiando:', err);
-        alert('❌ No se pudo copiar al portapapeles');
-      }
+      // Fallback: Solo mostrar confirmación (ya se copió arriba)
+      alert('✅ Copiado al portapapeles');
     }
   };
 
@@ -317,175 +317,6 @@ ${weather.summary}
             {weather.summary}
           </p>
         </div>
-      </div>
-
-      {/* ACORDEÓN - Detalles expandibles con más estilo */}
-      <div className="relative z-10 mt-4 border-t border-white/30 pt-4">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between text-sm sm:text-base font-bold text-white hover:text-white/90 transition-all duration-300 group hover:scale-105 active:scale-95"
-        >
-          <span className="flex items-center gap-2">
-            <span className="text-base sm:text-lg drop-shadow-lg">📊</span>
-            <span className="tracking-wide text-sm sm:text-base">{isExpanded ? 'Ocultar' : 'Ver'} detalles</span>
-          </span>
-          {isExpanded ? (
-            <ChevronUp className="w-4 h-4 group-hover:translate-y-[-3px] transition-transform drop-shadow-lg" />
-          ) : (
-            <ChevronDown className="w-4 h-4 group-hover:translate-y-[3px] transition-transform drop-shadow-lg" />
-          )}
-        </button>
-
-        {isExpanded && (
-          <div className="mt-3 space-y-2 animate-slideDown">
-            {/* PLANETAS PERSONALES */}
-            <div className="bg-white/20 dark:bg-white/10 rounded-xl p-3 backdrop-blur-md border border-white/20 space-y-2">
-              <div className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2">
-                🌠 Planetas Personales
-              </div>
-              
-              {/* Mercurio */}
-              <div className="flex items-start gap-2">
-                <span className="text-lg">☿️</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs sm:text-sm font-bold text-white">
-                      Mercurio en {weather.mercury?.sign}
-                    </span>
-                    {weather.mercury?.retrograde && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-orange-500/30 text-orange-200 rounded font-bold">℞ Retrógrado</span>
-                    )}
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-white/80 mt-0.5">
-                    {weather.mercury?.retrograde 
-                      ? 'Comunicación y tecnología requieren revisión y paciencia' 
-                      : 'Pensamientos, comunicación y aprendizaje fluyen en modo ' + weather.mercury?.sign}
-                  </p>
-                </div>
-              </div>
-
-              {/* Venus */}
-              <div className="flex items-start gap-2">
-                <span className="text-lg">♀️</span>
-                <div className="flex-1">
-                  <span className="text-xs sm:text-sm font-bold text-white">Venus en {weather.venus?.sign}</span>
-                  <p className="text-[10px] sm:text-xs text-white/80 mt-0.5">
-                    Amor, placer y valores expresados con el toque de {weather.venus?.sign}
-                  </p>
-                </div>
-              </div>
-
-              {/* Marte */}
-              <div className="flex items-start gap-2">
-                <span className="text-lg">♂️</span>
-                <div className="flex-1">
-                  <span className="text-xs sm:text-sm font-bold text-white">Marte en {weather.mars?.sign}</span>
-                  <p className="text-[10px] sm:text-xs text-white/80 mt-0.5">
-                    Acción, deseo y energía con el impulso de {weather.mars?.sign}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* CONSEJO */}
-            <div className="bg-yellow-400/20 dark:bg-yellow-500/15 rounded-xl p-2 backdrop-blur-sm border border-yellow-400/30">
-              <div className="flex items-start gap-2">
-                <span className="text-sm">✨</span>
-                <div>
-                  <div className="text-[10px] font-bold text-yellow-100 mb-0.5">CONSEJO</div>
-                  <p className="text-[11px] sm:text-xs text-white/90 leading-snug">
-                    {weather.advice}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* ASPECTOS PRINCIPALES - Estilo noticiero */}
-            {weather.mainAspects.length > 0 && (
-              <div className="bg-white/15 dark:bg-white/8 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-                <div className="text-[10px] sm:text-xs font-bold text-white/80 uppercase tracking-wider mb-2.5">
-                  🔗 Aspectos del Día
-                </div>
-                <div className="space-y-2.5">
-                  {weather.mainAspects.map((aspect, index) => {
-                    const aspectDescriptions: Record<string, string> = {
-                      'conjunción': 'fusionan energías',
-                      'oposición': 'crean tensión creativa',
-                      'trígono': 'fluyen con armonía',
-                      'cuadratura': 'generan desafíos constructivos',
-                      'sextil': 'abren oportunidades'
-                    };
-                    
-                    return (
-                      <div key={index} className="bg-white/10 rounded-lg p-2">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xs sm:text-sm font-bold text-white">
-                            {aspect.planet1} {aspect.symbol || '•'} {aspect.planet2}
-                          </span>
-                          <span className="text-[10px] text-white/60">
-                            (orbe {aspect.orb.toFixed(1)}°)
-                          </span>
-                        </div>
-                        <p className="text-[10px] sm:text-xs text-white/80">
-                          {aspectDescriptions[aspect.type.toLowerCase()] || 'interactúan'} hoy
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* TRANSPERSONALES - Contexto generacional */}
-            <div className="bg-white/15 dark:bg-white/8 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-              <div className="text-[10px] sm:text-xs font-bold text-white/80 uppercase tracking-wider mb-2.5">
-                🪐 Contexto Generacional
-              </div>
-              <p className="text-[10px] sm:text-xs text-white/70 mb-3 leading-relaxed">
-                Planetas lentos que marcan tendencias de largo plazo
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-white/80">♃ Júpiter en {weather.jupiter?.sign}</span>
-                  <span className="text-white/60">expansión</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-white/80">♄ Saturno en {weather.saturn?.sign}</span>
-                  <span className="text-white/60">estructura</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-white/80">♅ Urano en {weather.uranus?.sign}</span>
-                  <span className="text-white/60">revolución</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-white/80">♆ Neptuno en {weather.neptune?.sign}</span>
-                  <span className="text-white/60">sueños colectivos</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-white/80">♇ Plutón en {weather.pluto?.sign}</span>
-                  <span className="text-white/60">transformación</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ELEMENTO DOMINANTE - Badge compacto */}
-            <div className="bg-gradient-to-r from-white/20 to-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] sm:text-xs font-bold text-white/80 mb-0.5">
-                    {weather.dominantElement.emoji} ELEMENTO
-                  </div>
-                  <div className="text-sm sm:text-base font-bold text-white capitalize">
-                    {weather.dominantElement.element}
-                  </div>
-                </div>
-                <div className="text-xl sm:text-2xl font-bold text-white">
-                  {weather.dominantElement.percentage}%
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* BOTONES DE ACCIÓN - Móvil abajo, Desktop arriba */}

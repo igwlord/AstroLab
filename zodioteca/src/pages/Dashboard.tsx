@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import AstrologicalWeatherCard from '../components/AstrologicalWeatherCard';
 import DailyChartWheel from '../components/DailyChartWheel';
+import WeatherDetailsModal from '../components/WeatherDetailsModal';
 import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
 import type { PlanetData } from '../components/DailyChartWheel';
+import { Info } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const [chartSize, setChartSize] = useState(500);
   const [planets, setPlanets] = useState<PlanetData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [weather, setWeather] = useState<DailyWeather | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const updateSize = () => {
@@ -33,7 +37,8 @@ const Dashboard: React.FC = () => {
     const loadAstrologicalData = async () => {
       try {
         setIsLoading(true);
-        const weather: DailyWeather = await getDailyAstrologicalWeather();
+        const weatherData: DailyWeather = await getDailyAstrologicalWeather();
+        setWeather(weatherData);
         
         // Mapear planetas del weather a formato del Chart Wheel
         const planetsData: PlanetData[] = [];
@@ -82,7 +87,7 @@ const Dashboard: React.FC = () => {
         const planetKeys = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'] as const;
         
         for (const key of planetKeys) {
-          const planetPos = weather[key];
+          const planetPos = weatherData[key];
           if (planetPos) {
             planetsData.push({
               name: planetNames[key],
@@ -132,8 +137,42 @@ const Dashboard: React.FC = () => {
               />
             )}
           </div>
+
+          {/* Botón para abrir modal de detalles - Con efectos llamativos */}
+          {weather && (
+            <div className="relative mt-8 flex justify-center">
+              {/* Efecto de resplandor animado */}
+              <div className="absolute inset-0 flex justify-center items-center">
+                <div className="w-64 h-12 bg-purple-500/30 rounded-full blur-xl animate-pulse"></div>
+              </div>
+              
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="relative group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 rounded-2xl text-base sm:text-lg font-bold text-white transition-all duration-500 shadow-2xl shadow-purple-500/50 hover:shadow-purple-400/70 hover:scale-110 active:scale-95 border-2 border-purple-400/50 hover:border-purple-300 animate-pulse"
+                style={{ animationDuration: '2s' }}
+              >
+                {/* Brillo interior animado */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500 animate-shimmer"></div>
+                
+                <Info className="w-6 h-6 drop-shadow-lg group-hover:rotate-12 transition-transform duration-300" />
+                <span className="drop-shadow-lg tracking-wide">Ver Detalles del Cielo</span>
+                
+                {/* Iconos de estrellas decorativas */}
+                <span className="text-yellow-300 animate-pulse group-hover:scale-125 transition-transform">✨</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Modal de Detalles */}
+      {weather && (
+        <WeatherDetailsModal 
+          weather={weather}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

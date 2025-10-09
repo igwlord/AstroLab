@@ -7,11 +7,14 @@ import { normalize, deltaPos, absToRad, polar, degMin } from '../utils/chartGeom
  * Replica pixel-perfect la geometría de Astro-Seek
  */
 
+import type { DisplayOptions } from '../types/natalForm';
+
 interface NatalChartWheelProProps {
   data: ChartData;
   size?: number;
   showPlanetDegrees?: boolean; // Mostrar deg° min′ junto a planetas
   showDataTable?: boolean; // Tabla inferior con datos detallados
+  displayOptions?: DisplayOptions; // Opciones de qué mostrar en la rueda
 }
 
 const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
@@ -19,6 +22,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   size = 640,
   showPlanetDegrees = true,
   showDataTable = true,
+  displayOptions,
 }) => {
   const cx = size / 2;
   const cy = size / 2;
@@ -430,7 +434,34 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     }
 
     const planetsWithLayers: PlanetWithLayer[] = [];
-    const sortedPlanets = [...data.planets].sort((a, b) => a.longitude - b.longitude);
+    
+    // Filtrar planetas basados en displayOptions
+    let filteredPlanets = [...data.planets];
+    if (displayOptions) {
+      filteredPlanets = filteredPlanets.filter(planet => {
+        const name = planet.name.toLowerCase();
+        
+        // Fortuna
+        if (name.includes('fortuna') && !displayOptions.fortuna) return false;
+        
+        // Vertex
+        if (name.includes('vertex') && !displayOptions.vertex) return false;
+        
+        // Chiron
+        if (name.includes('chiron') && !displayOptions.chiron) return false;
+        
+        // Lilith True
+        if (name.includes('lilith') && name.includes('true') && !displayOptions.lilithTrue) return false;
+        
+        // Nodes True
+        if ((name.includes('nodo') || name.includes('node')) && 
+            name.includes('true') && !displayOptions.nodesTrue) return false;
+        
+        return true;
+      });
+    }
+    
+    const sortedPlanets = filteredPlanets.sort((a, b) => a.longitude - b.longitude);
 
     sortedPlanets.forEach((planet, index) => {
       // Calcular distancia angular con vecinos

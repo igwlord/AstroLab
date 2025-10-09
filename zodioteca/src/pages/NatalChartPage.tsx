@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import NatalChartForm from '../components/NatalChartForm';
+import NatalChartFormSimple from '../components/NatalChartFormSimple';
 import NatalChartWheelPro from '../components/NatalChartWheelPro';
 import ChartDataTable from '../components/ChartDataTable';
 import { adaptChartData } from '../utils/chartAdapter';
@@ -7,6 +7,7 @@ import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
 import StatCard from '../components/StatCard';
 import type { FormValue } from '../types/natalForm';
+import { DEFAULT_SETTINGS } from '../types/natalForm';
 import { calculateNatalChart, type NatalChart } from '../services/realAstroCalculator';
 import { calculateChartStatistics } from '../utils/chartStatistics';
 import type { ChartStatistics } from '../types/chartStatistics';
@@ -21,6 +22,7 @@ export default function NatalChartPage() {
   const [result, setResult] = useState<NatalChart | null>(null);
   const [statistics, setStatistics] = useState<ChartStatistics | null>(null);
   const [personName, setPersonName] = useState<string>('');
+  const [displayOptions, setDisplayOptions] = useState(DEFAULT_SETTINGS.display);
   const [showForm, setShowForm] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -33,6 +35,9 @@ export default function NatalChartPage() {
     // Guardar nombre completo de la persona
     const fullName = [formData.name, formData.surname].filter(Boolean).join(' ').trim();
     setPersonName(fullName || 'Persona sin nombre');
+    
+    // Guardar opciones de display para la rueda
+    setDisplayOptions(formData.settings.display);
 
     // Adaptar datos del nuevo formulario al formato esperado por calculateNatalChart
     const { birth, location } = formData;
@@ -256,7 +261,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
   return (
     <div className="py-2 sm:py-4 md:py-8 print:py-0">
       {showForm ? (
-        <NatalChartForm 
+        <NatalChartFormSimple 
           onSubmit={handleSubmit}
         />
       ) : result && (
@@ -402,6 +407,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                 size={typeof window !== 'undefined' && window.innerWidth < 640 ? 400 : 700}
                 showPlanetDegrees={true}
                 showDataTable={true}
+                displayOptions={displayOptions}
               />
             </div>
 
