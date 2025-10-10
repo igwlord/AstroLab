@@ -639,18 +639,59 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-3">
               {/* Rueda - Más grande y prioritaria */}
               <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 relative">
-                {/* Botón de Configuración - Arriba a la derecha */}
-                <button
-                  onClick={() => setShowConfigModal(true)}
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-10 px-2 py-1.5 sm:px-3 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5 text-xs sm:text-sm shadow-lg"
-                  title="Configuración de la Carta"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="hidden sm:inline">Config</span>
-                </button>
+                {/* Grupo de 4 botones DESKTOP - Config + Zoom (arriba derecha en 1 línea) */}
+                <div className="hidden md:flex absolute top-2 right-2 z-10 gap-1 bg-white/90 dark:bg-gray-800/90 rounded-lg p-1 shadow-lg backdrop-blur-sm print:hidden">
+                  {/* Botón Config */}
+                  <button
+                    onClick={() => setShowConfigModal(true)}
+                    className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:scale-95 text-white transition-all"
+                    title="Configuración"
+                    aria-label="Configuración de la carta"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                  {/* Separador visual */}
+                  <div className="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+                  {/* Botón Zoom In */}
+                  <button
+                    className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors pointer-events-none opacity-50"
+                    title="Zoom disponible en la rueda"
+                  >
+                    +
+                  </button>
+                  {/* Botón Zoom Out */}
+                  <button
+                    className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors pointer-events-none opacity-50"
+                    title="Zoom disponible en la rueda"
+                  >
+                    −
+                  </button>
+                  {/* Botón Reset */}
+                  <button
+                    className="w-8 h-8 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 text-white text-sm font-bold transition-colors pointer-events-none opacity-50"
+                    title="Zoom disponible en la rueda"
+                  >
+                    ⟲
+                  </button>
+                </div>
+                
+                {/* Grupo de botones MÓVIL - Lupa + Configuración (arriba izquierda) */}
+                <div className="md:hidden absolute top-1 left-1 z-10 flex gap-0.5 print:hidden">
+                  <button
+                    onClick={() => setShowConfigModal(true)}
+                    className="w-6 h-6 flex items-center justify-center rounded bg-purple-600 active:bg-purple-800 text-white shadow-md transition-colors"
+                    title="Configuración"
+                    aria-label="Abrir configuración"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                </div>
                 
                 <NatalChartWheelPro 
                 data={adaptChartData({

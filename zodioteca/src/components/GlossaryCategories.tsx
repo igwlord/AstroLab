@@ -28,6 +28,10 @@ const GlossaryCategoriesComponent: React.FC<GlossaryCategoriesProps> = ({
       categories: categories.filter(c => ['signs', 'houses', 'planets', 'lunar', 'ascendants'].includes(c.id)),
     },
     {
+      title: 'Sistemas',
+      categories: categories.filter(c => ['house-systems', 'coordinates'].includes(c.id)),
+    },
+    {
       title: 'Cuerpos Celestes',
       categories: categories.filter(c => ['asteroids', 'celestial'].includes(c.id)),
     },

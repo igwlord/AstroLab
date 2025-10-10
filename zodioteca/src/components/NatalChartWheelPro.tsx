@@ -1013,19 +1013,6 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   return (
     <>
       <div className="natal-chart-wheel-pro flex flex-col items-center">
-        {/* Instrucciones y botón modal para móviles */}
-        <div className="flex flex-col gap-2 mb-3 print:hidden md:hidden w-full max-w-lg">
-          <div className="flex gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-xs text-purple-900 dark:text-purple-300 font-medium">
-            <span>💡</span>
-            <span>Pellizca para zoom • Arrastra para mover • Toca dos veces para restablecer</span>
-          </div>
-          <button
-            onClick={() => setIsZoomModalOpen(true)}
-            className="px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
-          >
-            🔍 Abrir en pantalla completa
-          </button>
-        </div>
 
         {/* Contenedor con leyenda y rueda */}
         <div className="flex gap-6 justify-center items-start w-full flex-col lg:flex-row">
@@ -1129,28 +1116,40 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <>
-                  {/* Controles de zoom - flotantes arriba a la derecha */}
-                  <div className="absolute top-2 right-2 z-10 flex gap-1 bg-white/90 dark:bg-gray-800/90 rounded-lg p-1 shadow-lg backdrop-blur-sm print:hidden">
+                  {/* Botón de pantalla completa (lupa) - Solo móvil, al lado de config */}
+                  <button
+                    onClick={() => setIsZoomModalOpen(true)}
+                    className="md:hidden absolute top-1 left-7 z-10 w-6 h-6 flex items-center justify-center rounded bg-purple-600 active:bg-purple-800 text-white shadow-md print:hidden transition-colors"
+                    title="Pantalla completa"
+                    aria-label="Abrir en pantalla completa"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+
+                  {/* Controles de zoom - más compactos en móvil */}
+                  <div className="absolute top-1 right-1 md:top-2 md:right-2 z-10 flex gap-0.5 md:gap-1 bg-white/90 dark:bg-gray-800/90 rounded md:rounded-lg p-0.5 md:p-1 shadow-md md:shadow-lg backdrop-blur-sm print:hidden">
                     <button
                       onClick={() => zoomIn()}
-                      className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors"
-                      title="Acercar (Zoom In)"
+                      className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded text-xs md:text-base bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold transition-colors"
+                      title="Acercar"
                       aria-label="Acercar zoom"
                     >
                       +
                     </button>
                     <button
                       onClick={() => zoomOut()}
-                      className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors"
-                      title="Alejar (Zoom Out)"
+                      className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded text-xs md:text-base bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold transition-colors"
+                      title="Alejar"
                       aria-label="Alejar zoom"
                     >
                       −
                     </button>
                     <button
                       onClick={() => resetTransform()}
-                      className="w-8 h-8 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold transition-colors"
-                      title="Restablecer vista"
+                      className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded text-[10px] md:text-sm bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-bold transition-colors"
+                      title="Restablecer"
                       aria-label="Restablecer zoom"
                     >
                       ⟲
@@ -1251,11 +1250,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   </svg>
                 </button>
 
-                {/* Controles de zoom en modal */}
-                <div className="absolute top-4 left-4 z-20 flex gap-2 bg-white/20 rounded-lg p-2 backdrop-blur-sm">
+                {/* Controles de zoom en modal - más pequeños en móvil */}
+                <div className="absolute top-2 left-2 md:top-4 md:left-4 z-20 flex gap-1 md:gap-2 bg-white/20 rounded-md md:rounded-lg p-1 md:p-2 backdrop-blur-sm">
                   <button
                     onClick={() => zoomIn()}
-                    className="w-10 h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-colors"
+                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-base md:text-lg transition-colors"
                     title="Acercar"
                     aria-label="Acercar zoom"
                   >
@@ -1263,7 +1262,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   </button>
                   <button
                     onClick={() => zoomOut()}
-                    className="w-10 h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-colors"
+                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-base md:text-lg transition-colors"
                     title="Alejar"
                     aria-label="Alejar zoom"
                   >
@@ -1271,7 +1270,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   </button>
                   <button
                     onClick={() => resetTransform()}
-                    className="w-10 h-10 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 text-white font-bold transition-colors"
+                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-bold text-sm md:text-base transition-colors"
                     title="Restablecer"
                     aria-label="Restablecer zoom"
                   >
