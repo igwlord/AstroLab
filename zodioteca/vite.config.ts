@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // Ensure the registration script is injected and updates are applied automatically
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
@@ -65,6 +67,10 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // Make the new service worker take control immediately
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         // Excluir mp3 del precache - son muy grandes (10-16 MB cada uno)
         globPatterns: ['**/*.{js,css,html,svg,png,json,woff,woff2}'],
         globIgnores: ['**/media/**'],

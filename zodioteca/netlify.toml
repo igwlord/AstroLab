@@ -39,6 +39,25 @@
     Cross-Origin-Opener-Policy = "same-origin"
     X-Content-Type-Options = "nosniff"
 
+# Evitar cache agresivo del HTML y del Service Worker
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
 # Redirects para SPA (React Router)
 [[redirects]]
   from = "/*"

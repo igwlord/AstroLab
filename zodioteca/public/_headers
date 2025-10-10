@@ -32,3 +32,16 @@
   Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Opener-Policy: same-origin
   X-Content-Type-Options: nosniff
+
+# No-cache for HTML and Service Worker to prevent stale clients
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/registerSW.js
+  Cache-Control: no-cache, no-store, must-revalidate
