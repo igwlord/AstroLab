@@ -214,6 +214,15 @@ const PositionsTable: React.FC<PositionsTableProps> = ({ planets, ascendant, mid
           <div className="mt-4 p-3 bg-indigo-100/50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
             <p className="text-xs text-center text-gray-700 dark:text-gray-300">
               💡 <strong>Nota:</strong> Cada sistema ofrece una perspectiva única para ubicar los cuerpos celestes. La astrología tradicional usa principalmente el sistema <strong>Eclíptica</strong>.
+              {' '}
+              <a 
+                href="/glossary?categoria=coordinates" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 underline font-semibold transition-colors"
+              >
+                Leer más →
+              </a>
             </p>
           </div>
         </div>

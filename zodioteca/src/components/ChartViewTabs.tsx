@@ -11,7 +11,7 @@ const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, a
   const tabs = [
     { id: 'chart' as const, label: 'Carta Natal', icon: '🎯' },
     { id: 'aspects' as const, label: 'Aspectos', icon: '⚡', count: aspectsCount },
-    { id: 'positions' as const, label: 'Posiciones', icon: '📍' },
+    { id: 'positions' as const, label: 'Posiciones', icon: '�' },
     { id: 'dominances' as const, label: 'Dominancias', icon: '👑' },
     { id: 'polarizations' as const, label: 'Polarizaciones', icon: '⚖️', count: polarizationsCount }
   ];

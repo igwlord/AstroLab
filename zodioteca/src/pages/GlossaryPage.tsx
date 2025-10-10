@@ -19,6 +19,7 @@ import { RELATIONAL_TECHNIQUES } from '../types/relational';
 import { DIGNITIES } from '../types/dignity';
 import { POLARIZATIONS } from '../types/polarization';
 import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
+import { COORDINATE_SYSTEMS } from '../types/coordinateSystem';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
 import GlossarySearch, { type SearchResult } from '../components/GlossarySearch';
 import GlossaryCategories from '../components/GlossaryCategories';
@@ -39,6 +40,7 @@ const ConfigurationsGrid = lazy(() => import('../components/ConfigurationsGrid')
 const RelationalGrid = lazy(() => import('../components/RelationalGrid'));
 const DignitiesGrid = lazy(() => import('../components/DignitiesGrid'));
 const PolarizationsGrid = lazy(() => import('../components/PolarizationsGrid'));
+const CoordinateSystemsGrid = lazy(() => import('../components/CoordinateSystemsGrid'));
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
@@ -272,6 +274,20 @@ const GlossaryPage: React.FC = () => {
         categoryName: catInfo.name,
         categoryIcon: catInfo.icon,
         snippet: polar.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar sistemas de coordenadas
+    COORDINATE_SYSTEMS.forEach(system => {
+      const catInfo = getCategoryInfo('coordinates');
+      content.push({
+        id: `coordinate-${system.id}`,
+        title: system.name,
+        category: 'coordinates',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: system.base.substring(0, 100) + '...',
         matchType: 'title'
       });
     });
@@ -544,8 +560,8 @@ const GlossaryPage: React.FC = () => {
         entryCounts={entryCounts}
       />
 
-      {/* Results header and actions (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades o polarizaciones) */}
-      {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && (
+      {/* Results header and actions (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades, polarizaciones, sistemas de casas o coordenadas) */}
+      {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && selectedCategory !== 'house-systems' && selectedCategory !== 'coordinates' && (
         <div className="flex items-center justify-between mb-4 bg-purple-50 px-4 py-3 rounded-lg">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold text-purple-900">
@@ -671,6 +687,11 @@ const GlossaryPage: React.FC = () => {
           /* Mostrar grid de polarizaciones planetarias */
           <div>
             <PolarizationsGrid />
+          </div>
+        ) : selectedCategory === 'coordinates' ? (
+          /* Mostrar grid de sistemas de coordenadas celestes */
+          <div>
+            <CoordinateSystemsGrid />
           </div>
         ) : filteredEntries.length === 0 ? (
         <div className="text-center py-16">

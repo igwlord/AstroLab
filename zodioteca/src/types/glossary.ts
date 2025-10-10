@@ -137,6 +137,13 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     icon: '🌌',
     description: 'Quirón, centauros, transneptunianos',
     color: 'violet'
+  },
+  {
+    id: 'coordinates',
+    name: 'Sistemas de Coordenadas',
+    icon: '🔭',
+    description: 'Sistemas de referencia celeste y coordenadas astronómicas',
+    color: 'cyan'
   }
 ];
 
