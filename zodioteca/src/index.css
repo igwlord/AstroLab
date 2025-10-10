@@ -757,18 +757,68 @@ html.dark .bg-cyan-500 {
   will-change: box-shadow;
 }
 
-/* Animación de ondas para mini player */
+/* Animación de ondas para mini player - MEJORADA con cubic-bezier */
 @keyframes wave {
   0%, 100% {
-    transform: scaleY(0.5);
+    transform: scaleY(0.3);
+    opacity: 0.6;
   }
   50% {
-    transform: scaleY(1);
+    transform: scaleY(1.2);
+    opacity: 1;
   }
 }
 
 .animate-wave {
-  animation: wave 1s ease-in-out infinite;
+  animation: wave 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: bottom;
+}
+
+/* Animación de ondas SVG para visualización avanzada */
+@keyframes wave-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-wave-ripple {
+  animation: wave-ripple 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: center;
+}
+
+/* Animación de rotación continua para anillos de frecuencias */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animación de respiración suave para halos */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Estilos para impresión de la rueda natal */
@@ -906,4 +956,59 @@ html.dark .bg-cyan-500 {
   .print-content > div {
     margin-bottom: 1em !important;
   }
+}
+
+/* ==================== CUSTOM RANGE INPUT STYLES ==================== */
+/* Estilos para barra de volumen con fases lunares */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"]::-ms-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-ms-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }

@@ -22,6 +22,9 @@ interface NatalChartWheelProProps {
   aspectsLevel?: 'basic' | 'standard' | 'complete'; // Nivel de aspectos a mostrar
 }
 
+// Símbolos - Estilo moderno bold (más parecidos a la imagen)
+export const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+
 const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   data,
   size = 1100,
@@ -60,8 +63,6 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const PLANET_SIZE = Math.max(12, Math.min(0.026 * size, 22));
   const PLANET_LABEL_SIZE = Math.max(7, Math.min(0.018 * size, 12));
 
-  // Símbolos - Estilo moderno bold (más parecidos a la imagen)
-  const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
   const PLANET_SYMBOLS: Record<string, string> = {
     Sol: '☉',
     Luna: '☽',

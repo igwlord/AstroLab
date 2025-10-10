@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+import { useAudioPlayer } from '../context/useAudioPlayer';
 
 interface FloatingMiniPlayerProps {
   isMobile?: boolean;
 }
 
+// Función para obtener emoji de fase lunar según volumen
+const getMoonPhase = (volume: number): string => {
+  if (volume === 0) return '🌑'; // Luna nueva
+  if (volume <= 0.25) return '🌒'; // Creciente
+  if (volume <= 0.5) return '🌓'; // Cuarto creciente
+  if (volume <= 0.75) return '🌔'; // Gibosa creciente
+  return '🌕'; // Luna llena
+};
+
 const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = false }) => {
-  const { currentFrequency, isPlaying, toggle, next, previous } = useAudioPlayer();
+  const { currentFrequency, isPlaying, toggle, next, previous, volume, setVolume } = useAudioPlayer();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // No mostrar si no hay frecuencia seleccionada
@@ -50,14 +59,43 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
                 </p>
               </div>
 
-              {/* Indicador visual compacto */}
+              {/* Indicador visual compacto - 3 capas de ondas */}
               {isPlaying && (
-                <div className="flex items-center gap-0.5">
-                  <div className="w-0.5 h-2 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0s' }}></div>
-                  <div className="w-0.5 h-3 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-0.5 h-2 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.2s' }}></div>
+                <div className="relative w-8 h-4 flex items-center justify-center">
+                  {/* Capa 1: Rápida */}
+                  <div className="absolute flex items-center gap-0.5">
+                    <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0s', animationDuration: '1s' }}></div>
+                    <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.15s', animationDuration: '1s' }}></div>
+                    <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.3s', animationDuration: '1s' }}></div>
+                  </div>
+                  {/* Capa 2: Color del signo */}
+                  <div className="absolute flex items-center justify-center">
+                    <div className="w-0.5 h-3 rounded-full animate-wave" style={{ animationDelay: '0.2s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
+                  </div>
                 </div>
               )}
+            </div>
+
+            {/* Barra de volumen con fases lunares - MÓVIL */}
+            <div className="mb-2 px-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lg flex-shrink-0 transition-transform duration-300" style={{ transform: `scale(${0.8 + volume * 0.4})` }}>
+                  {getMoonPhase(volume)}
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume * 100}
+                  onChange={(e) => setVolume(Number(e.target.value) / 100)}
+                  className="flex-1 h-1.5 rounded-full appearance-none bg-white/20 outline-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, ${currentFrequency.color.hex} 0%, ${currentFrequency.color.hex} ${volume * 100}%, rgba(255,255,255,0.2) ${volume * 100}%, rgba(255,255,255,0.2) 100%)`,
+                  }}
+                  aria-label="Volumen"
+                />
+                <span className="text-purple-200 text-[10px] font-medium w-8 text-right">{Math.round(volume * 100)}%</span>
+              </div>
             </div>
 
             {/* Controles compactos */}
@@ -115,7 +153,7 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
         <div 
           className="relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-purple-500/30 overflow-hidden"
           style={{
-            width: isExpanded ? '280px' : '240px',
+            width: isExpanded ? '320px' : '280px',
             transition: 'all 0.3s ease',
           }}
         >
@@ -136,40 +174,38 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
           )}
 
           <div className="relative z-10 p-3">
-            {/* Header con símbolo del signo */}
-            <div className="flex items-center gap-2 mb-2.5">
+            {/* Botón expandir/colapsar - posición absoluta arriba derecha */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="absolute top-2 right-2 text-purple-300 hover:text-white transition-colors p-0.5 z-20"
+              aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                {isExpanded ? (
+                  <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                ) : (
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                )}
+              </svg>
+            </button>
+
+            {/* Header centrado con símbolo y nombre */}
+            <div className="flex flex-col items-center text-center mb-2.5 pt-1">
               <div 
-                className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center shadow-lg"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-2xl mb-2 ring-2 ring-white/20"
                 style={{
                   background: `linear-gradient(135deg, ${currentFrequency.color.hex}ee, ${currentFrequency.color.hex}99)`,
                 }}
               >
-                <span className="text-lg drop-shadow-lg">{currentFrequency.symbol}</span>
+                <span className="text-2xl drop-shadow-2xl filter brightness-110">{currentFrequency.symbol}</span>
               </div>
               
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-xs truncate">
-                  {currentFrequency.name}
-                </h3>
-                <p className="text-purple-200 text-[10px]">
-                  {currentFrequency.frequency} Hz
-                </p>
-              </div>
-
-              {/* Botón expandir/colapsar */}
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-purple-300 hover:text-white transition-colors p-0.5"
-                aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
-              >
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  {isExpanded ? (
-                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                  ) : (
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  )}
-                </svg>
-              </button>
+              <h3 className="text-white font-bold text-sm mb-0.5">
+                {currentFrequency.name}
+              </h3>
+              <p className="text-purple-200 text-xs font-medium">
+                {currentFrequency.frequency} Hz
+              </p>
             </div>
 
             {/* Info adicional expandida */}
@@ -183,6 +219,34 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
                 </p>
               </div>
             )}
+
+            {/* Barra de volumen con fases lunares - DESKTOP */}
+            <div className="mb-2.5 px-1">
+              <div className="flex items-center gap-2">
+                <span 
+                  className="text-xl flex-shrink-0 transition-all duration-300 drop-shadow-lg" 
+                  style={{ 
+                    transform: `scale(${0.8 + volume * 0.4})`,
+                    filter: `drop-shadow(0 0 ${volume * 8}px ${currentFrequency.color.hex})`
+                  }}
+                >
+                  {getMoonPhase(volume)}
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume * 100}
+                  onChange={(e) => setVolume(Number(e.target.value) / 100)}
+                  className="flex-1 h-2 rounded-full appearance-none outline-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, ${currentFrequency.color.hex} 0%, ${currentFrequency.color.hex} ${volume * 100}%, rgba(255,255,255,0.2) ${volume * 100}%, rgba(255,255,255,0.2) 100%)`,
+                  }}
+                  aria-label="Volumen"
+                />
+                <span className="text-purple-200 text-xs font-medium w-10 text-right">{Math.round(volume * 100)}%</span>
+              </div>
+            </div>
 
             {/* Controles */}
             <div className="flex items-center justify-center gap-2.5">
@@ -241,14 +305,28 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
               </button>
             </div>
 
-            {/* Indicador de reproducción */}
+            {/* Visualización de ondas mejorada - 3 capas */}
             {isPlaying && (
-              <div className="mt-2 flex items-center justify-center gap-0.5">
-                <div className="w-0.5 h-2 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0s' }}></div>
-                <div className="w-0.5 h-3 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-0.5 h-4 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-0.5 h-3 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.3s' }}></div>
-                <div className="w-0.5 h-2 bg-purple-300 rounded-full animate-wave" style={{ animationDelay: '0.4s' }}></div>
+              <div className="mt-2 relative h-6 flex items-center justify-center overflow-hidden">
+                {/* Capa 1: Ondas rápidas (alta frecuencia) */}
+                <div className="absolute flex items-center justify-center gap-0.5">
+                  <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.1s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-4 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.2s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.3s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.4s', animationDuration: '1s' }}></div>
+                </div>
+                {/* Capa 2: Ondas medias (media frecuencia) */}
+                <div className="absolute flex items-center justify-center gap-1">
+                  <div className="w-0.5 h-3 rounded-full animate-wave" style={{ animationDelay: '0.2s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
+                  <div className="w-0.5 h-5 rounded-full animate-wave" style={{ animationDelay: '0.4s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
+                  <div className="w-0.5 h-4 rounded-full animate-wave" style={{ animationDelay: '0.6s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
+                </div>
+                {/* Capa 3: Ondas lentas (baja frecuencia) */}
+                <div className="absolute flex items-center justify-center gap-2">
+                  <div className="w-0.5 h-4 bg-white/40 rounded-full animate-wave" style={{ animationDelay: '0.5s', animationDuration: '2s' }}></div>
+                  <div className="w-0.5 h-5 bg-white/40 rounded-full animate-wave" style={{ animationDelay: '1s', animationDuration: '2s' }}></div>
+                </div>
               </div>
             )}
           </div>

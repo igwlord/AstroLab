@@ -1,23 +1,26 @@
-import React, { createContext, useContext, useState, useRef, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useRef, useCallback, useEffect } from 'react';
 import type { ZodiacFrequency } from '../types/zodiacFrequency';
 import { ZODIAC_FREQUENCIES } from '../data/zodiacFrequencies';
 import { logger } from '../utils/logger';
 
-interface AudioPlayerContextType {
+export interface AudioPlayerContextType {
   currentFrequency: ZodiacFrequency | null;
   isPlaying: boolean;
+  volume: number;
   play: (frequency: ZodiacFrequency) => void;
   pause: () => void;
   toggle: () => void;
   next: () => void;
   previous: () => void;
+  setVolume: (volume: number) => void;
 }
 
-const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
+export const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
 
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentFrequency, setCurrentFrequency] = useState<ZodiacFrequency | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolumeState] = useState(0.7); // Volumen inicial 70%
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Inicializar el elemento de audio
@@ -107,14 +110,31 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     play(prevFrequency);
   }, [currentFrequency, play]);
 
+  const setVolume = useCallback((newVolume: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    setVolumeState(clampedVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = clampedVolume;
+    }
+  }, []);
+
+  // Sincronizar volumen con el audio element
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
   const value: AudioPlayerContextType = {
     currentFrequency,
     isPlaying,
+    volume,
     play,
     pause,
     toggle,
     next,
     previous,
+    setVolume,
   };
 
   return (
@@ -122,12 +142,4 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {children}
     </AudioPlayerContext.Provider>
   );
-};
-
-export const useAudioPlayer = () => {
-  const context = useContext(AudioPlayerContext);
-  if (context === undefined) {
-    throw new Error('useAudioPlayer must be used within an AudioPlayerProvider');
-  }
-  return context;
 };

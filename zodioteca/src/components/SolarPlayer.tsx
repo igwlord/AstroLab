@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import type { ZodiacFrequency } from '../types/zodiacFrequency';
-import { useAudioPlayer } from '../context/AudioPlayerContext';
+import { useAudioPlayer } from '../context/useAudioPlayer';
 
 interface SolarPlayerProps {
   selectedFrequency: ZodiacFrequency | null;

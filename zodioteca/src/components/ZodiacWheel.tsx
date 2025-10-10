@@ -2,6 +2,9 @@ import React from 'react';
 import type { ZodiacFrequency } from '../types/zodiacFrequency';
 import SolarPlayer from './SolarPlayer';
 
+// Símbolos zodiacales EXACTOS de NatalChartWheelPro
+const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+
 interface ZodiacWheelProps {
   frequencies: ZodiacFrequency[];
   selectedId: string | null;
@@ -57,6 +60,7 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
               rounded-full flex flex-col items-center justify-center
               transition-all duration-300 cursor-pointer
               focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-offset-2
+              group
               ${isSelected 
                 ? 'scale-110 z-20 shadow-2xl ring-4 ring-white dark:ring-gray-900' 
                 : 'hover:scale-105 hover:z-10 hover:shadow-xl'
@@ -66,38 +70,113 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
               ...position,
               backgroundColor: frequency.color.hex,
               boxShadow: isSelected 
-                ? `0 0 30px ${frequency.color.hex}` 
+                ? `0 0 40px ${frequency.color.hex}, 0 0 80px ${frequency.color.hex}80` 
                 : `0 4px 15px ${frequency.color.hex}40`,
             }}
           >
-            {/* Símbolo del signo */}
-            <span className="text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-lg">
-              {frequency.symbol}
-            </span>
-            
-            {/* Nombre del signo (siempre visible) */}
-            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-bold text-white mt-0.5 drop-shadow">
-              {frequency.name}
-            </span>
+            {/* Anillo exterior con gradiente - NUEVO */}
+            <div 
+              className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'}`}
+              style={{
+                background: `conic-gradient(from 0deg, ${frequency.color.hex}00, ${frequency.color.hex}ff, ${frequency.color.hex}00)`,
+                animation: isSelected ? 'spin 4s linear infinite' : 'none',
+              }}
+            ></div>
 
-            {/* Halo animado que respira cuando está seleccionado - detrás del círculo */}
+            {/* Círculo interno con brillo - NUEVO */}
+            <div 
+              className={`absolute inset-[4px] rounded-full flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-black/20' : 'bg-black/10'}`}
+              style={{
+                backdropFilter: 'blur(2px)',
+              }}
+            >
+              {/* Símbolo SVG con MISMO estilo que NatalChartWheelPro */}
+              <div className="flex flex-col items-center justify-center">
+                <svg 
+                  viewBox="0 0 100 100" 
+                  className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 transition-all duration-300 ${isSelected ? 'scale-110' : ''}`}
+                  style={{
+                    filter: isSelected 
+                      ? `drop-shadow(0 0 8px ${frequency.color.hex}) drop-shadow(0 0 16px white) drop-shadow(0 4px 8px rgba(0,0,0,0.5))` 
+                      : `drop-shadow(0 0 4px ${frequency.color.hex}) drop-shadow(0 2px 4px rgba(0,0,0,0.3))`,
+                  }}
+                >
+                  <text
+                    x="50"
+                    y="50"
+                    fontSize="60"
+                    fill="white"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontWeight="900"
+                    style={{
+                      fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+                      strokeWidth: isSelected ? '2px' : '1px',
+                      stroke: 'white',
+                      paintOrder: 'stroke fill',
+                    }}
+                  >
+                    {SIGN_SYMBOLS[index]}
+                  </text>
+                </svg>
+                
+                {/* Nombre del signo con mejor contraste */}
+                <span 
+                  className={`text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-1 transition-all duration-300 ${isSelected ? 'text-white scale-105' : 'text-white/90'}`}
+                  style={{
+                    textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {frequency.name}
+                </span>
+              </div>
+            </div>
+
+            {/* Partículas flotantes cuando está seleccionado - NUEVO */}
+            {isSelected && (
+              <>
+                {[...Array(8)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full animate-ping pointer-events-none"
+                    style={{
+                      backgroundColor: 'white',
+                      top: `${30 + Math.cos(i * Math.PI / 4) * 40}%`,
+                      left: `${30 + Math.sin(i * Math.PI / 4) * 40}%`,
+                      animationDelay: `${i * 0.2}s`,
+                      animationDuration: '2s',
+                      filter: `drop-shadow(0 0 4px ${frequency.color.hex})`,
+                    }}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* Halo animado que respira - MEJORADO */}
             {isSelected && (
               <>
                 <div 
-                  className="absolute inset-[-25%] rounded-full animate-breathe pointer-events-none -z-10"
+                  className="absolute inset-[-30%] rounded-full animate-breathe pointer-events-none -z-10"
                   style={{
-                    backgroundColor: frequency.color.hex,
+                    background: `radial-gradient(circle, ${frequency.color.hex}80 0%, ${frequency.color.hex}40 50%, transparent 80%)`,
                     filter: 'blur(20px)',
-                    opacity: 0.5,
                   }}
                 ></div>
                 <div 
-                  className="absolute inset-[-15%] rounded-full animate-breathe pointer-events-none -z-10"
+                  className="absolute inset-[-20%] rounded-full animate-breathe pointer-events-none -z-10"
+                  style={{
+                    background: `radial-gradient(circle, ${frequency.color.hex} 0%, ${frequency.color.hex}60 40%, transparent 70%)`,
+                    filter: 'blur(15px)',
+                    animationDelay: '0.5s',
+                  }}
+                ></div>
+                <div 
+                  className="absolute inset-[-10%] rounded-full animate-pulse pointer-events-none -z-10"
                   style={{
                     backgroundColor: frequency.color.hex,
-                    filter: 'blur(12px)',
-                    opacity: 0.3,
-                    animationDelay: '0.5s',
+                    filter: 'blur(8px)',
+                    opacity: 0.6,
                   }}
                 ></div>
               </>
