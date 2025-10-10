@@ -131,6 +131,15 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
   };
 
   // ============================================
+  // OPTIMIZACIÓN: Memoizar planetas ordenados
+  // Evita re-sorts innecesarios en cada render
+  // ============================================
+  const sortedPlanets = React.useMemo(
+    () => [...planets].sort((a, b) => a.degree - b.degree),
+    [planets]
+  );
+
+  // ============================================
   // DATOS DE LOS SIGNOS ZODIACALES
   // Colores SÓLIDOS sin transparencia - Paleta HSL vibrante
   // ============================================
@@ -162,6 +171,8 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
         viewBox={`0 0 ${size} ${size}`}
         className="drop-shadow-2xl"
         xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={`Carta astrológica diaria con ${sortedPlanets.length} planetas, 12 casas y signos zodiacales para ${new Date().toLocaleDateString('es-ES')}`}
       >
         {/* ============================================ */}
         {/* FONDO Y GRADIENTES */}
@@ -388,10 +399,12 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 opacity="0.9"
                 style={{ 
                   fontSize: size < 450 ? '18px' : '26px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
                 }}
               >
                 {sign.symbol}
+                <title>{sign.name} - {sign.element}</title>
               </text>
             </g>
           );
@@ -493,7 +506,7 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
         {/* Estilo Astrodienst: símbolos con colores tradicionales */}
         {/* ============================================ */}
         
-        {planets.length > 0 && planets.map((planet) => {
+        {sortedPlanets.length > 0 && sortedPlanets.map((planet) => {
           // Posicionar planeta en el círculo de planetas
           const pos = polarToCartesian(planet.degree, RADIUS_PLANETS);
           
@@ -530,10 +543,14 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 filter={planetFilter}
                 style={{ 
                   fontSize: `${planetSize + 4}px`,
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
                 }}
               >
                 {planet.symbol}
+                <title>
+                  {planet.name} en {planet.degree.toFixed(1)}° de {planet.sign}{planet.retrograde ? ' (retrógrado)' : ''}
+                </title>
               </text>
               
               {/* Indicador de retrógrado */}
@@ -642,5 +659,13 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
   );
 };
 
-// ⚡ React.memo para evitar re-renders cuando planets no cambia
-export default React.memo(DailyChartWheel);
+// ⚡ React.memo con comparación custom para evitar re-renders innecesarios
+export default React.memo(DailyChartWheel, (prevProps, nextProps) => {
+  // Solo re-render si props realmente cambian
+  return (
+    prevProps.size === nextProps.size &&
+    prevProps.className === nextProps.className &&
+    JSON.stringify(prevProps.planets) === JSON.stringify(nextProps.planets) &&
+    JSON.stringify(prevProps.houses) === JSON.stringify(nextProps.houses)
+  );
+});

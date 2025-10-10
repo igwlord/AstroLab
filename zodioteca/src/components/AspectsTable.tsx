@@ -22,6 +22,41 @@ interface AspectsTableProps {
   planets?: Planet[];
 }
 
+// ⚡ Componente memoizado para estadísticas (evita recálculos)
+const StatsSummary: React.FC<{ aspects: Aspect[] }> = React.memo(({ aspects }) => {
+  const majorCount = React.useMemo(() => aspects.filter(a => a.category === 'mayor').length, [aspects]);
+  const minorCount = React.useMemo(() => aspects.filter(a => a.category === 'menor').length, [aspects]);
+  const avgExactness = React.useMemo(() => {
+    if (aspects.length === 0) return 0;
+    return aspects.reduce((sum, a) => sum + (a.exactness || 0), 0) / aspects.length;
+  }, [aspects]);
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
+        <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Mayores</div>
+        <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+          {majorCount}
+        </div>
+      </div>
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-700">
+        <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Menores</div>
+        <div className="text-xl font-bold text-amber-700 dark:text-amber-300">
+          {minorCount}
+        </div>
+      </div>
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 border border-green-200 dark:border-green-700 col-span-2">
+        <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Exactitud Promedio</div>
+        <div className="text-xl font-bold text-green-700 dark:text-green-300">
+          {avgExactness.toFixed(1)}%
+        </div>
+      </div>
+    </div>
+  );
+});
+
+StatsSummary.displayName = 'StatsSummary';
+
 const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlanets = [] }) => {
   // Símbolos de planetas
   const planetSymbols: Record<string, string> = {
@@ -58,24 +93,28 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
   // Evitar warning de variable no usada
   logger.debug('Planets provided:', propPlanets.length);
 
-  // Agrupar aspectos por tipo
-  const groupedAspects = aspects.reduce((acc, aspect) => {
-    const type = aspect.type || 'Otro';
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(aspect);
-    return acc;
-  }, {} as Record<string, Aspect[]>);
+  // ⚡ OPTIMIZACIÓN: Memoizar agrupación de aspectos (evita reduce en cada render)
+  const groupedAspects = React.useMemo(() => {
+    return aspects.reduce((acc, aspect) => {
+      const type = aspect.type || 'Otro';
+      if (!acc[type]) acc[type] = [];
+      acc[type].push(aspect);
+      return acc;
+    }, {} as Record<string, Aspect[]>);
+  }, [aspects]);
 
-  // Ordenar tipos de aspectos (mayores primero)
-  const orderedTypes = Object.keys(groupedAspects).sort((a, b) => {
-    const order = ['Conjunción', 'Oposición', 'Trígono', 'Cuadratura', 'Sextil'];
-    const indexA = order.indexOf(a);
-    const indexB = order.indexOf(b);
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    return a.localeCompare(b);
-  });
+  // ⚡ OPTIMIZACIÓN: Memoizar ordenamiento de tipos (evita sort en cada render)
+  const orderedTypes = React.useMemo(() => {
+    return Object.keys(groupedAspects).sort((a, b) => {
+      const order = ['Conjunción', 'Oposición', 'Trígono', 'Cuadratura', 'Sextil'];
+      const indexA = order.indexOf(a);
+      const indexB = order.indexOf(b);
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+  }, [groupedAspects]);
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 shadow-lg border border-purple-200 dark:border-purple-700 space-y-6">
@@ -128,14 +167,23 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
                   {typeAspects.map((aspect, idx) => (
                     <tr key={idx} className="border-b border-current opacity-30 last:border-0 hover:bg-white/50 dark:hover:bg-black/20">
                       <td className="py-2 px-2 font-semibold">
-                        <span className="text-base mr-1">{planetSymbols[aspect.planet1] || '•'}</span>
+                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                          {planetSymbols[aspect.planet1] || '•'}
+                          <title>{aspect.planet1}</title>
+                        </span>
                         {aspect.planet1}
                       </td>
                       <td className="text-center py-2 px-2">
-                        <span className="text-xl font-bold">{info.symbol}</span>
+                        <span className="text-xl font-bold" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                          {info.symbol}
+                          <title>{aspect.type}</title>
+                        </span>
                       </td>
                       <td className="py-2 px-2 font-semibold">
-                        <span className="text-base mr-1">{planetSymbols[aspect.planet2] || '•'}</span>
+                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                          {planetSymbols[aspect.planet2] || '•'}
+                          <title>{aspect.planet2}</title>
+                        </span>
                         {aspect.planet2}
                       </td>
                       <td className="text-right py-2 px-2 font-mono">{aspect.angle.toFixed(1)}°</td>
@@ -160,7 +208,16 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
             const info = getAspectInfo(name);
             return (
               <div key={name} className="flex items-center gap-2">
-                <span className="text-xl" style={{ color: info.color }}>{info.symbol}</span>
+                <span 
+                  className="text-xl" 
+                  style={{ 
+                    color: info.color,
+                    fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
+                  }}
+                  title={name}
+                >
+                  {info.symbol}
+                </span>
                 <span className="text-gray-700 dark:text-gray-300">{name}</span>
               </div>
             );
@@ -177,32 +234,16 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
       </div>
 
       {/* Resumen estadístico */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-          <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Mayores</div>
-          <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-            {aspects.filter(a => a.category === 'mayor').length}
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-700">
-          <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Menores</div>
-          <div className="text-xl font-bold text-amber-700 dark:text-amber-300">
-            {aspects.filter(a => a.category === 'menor').length}
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 border border-green-200 dark:border-green-700 col-span-2">
-          <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Exactitud Promedio</div>
-          <div className="text-xl font-bold text-green-700 dark:text-green-300">
-            {aspects.length > 0 
-              ? ((aspects.reduce((sum, a) => sum + (a.exactness || 0), 0) / aspects.length).toFixed(1))
-              : '0'
-            }%
-          </div>
-        </div>
-      </div>
+      <StatsSummary aspects={aspects} />
     </div>
   );
 };
 
-// ⚡ React.memo para evitar re-renders innecesarios cuando aspects no cambian
-export default React.memo(AspectsTable);
+// ⚡ React.memo con comparación custom para evitar re-renders innecesarios
+export default React.memo(AspectsTable, (prevProps, nextProps) => {
+  // Solo re-render si aspects realmente cambian
+  return (
+    JSON.stringify(prevProps.aspects) === JSON.stringify(nextProps.aspects) &&
+    JSON.stringify(prevProps.planets) === JSON.stringify(nextProps.planets)
+  );
+});
