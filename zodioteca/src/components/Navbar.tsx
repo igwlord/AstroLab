@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import ThemeToggle from './ThemeToggle';
 import BiographyModal from './BiographyModal';
+import FloatingMiniPlayer from './FloatingMiniPlayer';
 
 const Navbar: React.FC = () => {
   const { t } = useI18n();
@@ -123,6 +124,9 @@ const Navbar: React.FC = () => {
                     <span className="text-base font-semibold">{item.label}</span>
                   </Link>
                 ))}
+                
+                {/* Mini Player Mobile - Integrado en el menú */}
+                <FloatingMiniPlayer isMobile={true} />
                 
                 {/* Mobile Tools - Theme Toggle */}
                 <div className="border-t border-purple-500/30 pt-4 mt-4">

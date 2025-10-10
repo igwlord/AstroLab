@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { createGlossaryParser, GlossaryParser } from '../utils/parseGlossary';
+import { logger } from '../utils/logger';
 import type { GlossaryEntry } from '../types/glossary';
 import { GLOSSARY_CATEGORIES } from '../types/glossary';
 import { ZODIAC_SIGNS } from '../types/zodiacSign';
@@ -68,7 +69,7 @@ const GlossaryPage: React.FC = () => {
         setEntries(parsedEntries);
         setError(null);
       } catch (err) {
-        console.error('Error loading glossary:', err);
+        logger.error('Error loading glossary:', err);
         setError('Error al cargar el glosario. Por favor, intenta más tarde.');
       } finally {
         setLoading(false);
@@ -338,7 +339,7 @@ const GlossaryPage: React.FC = () => {
       const maxAttempts = 10;
       
       if (attempts >= maxAttempts) {
-        console.warn(`No se pudo encontrar el elemento con data-id="${id}"`);
+        logger.warn(`No se pudo encontrar el elemento con data-id="${id}"`);
         return;
       }
       

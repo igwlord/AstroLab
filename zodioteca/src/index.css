@@ -757,6 +757,20 @@ html.dark .bg-cyan-500 {
   will-change: box-shadow;
 }
 
+/* Animación de ondas para mini player */
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-wave {
+  animation: wave 1s ease-in-out infinite;
+}
+
 /* Estilos para impresión de la rueda natal */
 @media print {
   /* ==================== CONFIGURACIÓN DE PÁGINA ==================== */

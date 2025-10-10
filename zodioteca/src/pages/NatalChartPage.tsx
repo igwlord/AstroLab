@@ -20,9 +20,10 @@ import { verifyChart, printVerificationReport, exportChartToText } from '../util
 import { logger } from '../utils/logger';
 import { saveChartLocal } from '../services/chartStorage';
 import { detectPolarizations } from '../utils/polarizationDetector';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { Save, Check } from 'lucide-react';
+
+// ⚡ Lazy imports para reducir bundle inicial (401 KB + 200 KB = 601 KB ahorrados)
+// Solo se cargan cuando el usuario hace click en "Descargar PDF"
 import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 // Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
@@ -203,6 +204,14 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     setIsGeneratingPDF(true);
 
     try {
+      // 0. Lazy load jsPDF y html2canvas solo cuando se necesitan
+      logger.debug('⏳ Cargando librerías de PDF...');
+      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+      logger.debug('✅ Librerías de PDF cargadas');
+
       // 1. Expandir todos los acordeones automáticamente
       const accordionButtons = chartRef.current.querySelectorAll('button[class*="w-full flex items-center justify-between"]');
       const closedAccordions: HTMLElement[] = [];

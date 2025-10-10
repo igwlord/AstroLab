@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import { useI18n } from '../i18n';
 import { useGoogleDrive } from '../context/GoogleDriveContext';
+import { logger } from '../utils/logger';
 import ChartModal from '../components/ChartModal';
 import {
   getLocalCharts,
@@ -50,7 +51,7 @@ const SavedChartsPage: FC = () => {
         setCharts(localCharts.map(c => ({ ...c, syncStatus: 'local-only' as SyncStatus })));
       }
     } catch (error) {
-      console.error('Error loading charts:', error);
+      logger.error('Error loading charts:', error);
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ const SavedChartsPage: FC = () => {
       await syncAllCharts(charts);
       await loadCharts();
     } catch (error) {
-      console.error('Error syncing:', error);
+      logger.error('Error syncing:', error);
       alert('Error al sincronizar cartas');
     } finally {
       setSyncing(false);
@@ -86,7 +87,7 @@ const SavedChartsPage: FC = () => {
       setSelectedCharts(new Set());
       await loadCharts();
     } catch (error) {
-      console.error('Error syncing selected:', error);
+      logger.error('Error syncing selected:', error);
       alert('Error al sincronizar cartas seleccionadas');
     } finally {
       setSyncing(false);
@@ -141,7 +142,7 @@ const SavedChartsPage: FC = () => {
       alert(`✅ ${count} cartas importadas exitosamente`);
       await loadCharts();
     } catch (error) {
-      console.error('Error importing:', error);
+      logger.error('Error importing:', error);
       alert('❌ Error al importar cartas');
     }
 

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { ZODIAC_FREQUENCIES } from '../data/zodiacFrequencies';
+import { logger } from '../utils/logger';
 
 interface FrequencyBadgeProps {
   frequency: string; // "528 Hz" o "528"
@@ -27,7 +28,7 @@ const FrequencyBadge: React.FC<FrequencyBadgeProps> = ({
     e.preventDefault();
     
     if (!targetId) {
-      console.warn(`No se encontró un signo zodiacal para la frecuencia ${frequency}`);
+      logger.warn(`No se encontró un signo zodiacal para la frecuencia ${frequency}`);
       return;
     }
     

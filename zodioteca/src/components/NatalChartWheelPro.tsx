@@ -402,8 +402,18 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const key = normalizeAspectKey(aspect.type);
       if (!key) return;
       const cfg = getAspectStyle(key);
+      const aspectStandard = ASPECTS_STANDARD[key];
 
-  // (sin filtro por niveles por ahora; se puede mapear por kind major/minor si se desea)
+      // ⚡ FILTRO POR NIVEL DE ASPECTOS
+      if (aspectsLevel === 'basic') {
+        // Solo aspectos mayores: conjunción, oposición, cuadratura, trígono, sextil
+        if (aspectStandard.kind !== 'major') return;
+      } else if (aspectsLevel === 'standard') {
+        // Mayores + semi-aspectos (sin menores como semisextil y quincunx)
+        const minorAspects = ['semisextile', 'quincunx'];
+        if (minorAspects.includes(key)) return;
+      }
+      // 'complete' muestra todos los aspectos
 
       const p1 = data.planets.find((p) => p.name === aspect.planet1);
       const p2 = data.planets.find((p) => p.name === aspect.planet2);
@@ -1051,4 +1061,13 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   );
 };
 
-export default NatalChartWheelPro;
+// ⚡ React.memo con comparación custom para evitar re-renders cuando data no cambia
+export default React.memo(NatalChartWheelPro, (prevProps, nextProps) => {
+  // Solo re-render si data o size realmente cambian
+  return (
+    prevProps.size === nextProps.size &&
+    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
+    prevProps.showPlanetDegrees === nextProps.showPlanetDegrees &&
+    prevProps.showDataTable === nextProps.showDataTable
+  );
+});

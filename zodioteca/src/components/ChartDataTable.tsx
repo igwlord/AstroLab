@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '../utils/logger';
 
 interface Planet {
   name: string;
@@ -77,7 +78,7 @@ const ChartDataTable: React.FC<ChartDataTableProps> = ({ planets, houses, elemen
   };
 
   // Debug: ver qué nombres estamos recibiendo
-  console.log('🔍 Todos los planetas recibidos:', planets.map(p => p.name));
+  logger.debug('🔍 Todos los planetas recibidos:', planets.map(p => p.name));
 
   // Separar planetas principales de puntos avanzados (solo los 10 planetas clásicos)
   const MAIN_PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
@@ -91,7 +92,7 @@ const ChartDataTable: React.FC<ChartDataTableProps> = ({ planets, houses, elemen
     vertex: planets.find(p => p.name === 'Vértex')
   };
 
-  console.log('🔍 Puntos avanzados encontrados:', {
+  logger.debug('🔍 Puntos avanzados encontrados:', {
     nodoNorte: advancedPoints.nodoNorte?.name,
     lilith: advancedPoints.lilith?.name,
     quiron: advancedPoints.quiron?.name,
@@ -384,4 +385,5 @@ const ChartDataTable: React.FC<ChartDataTableProps> = ({ planets, houses, elemen
   );
 };
 
-export default ChartDataTable;
+// ⚡ React.memo para evitar re-renders innecesarios cuando props no cambian
+export default React.memo(ChartDataTable);

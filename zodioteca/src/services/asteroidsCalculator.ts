@@ -10,6 +10,8 @@
  * Para producción: usar astro.com API o Swiss Ephemeris WASM
  */
 
+import { logger } from '../utils/logger';
+
 export interface AsteroidPosition {
   name: string;
   sign: string;
@@ -106,7 +108,7 @@ export async function calculateAsteroids(
         retrograde
       });
     } catch (error) {
-      console.error(`Error calculando ${asteroid.name}:`, error);
+      logger.error(`Error calculando ${asteroid.name}:`, error);
       // Posición por defecto en caso de error
       positions.push({
         name: asteroid.name,
@@ -224,13 +226,13 @@ export async function calculateAsteroidsFromAPI(
     
     // Nota: Aquí iría la llamada a una API real
     // Ejemplo: astro-api.org, astro.com, etc.
-    console.log('API call would go here:', { dateStr, latitude, longitude });
+    logger.debug('API call would go here:', { dateStr, latitude, longitude });
     
     // Por ahora, retornar posiciones calculadas localmente
     // En producción, parsear respuesta de API
     throw new Error('API not implemented yet');
   } catch (error) {
-    console.error('Error en API de asteroides:', error);
+    logger.error('Error en API de asteroides:', error);
     throw error;
   }
 }

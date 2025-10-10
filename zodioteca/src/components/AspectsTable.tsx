@@ -1,5 +1,6 @@
 import React from 'react';
 import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
+import { logger } from '../utils/logger';
 
 interface Aspect {
   planet1: string;
@@ -55,7 +56,7 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
   // const planetOrder = ['Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón', 'Quirón', 'Lilith (Mean)', 'Nodo Norte', 'Nodo Sur', 'Parte de la Fortuna', 'Vértex'];
   
   // Evitar warning de variable no usada
-  console.log('Planets provided:', propPlanets.length);
+  logger.debug('Planets provided:', propPlanets.length);
 
   // Agrupar aspectos por tipo
   const groupedAspects = aspects.reduce((acc, aspect) => {
@@ -203,4 +204,5 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
   );
 };
 
-export default AspectsTable;
+// ⚡ React.memo para evitar re-renders innecesarios cuando aspects no cambian
+export default React.memo(AspectsTable);

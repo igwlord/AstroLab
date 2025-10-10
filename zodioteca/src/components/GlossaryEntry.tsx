@@ -250,4 +250,5 @@ const GlossaryEntryComponent: React.FC<GlossaryEntryProps> = ({
   );
 };
 
-export default GlossaryEntryComponent;
+// ⚡ React.memo para evitar re-renders cuando entry no cambia
+export default React.memo(GlossaryEntryComponent);

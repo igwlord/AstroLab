@@ -3,6 +3,7 @@ import AstrologicalWeatherCard from '../components/AstrologicalWeatherCard';
 import DailyChartWheel from '../components/DailyChartWheel';
 import WeatherDetailsModal from '../components/WeatherDetailsModal';
 import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
+import { logger } from '../utils/logger';
 import type { PlanetData } from '../components/DailyChartWheel';
 import { Info } from 'lucide-react';
 
@@ -102,7 +103,7 @@ const Dashboard: React.FC = () => {
 
         setPlanets(planetsData);
       } catch (error) {
-        console.error('Error cargando clima astrológico:', error);
+        logger.error('Error cargando clima astrológico:', error);
         // Si falla, usar datos de ejemplo
         setPlanets([
           { name: 'Sol', symbol: '☉', degree: 194, sign: 'Libra', color: '#FFD700' },

@@ -13,6 +13,7 @@ import { createPortal } from 'react-dom';
 import { DateTime } from 'luxon';
 import Fuse from 'fuse.js';
 import { Search, MapPin, Settings, X } from 'lucide-react';
+import { logger } from '../utils/logger';
 import type { FormValue, NatalChartFormProps } from '../types/natalForm';
 import { DEFAULT_SETTINGS } from '../types/natalForm';
 import { CITIES_DB, type CityData } from '../data/cities';
@@ -33,7 +34,7 @@ const loadSavedFormData = (): Partial<FormValue> | null => {
       return JSON.parse(saved);
     }
   } catch (error) {
-    console.error('Error loading saved form data:', error);
+    logger.error('Error loading saved form data:', error);
   }
   return null;
 };
@@ -43,7 +44,7 @@ const saveFormData = (data: FormValue) => {
   try {
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
-    console.error('Error saving form data:', error);
+    logger.error('Error saving form data:', error);
   }
 };
 

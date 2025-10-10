@@ -642,4 +642,5 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
   );
 };
 
-export default DailyChartWheel;
+// ⚡ React.memo para evitar re-renders cuando planets no cambia
+export default React.memo(DailyChartWheel);

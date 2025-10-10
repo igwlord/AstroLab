@@ -2,9 +2,12 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { GoogleDriveWrapper } from './context/GoogleDriveContext';
+import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import { I18nProvider } from './i18n';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
+import FloatingMiniPlayer from './components/FloatingMiniPlayer';
 
 // Lazy loading para páginas - reduce bundle inicial ~40-50%
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -128,15 +131,23 @@ function AppRoutes() {
 
 function App() {
   return (
-    <I18nProvider>
-      <GoogleDriveWrapper>
-        <AuthProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
-        </AuthProvider>
-      </GoogleDriveWrapper>
-    </I18nProvider>
+    <ErrorBoundary>
+      <I18nProvider>
+        <GoogleDriveWrapper>
+          <AuthProvider>
+            <AudioPlayerProvider>
+              <Router>
+                <ErrorBoundary>
+                  <AppRoutes />
+                  {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
+                  <FloatingMiniPlayer isMobile={false} />
+                </ErrorBoundary>
+              </Router>
+            </AudioPlayerProvider>
+          </AuthProvider>
+        </GoogleDriveWrapper>
+      </I18nProvider>
+    </ErrorBoundary>
   );
 }
 
