@@ -108,13 +108,13 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
                     fill="white"
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    style={{
-                      fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
-                      fontWeight: 400,
-                      WebkitTextStrokeWidth: isSelected ? '2px' : '1px',
-                      WebkitTextStrokeColor: 'white',
-                      paintOrder: 'stroke fill'
-                    }}
+                  style={{
+                    fontFamily: '"Zodiac Symbols", "Zodiac Symbols Fallback", "Noto Sans Symbols 2", "Segoe UI Symbol", Arial, sans-serif',
+                    fontWeight: 400,
+                    WebkitTextStrokeWidth: isSelected ? '2px' : '1px',
+                    WebkitTextStrokeColor: 'white',
+                    paintOrder: 'stroke fill'
+                  }}
                   >
                     {SIGN_SYMBOLS[index]}
                   </text>

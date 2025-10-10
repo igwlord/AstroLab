@@ -400,7 +400,7 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 style={{ 
                   fontSize: size < 450 ? '18px' : '26px',
                   fontWeight: 400,
-                  fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+                  fontFamily: '"Zodiac Symbols", "Zodiac Symbols Fallback", "Noto Sans Symbols 2", "Segoe UI Symbol", Arial, sans-serif',
                   WebkitTextStrokeWidth: '1px',
                   WebkitTextStrokeColor: '#ffffff',
                   paintOrder: 'stroke fill'
@@ -547,7 +547,7 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 style={{ 
                   fontSize: `${planetSize + 4}px`,
                   fontWeight: 400,
-                  fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+                  fontFamily: '"Zodiac Symbols", "Zodiac Symbols Fallback", "Noto Sans Symbols 2", "Segoe UI Symbol", Arial, sans-serif',
                   WebkitTextStrokeWidth: '1px',
                   WebkitTextStrokeColor: planet.color,
                   paintOrder: 'stroke fill'

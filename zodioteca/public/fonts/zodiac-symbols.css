@@ -1,0 +1,28 @@
+/**
+ * Zodiac Symbols Font Face
+ * Uses Unicode range to load only zodiac glyphs (U+2648 to U+2653)
+ * Fallback stack ensures compatibility
+ */
+
+@font-face {
+  font-family: 'Zodiac Symbols';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* Load Noto Sans Symbols 2 directly from Google with unicode-range for zodiac only */
+  src: url('https://fonts.gstatic.com/s/notosanssymbols2/v23/I_uyMoGduATTei9eI8daxVHDyfisHr71ypPqfX71-AI.woff2') format('woff2');
+  unicode-range: U+2648-2653; /* ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ */
+}
+
+/* Fallback for systems without Noto Sans Symbols 2 */
+@font-face {
+  font-family: 'Zodiac Symbols Fallback';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Segoe UI Symbol'),
+       local('Noto Sans Symbols'),
+       local('Apple Symbols'),
+       local('DejaVu Sans');
+  unicode-range: U+2648-2653;
+}
