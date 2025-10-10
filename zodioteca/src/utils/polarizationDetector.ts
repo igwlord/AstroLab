@@ -24,6 +24,7 @@ export interface DetectedPolarization {
   integration: string;
   sacredGeometry: string;
   geometryPurpose: string;
+  frequency: number; // Frecuencia Solfeggio en Hz
 }
 
 /**
@@ -46,7 +47,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Control, obsesión, miedo al poder, manipulación',
     integration: 'Aceptar el poder personal sin dominar. Transformación consciente y renacimiento evolutivo.',
     sacredGeometry: 'Dodecaedro (Éter)',
-    geometryPurpose: 'Facilita la alquimia interior. Muerte y renacimiento del ego hacia la conciencia pura.'
+    geometryPurpose: 'Facilita la alquimia interior. Muerte y renacimiento del ego hacia la conciencia pura.',
+    frequency: 741 // Expresión y soluciones, liberación de toxinas emocionales
   },
   'Neptuno': {
     chakra: 'Corona y Tercer Ojo',
@@ -56,7 +58,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Evasión, confusión, victimismo, adicciones, escapismo espiritual',
     integration: 'Conexión espiritual con discernimiento. Estructura y límites claros (energía de Virgo/Saturno).',
     sacredGeometry: 'Icosaedro (Agua)',
-    geometryPurpose: 'Purifica emociones, conecta con la intuición y la empatía desde la realidad.'
+    geometryPurpose: 'Purifica emociones, conecta con la intuición y la empatía desde la realidad.',
+    frequency: 963 // Conexión espiritual, glándula pineal
   },
   'Urano': {
     chakra: 'Corona y Garganta',
@@ -66,7 +69,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Rebeldía destructiva, desapego extremo, caos sin propósito',
     integration: 'Innovación consciente. Balance entre libertad e integración social.',
     sacredGeometry: 'Octaedro (Aire)',
-    geometryPurpose: 'Integra cielo y tierra. Favorece la claridad y la libertad con propósito.'
+    geometryPurpose: 'Integra cielo y tierra. Favorece la claridad y la libertad con propósito.',
+    frequency: 852 // Intuición, retorno al orden espiritual
   },
   'Saturno': {
     chakra: 'Raíz',
@@ -76,7 +80,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Rigidez, miedo paralizante, pesimismo, autoexigencia destructiva',
     integration: 'Disciplina con flexibilidad. Soltar control, integrar juego y humor (energía de Júpiter).',
     sacredGeometry: 'Cubo o Hexaedro (Tierra)',
-    geometryPurpose: 'Estabiliza; enseña estructura flexible. Transforma el límite en sostén.'
+    geometryPurpose: 'Estabiliza; enseña estructura flexible. Transforma el límite en sostén.',
+    frequency: 417 // Cambio, liberación de patrones negativos
   },
   'Marte': {
     chakra: 'Raíz y Plexo Solar',
@@ -86,7 +91,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Impulsividad, agresividad, impaciencia, autodestrucción por acción irreflexiva',
     integration: 'Canalizar la acción conscientemente. Paciencia y reflexión (energía de Saturno/Libra).',
     sacredGeometry: 'Tetraedro Estrellado (Merkaba)',
-    geometryPurpose: 'Canaliza la fuerza vital desde el corazón; acción consciente y no reactiva.'
+    geometryPurpose: 'Canaliza la fuerza vital desde el corazón; acción consciente y no reactiva.',
+    frequency: 396 // Liberación de culpa y miedo, chakra raíz
   },
   'Venus': {
     chakra: 'Corazón',
@@ -96,7 +102,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Dependencia afectiva, búsqueda externa de validación, superficialidad',
     integration: 'Amor propio independiente. Autovalidación y valores internos sólidos.',
     sacredGeometry: 'Flor de la Vida',
-    geometryPurpose: 'Abre el corazón al amor universal; ayuda a integrar placer y espiritualidad.'
+    geometryPurpose: 'Abre el corazón al amor universal; ayuda a integrar placer y espiritualidad.',
+    frequency: 639 // Conexión y relaciones, chakra corazón
   },
   'Sol': {
     chakra: 'Plexo Solar',
@@ -106,7 +113,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Ego inflado, necesidad de reconocimiento, orgullo destructivo',
     integration: 'Equilibrar el poder personal con la humildad. Alinear el yo interno con el propósito del alma.',
     sacredGeometry: 'Tetraedro (Fuego)',
-    geometryPurpose: 'Equilibra el poder personal con la humildad. Alinea el yo interno con el propósito del alma.'
+    geometryPurpose: 'Equilibra el poder personal con la humildad. Alinea el yo interno con el propósito del alma.',
+    frequency: 528 // Transformación y milagros, reparación ADN
   },
   'Luna': {
     chakra: 'Sacro',
@@ -116,7 +124,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Dependencia emocional, apego al pasado, reactividad emocional',
     integration: 'Seguridad emocional interna. Nutrir sin depender, sentir sin reaccionar.',
     sacredGeometry: 'Vesica Piscis',
-    geometryPurpose: 'Restaura la armonía emocional y la receptividad sin apego. Favorece la contención amorosa.'
+    geometryPurpose: 'Restaura la armonía emocional y la receptividad sin apego. Favorece la contención amorosa.',
+    frequency: 417 // Cambio facilitador, liberación de trauma
   },
   'Mercurio': {
     chakra: 'Garganta',
@@ -126,7 +135,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Dispersión mental, racionalización excesiva, comunicación manipuladora',
     integration: 'Comunicación clara y consciente. Mente enfocada al servicio del corazón.',
     sacredGeometry: 'Cubo de Metatrón',
-    geometryPurpose: 'Ordena pensamientos, unifica hemisferios, clarifica la comunicación interior y exterior.'
+    geometryPurpose: 'Ordena pensamientos, unifica hemisferios, clarifica la comunicación interior y exterior.',
+    frequency: 741 // Expresión y soluciones
   },
   'Júpiter': {
     chakra: 'Tercer Ojo',
@@ -136,7 +146,8 @@ const TRANSPERSONAL_PLANETS = {
     shadow: 'Exceso, dogmatismo, expansión sin raíz, irresponsabilidad',
     integration: 'Sabiduría con humildad. Expansión consciente con enraizamiento.',
     sacredGeometry: 'Toroide (Campo Unificado)',
-    geometryPurpose: 'Centra la expansión; equilibrio entre abundancia y sabiduría interior.'
+    geometryPurpose: 'Centra la expansión; equilibrio entre abundancia y sabiduría interior.',
+    frequency: 852 // Intuición, retorno al orden espiritual
   }
 };
 
@@ -153,7 +164,8 @@ const ELEMENTS_INFO = {
     shadow: 'Impulsividad extrema, falta de reflexión, agotamiento por exceso de acción',
     integration: 'Incorporar reflexión (Aire) y sensibilidad emocional (Agua). Pausas conscientes.',
     sacredGeometry: 'Tetraedro (Fuego)',
-    geometryPurpose: 'Acción consciente, voluntad creadora alineada con el corazón.'
+    geometryPurpose: 'Acción consciente, voluntad creadora alineada con el corazón.',
+    frequency: 528
   },
   'Tierra': {
     signs: ['Tauro', 'Virgo', 'Capricornio'],
@@ -164,7 +176,8 @@ const ELEMENTS_INFO = {
     shadow: 'Rigidez, materialismo excesivo, falta de espontaneidad',
     integration: 'Incorporar fluidez (Agua) y visión (Fuego). Soltar el control.',
     sacredGeometry: 'Cubo o Hexaedro (Tierra)',
-    geometryPurpose: 'Estructura, estabilidad, límites saludables y flexibles.'
+    geometryPurpose: 'Estructura, estabilidad, límites saludables y flexibles.',
+    frequency: 396
   },
   'Aire': {
     signs: ['Géminis', 'Libra', 'Acuario'],
@@ -175,7 +188,8 @@ const ELEMENTS_INFO = {
     shadow: 'Dispersión mental, desconexión emocional, racionalización excesiva',
     integration: 'Incorporar enraizamiento (Tierra) y conexión emocional (Agua).',
     sacredGeometry: 'Octaedro (Aire)',
-    geometryPurpose: 'Expansión mental, comunicación clara, libertad con propósito.'
+    geometryPurpose: 'Expansión mental, comunicación clara, libertad con propósito.',
+    frequency: 741
   },
   'Agua': {
     signs: ['Cáncer', 'Escorpio', 'Piscis'],
@@ -186,7 +200,8 @@ const ELEMENTS_INFO = {
     shadow: 'Hipersensibilidad, ahogarse en emociones, victimismo',
     integration: 'Incorporar límites (Tierra) y perspectiva mental (Aire).',
     sacredGeometry: 'Icosaedro (Agua)',
-    geometryPurpose: 'Emoción purificada, conexión empática desde la claridad.'
+    geometryPurpose: 'Emoción purificada, conexión empática desde la claridad.',
+    frequency: 417
   }
 };
 
@@ -203,7 +218,8 @@ const MODALITIES_INFO = {
     shadow: 'Ansiedad, impaciencia extrema, iniciar sin terminar',
     integration: 'Incorporar constancia (Fijo) y adaptabilidad (Mutable).',
     sacredGeometry: 'Tetraedro (Cardinal)',
-    geometryPurpose: 'Impulso inicial consciente, liderazgo desde el corazón.'
+    geometryPurpose: 'Impulso inicial consciente, liderazgo desde el corazón.',
+    frequency: 528
   },
   'Fijo': {
     signs: ['Tauro', 'Leo', 'Escorpio', 'Acuario'],
@@ -214,7 +230,8 @@ const MODALITIES_INFO = {
     shadow: 'Terquedad, resistencia al cambio, estancamiento',
     integration: 'Incorporar flexibilidad (Mutable) y empuje (Cardinal).',
     sacredGeometry: 'Cubo (Fijo)',
-    geometryPurpose: 'Estabilidad flexible, sostén sin rigidez.'
+    geometryPurpose: 'Estabilidad flexible, sostén sin rigidez.',
+    frequency: 396
   },
   'Mutable': {
     signs: ['Géminis', 'Virgo', 'Sagitario', 'Piscis'],
@@ -225,7 +242,8 @@ const MODALITIES_INFO = {
     shadow: 'Dispersión, falta de dirección clara, indecisión crónica',
     integration: 'Incorporar estabilidad (Fijo) y dirección (Cardinal).',
     sacredGeometry: 'Esfera o Toroide (Mutable)',
-    geometryPurpose: 'Adaptabilidad con centro, fluidez consciente.'
+    geometryPurpose: 'Adaptabilidad con centro, fluidez consciente.',
+    frequency: 639
   }
 };
 
@@ -241,19 +259,20 @@ const SIGNS_INFO: Record<string, {
   integration: string;
   sacredGeometry: string;
   geometryPurpose: string;
+  frequency: number;
 }> = {
-  'Aries': { chakra: 'Plexo Solar', color: '#FF0000', gradient: 'from-red-600 to-rose-700', icon: '♈', shadow: 'Impulsividad, agresividad', integration: 'Balance con Libra: diplomacia y colaboración', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Acción consciente desde el corazón' },
-  'Tauro': { chakra: 'Garganta', color: '#50C878', gradient: 'from-green-600 to-emerald-700', icon: '♉', shadow: 'Terquedad, apego material', integration: 'Balance con Escorpio: transformación y soltar', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Estabilidad flexible y generosa' },
-  'Géminis': { chakra: 'Garganta', color: '#FFFF00', gradient: 'from-yellow-400 to-amber-500', icon: '♊', shadow: 'Dispersión, superficialidad', integration: 'Balance con Sagitario: visión profunda y dirección', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Comunicación clara con propósito' },
-  'Cáncer': { chakra: 'Sacro', color: '#C0C0C0', gradient: 'from-gray-300 to-slate-400', icon: '♋', shadow: 'Apego emocional, dependencia', integration: 'Balance con Capricornio: autonomía y estructura', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Nutrir sin apego, contener con amor' },
-  'Leo': { chakra: 'Corazón', color: '#FFD700', gradient: 'from-yellow-500 to-orange-600', icon: '♌', shadow: 'Ego, necesidad de reconocimiento', integration: 'Balance con Acuario: servicio al colectivo', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Liderazgo desde el corazón' },
-  'Virgo': { chakra: 'Plexo Solar', color: '#8B4513', gradient: 'from-amber-700 to-yellow-800', icon: '♍', shadow: 'Perfeccionismo, crítica excesiva', integration: 'Balance con Piscis: aceptación y fluidez', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Servicio organizado con compasión' },
-  'Libra': { chakra: 'Corazón', color: '#FF69B4', gradient: 'from-pink-400 to-rose-500', icon: '♎', shadow: 'Indecisión, dependencia de otros', integration: 'Balance con Aries: autonomía y acción', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Equilibrio dinámico consciente' },
-  'Escorpio': { chakra: 'Sacro', color: '#800020', gradient: 'from-red-900 to-purple-900', icon: '♏', shadow: 'Obsesión, control, intensidad destructiva', integration: 'Balance con Tauro: simplicidad y estabilidad', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Transformación profunda con amor' },
-  'Sagitario': { chakra: 'Tercer Ojo', color: '#9370DB', gradient: 'from-purple-500 to-indigo-600', icon: '♐', shadow: 'Exceso de expansión, irresponsabilidad', integration: 'Balance con Géminis: atención al detalle', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Expansión consciente enraizada' },
-  'Capricornio': { chakra: 'Raíz', color: '#2F4F4F', gradient: 'from-gray-700 to-slate-900', icon: '♑', shadow: 'Rigidez, frialdad emocional', integration: 'Balance con Cáncer: calidez y empatía', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Estructura con corazón abierto' },
-  'Acuario': { chakra: 'Corona', color: '#00CED1', gradient: 'from-cyan-400 to-blue-600', icon: '♒', shadow: 'Desapego extremo, rebeldía sin causa', integration: 'Balance con Leo: calor humano y corazón', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Visión innovadora humanizada' },
-  'Piscis': { chakra: 'Corona', color: '#7FFFD4', gradient: 'from-teal-400 to-blue-500', icon: '♓', shadow: 'Confusión, evasión de la realidad', integration: 'Balance con Virgo: discernimiento y orden', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Compasión universal con límites claros' }
+  'Aries': { chakra: 'Plexo Solar', color: '#FF0000', gradient: 'from-red-600 to-rose-700', icon: '♈', shadow: 'Impulsividad, agresividad', integration: 'Balance con Libra: diplomacia y colaboración', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Acción consciente desde el corazón', frequency: 528 },
+  'Tauro': { chakra: 'Garganta', color: '#50C878', gradient: 'from-green-600 to-emerald-700', icon: '♉', shadow: 'Terquedad, apego material', integration: 'Balance con Escorpio: transformación y soltar', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Estabilidad flexible y generosa', frequency: 396 },
+  'Géminis': { chakra: 'Garganta', color: '#FFFF00', gradient: 'from-yellow-400 to-amber-500', icon: '♊', shadow: 'Dispersión, superficialidad', integration: 'Balance con Sagitario: visión profunda y dirección', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Comunicación clara con propósito', frequency: 741 },
+  'Cáncer': { chakra: 'Sacro', color: '#C0C0C0', gradient: 'from-gray-300 to-slate-400', icon: '♋', shadow: 'Apego emocional, dependencia', integration: 'Balance con Capricornio: autonomía y estructura', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Nutrir sin apego, contener con amor', frequency: 417 },
+  'Leo': { chakra: 'Corazón', color: '#FFD700', gradient: 'from-yellow-500 to-orange-600', icon: '♌', shadow: 'Ego, necesidad de reconocimiento', integration: 'Balance con Acuario: servicio al colectivo', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Liderazgo desde el corazón', frequency: 528 },
+  'Virgo': { chakra: 'Plexo Solar', color: '#8B4513', gradient: 'from-amber-700 to-yellow-800', icon: '♍', shadow: 'Perfeccionismo, crítica excesiva', integration: 'Balance con Piscis: aceptación y fluidez', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Servicio organizado con compasión', frequency: 396 },
+  'Libra': { chakra: 'Corazón', color: '#FF69B4', gradient: 'from-pink-400 to-rose-500', icon: '♎', shadow: 'Indecisión, dependencia de otros', integration: 'Balance con Aries: autonomía y acción', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Equilibrio dinámico consciente', frequency: 741 },
+  'Escorpio': { chakra: 'Sacro', color: '#800020', gradient: 'from-red-900 to-purple-900', icon: '♏', shadow: 'Obsesión, control, intensidad destructiva', integration: 'Balance con Tauro: simplicidad y estabilidad', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Transformación profunda con amor', frequency: 417 },
+  'Sagitario': { chakra: 'Tercer Ojo', color: '#9370DB', gradient: 'from-purple-500 to-indigo-600', icon: '♐', shadow: 'Exceso de expansión, irresponsabilidad', integration: 'Balance con Géminis: atención al detalle', sacredGeometry: 'Tetraedro (Fuego)', geometryPurpose: 'Expansión consciente enraizada', frequency: 852 },
+  'Capricornio': { chakra: 'Raíz', color: '#2F4F4F', gradient: 'from-gray-700 to-slate-900', icon: '♑', shadow: 'Rigidez, frialdad emocional', integration: 'Balance con Cáncer: calidez y empatía', sacredGeometry: 'Cubo (Tierra)', geometryPurpose: 'Estructura con corazón abierto', frequency: 396 },
+  'Acuario': { chakra: 'Corona', color: '#00CED1', gradient: 'from-cyan-400 to-blue-600', icon: '♒', shadow: 'Desapego extremo, rebeldía sin causa', integration: 'Balance con Leo: calor humano y corazón', sacredGeometry: 'Octaedro (Aire)', geometryPurpose: 'Visión innovadora humanizada', frequency: 852 },
+  'Piscis': { chakra: 'Corona', color: '#7FFFD4', gradient: 'from-teal-400 to-blue-500', icon: '♓', shadow: 'Confusión, evasión de la realidad', integration: 'Balance con Virgo: discernimiento y orden', sacredGeometry: 'Icosaedro (Agua)', geometryPurpose: 'Compasión universal con límites claros', frequency: 963 }
 };
 
 /**
@@ -309,7 +328,8 @@ function detectPlanetaryPolarizations(chart: NatalChart): DetectedPolarization[]
         shadow: info.shadow,
         integration: info.integration,
         sacredGeometry: info.sacredGeometry,
-        geometryPurpose: info.geometryPurpose
+        geometryPurpose: info.geometryPurpose,
+        frequency: info.frequency
       });
     }
   });
@@ -364,7 +384,8 @@ function detectSignPolarizations(chart: NatalChart): DetectedPolarization[] {
         shadow: info.shadow,
         integration: info.integration,
         sacredGeometry: info.sacredGeometry,
-        geometryPurpose: info.geometryPurpose
+        geometryPurpose: info.geometryPurpose,
+        frequency: info.frequency
       });
     }
   });
@@ -421,7 +442,8 @@ function detectElementPolarizations(chart: NatalChart): DetectedPolarization[] {
         shadow: info.shadow,
         integration: info.integration,
         sacredGeometry: info.sacredGeometry,
-        geometryPurpose: info.geometryPurpose
+        geometryPurpose: info.geometryPurpose,
+        frequency: info.frequency
       });
     }
   });
@@ -477,7 +499,8 @@ function detectModalityPolarizations(chart: NatalChart): DetectedPolarization[] 
         shadow: info.shadow,
         integration: info.integration,
         sacredGeometry: info.sacredGeometry,
-        geometryPurpose: info.geometryPurpose
+        geometryPurpose: info.geometryPurpose,
+        frequency: info.frequency
       });
     }
   });

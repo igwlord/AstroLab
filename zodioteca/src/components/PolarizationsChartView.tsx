@@ -241,7 +241,7 @@ export default function PolarizationsChartView({ chart }: PolarizationsChartView
             integration: selectedPolarization.integration,
             color: selectedPolarization.color,
             chakra: selectedPolarization.chakra,
-            frequency: '528',
+            frequency: selectedPolarization.frequency,
             category: 'example',
             sacredGeometry: selectedPolarization.sacredGeometry,
             geometryPurpose: selectedPolarization.geometryPurpose

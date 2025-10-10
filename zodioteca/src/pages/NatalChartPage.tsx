@@ -2869,8 +2869,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   { key: 'vertex', label: '⚹ Vértex' },
                   { key: 'lilithMean', label: '⚸ Lilith (Mean)' },
                   { key: 'lilithTrue', label: '⚸ Lilith (True)' },
-                  { key: 'nodesMean', label: '☊☋ Nodos Lunares (Mean)' },
-                  { key: 'nodesTrue', label: '☊☋ Nodos Lunares (True)' }
+                  { key: 'nodesMean', label: '☊☋ Nodos Lunares' }
                 ].map(({ key, label }) => (
                   <label key={key} className="flex items-center gap-3 cursor-pointer group">
                     <input

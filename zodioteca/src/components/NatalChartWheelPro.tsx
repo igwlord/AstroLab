@@ -44,10 +44,10 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const R_SIGNS_INNER = 0.80 * R;  // Signos van afuera (inicio) - AGRANDADO
   const R_SIGNS_OUTER = 0.98 * R;  // Borde externo de signos (más cerca del borde) - AGRANDADO
 
-  // Longitudes de ticks
-  const LEN_TICK_1 = Math.max(2, 0.008 * R);
-  const LEN_TICK_5 = Math.max(3, 0.015 * R);
-  const LEN_TICK_10 = Math.max(4, 0.025 * R);
+  // Longitudes de ticks - Aumentado para mejor visibilidad
+  const LEN_TICK_1 = Math.max(3, 0.012 * R);  // 1° - más largo
+  const LEN_TICK_5 = Math.max(5, 0.020 * R);  // 5° - más largo
+  const LEN_TICK_10 = Math.max(7, 0.035 * R); // 10° - más largo y prominente
 
   const R_SIGN_SYMBOL = (R_SIGNS_INNER + R_SIGNS_OUTER) / 2;
 
@@ -74,6 +74,10 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     // Puntos Avanzados (español e inglés para compatibilidad)
     'Nodo Norte': '☊',
     'Nodo Sur': '☋',
+    'Nodo Norte (Mean)': '☊',
+    'Nodo Sur (Mean)': '☋',
+    'Nodo Norte (True)': '☊',
+    'Nodo Sur (True)': '☋',
     Quirón: '⚷',
     Chiron: '⚷', // Alias inglés
     'Parte de la Fortuna': '⊕',
@@ -93,7 +97,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const THEME = {
     background: isDark ? 'radial-gradient(circle, #1a1a2e 0%, #0a0a18 100%)' : 'radial-gradient(circle, #FFF8F5 0%, #FFE5D9 100%)',
     ticks: isDark ? '#d4af37' : '#9333EA', // Dorado (oscuro) / Púrpura (claro)
-    ticksOpacity: [0.3, 0.5, 0.7], // 1°, 5°, 10°
+    ticksOpacity: [0.5, 0.75, 1.0], // 1°, 5°, 10° - Aumentado para mejor visibilidad
     degLabels: isDark ? '#f4e5b8' : '#4B5563', // Dorado claro (oscuro) / Gris oscuro (claro)
     signDividers: isDark ? '#8b7355' : '#7C3AED', // Dorado oscuro / Púrpura
     signSymbols: isDark ? '#ffd700' : '#7C3AED', // Dorado brillante / Púrpura
@@ -151,7 +155,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const len = is10 ? LEN_TICK_10 : is5 ? LEN_TICK_5 : LEN_TICK_1;
       const opacityIndex = is10 ? 2 : is5 ? 1 : 0;
       const opacity = THEME.ticksOpacity[opacityIndex];
-      const strokeWidth = is10 ? 1.2 : is5 ? 0.9 : 0.6;
+      const strokeWidth = is10 ? 2.0 : is5 ? 1.5 : 1.0; // Aumentado grosor para mejor visibilidad
 
       // Ticks hacia ADENTRO desde el borde externo de signos
       const [x1, y1] = polar(cx, cy, R_SIGNS_OUTER, rad);
@@ -477,18 +481,22 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         // Fortuna
         if (name.includes('fortuna') && !displayOptions.fortuna) return false;
         
-        // Vertex
-        if (name.includes('vertex') && !displayOptions.vertex) return false;
+        // Vertex (pero NO anti-vertex, que se oculta siempre)
+        if (name.includes('vértex') && !name.includes('anti') && !displayOptions.vertex) return false;
+        if (name.includes('vertex') && !name.includes('anti') && !displayOptions.vertex) return false;
         
         // Chiron
         if (name.includes('chiron') && !displayOptions.chiron) return false;
+        if (name.includes('quirón') && !displayOptions.chiron) return false;
+        
+        // Lilith Mean
+        if (name.includes('lilith') && name.includes('mean') && !displayOptions.lilithMean) return false;
         
         // Lilith True
         if (name.includes('lilith') && name.includes('true') && !displayOptions.lilithTrue) return false;
         
-        // Nodes True
-        if ((name.includes('nodo') || name.includes('node')) && 
-            name.includes('true') && !displayOptions.nodesTrue) return false;
+        // Nodes Mean (solo Mean, True removido)
+        if ((name.includes('nodo') || name.includes('node')) && !displayOptions.nodesMean) return false;
         
         return true;
       });

@@ -68,14 +68,13 @@ const StandardModal: React.FC<StandardModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
+        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn bg-white dark:bg-gray-900"
         style={{ 
-          willChange: 'transform, opacity',
-          contain: 'layout style paint'
+          willChange: 'transform, opacity'
         }}
       >
-        {/* Header con gradiente */}
-        <div className={`relative bg-gradient-to-r ${gradientColors} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>
+        {/* Header con gradiente - altura fija */}
+        <div className={`relative flex-shrink-0 bg-gradient-to-r ${gradientColors} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>
           {/* Patrón de fondo con puntos */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0" style={{
@@ -84,7 +83,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
             }}></div>
           </div>
 
-          {/* Contenido del header - IMPORTANTE: debe estar ANTES del botón en el DOM pero con z-index menor */}
+          {/* Contenido del header */}
           <div className="relative z-[1] pr-12 sm:pr-14 md:pr-16">
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
               {icon && <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl animate-bounce">{icon}</div>}
@@ -95,7 +94,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
             </div>
           </div>
 
-          {/* Botón cerrar - DEBE ESTAR AL FINAL con z-index MÁS ALTO */}
+          {/* Botón cerrar - posición fija en el header */}
           <button
             type="button"
             onClick={(e) => {
@@ -103,14 +102,13 @@ const StandardModal: React.FC<StandardModalProps> = ({
               e.stopPropagation();
               onClose();
             }}
-            className="group absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 active:bg-white/50 transition-all backdrop-blur-sm text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95"
+            className="group absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 z-10 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 active:bg-white/50 transition-all backdrop-blur-sm text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95"
             aria-label="Cerrar modal"
             style={{ 
               touchAction: 'manipulation',
               WebkitTapHighlightColor: 'transparent',
               minWidth: '48px',
               minHeight: '48px',
-              zIndex: 9999,
               pointerEvents: 'all',
               cursor: 'pointer'
             }}
@@ -127,8 +125,8 @@ const StandardModal: React.FC<StandardModalProps> = ({
           </button>
         </div>
 
-        {/* Contenido scrolleable */}
-        <div className="bg-white dark:bg-gray-900 overflow-y-auto max-h-[calc(90vh-100px)] sm:max-h-[calc(90vh-140px)] md:max-h-[calc(90vh-180px)] lg:max-h-[calc(90vh-200px)]">
+        {/* Contenido scrolleable - toma el espacio restante */}
+        <div className="flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </div>

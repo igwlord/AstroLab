@@ -50,10 +50,11 @@ export function adaptChartData(chart: ChartWithStatus): ChartData {
   }
   
   // ✅ Nodos Lunares - SÍ van en rueda (NO en tabla, se filtra después)
+  // Solo se usan Nodos Mean, no True
   if ('lunarNodes' in chart.data && Array.isArray(chart.data.lunarNodes)) {
     chart.data.lunarNodes.forEach((node) => {
       planets.push({
-        name: node.name,
+        name: node.name, // "Nodo Norte" o "Nodo Sur" sin variante
         longitude: node.longitude,
         retrograde: node.retrograde
       });

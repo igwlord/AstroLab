@@ -33,7 +33,12 @@ const loadSavedFormData = (): Partial<FormValue> | null => {
   try {
     const saved = localStorage.getItem(FORM_STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const data = JSON.parse(saved);
+      // 🔧 Limpiar datos legacy: remover nodesTrue si existe
+      if (data.settings?.display?.nodesTrue !== undefined) {
+        delete data.settings.display.nodesTrue;
+      }
+      return data;
     }
   } catch (error) {
     logger.error('Error loading saved form data:', error);
@@ -867,6 +872,25 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   </span>
                 </label>
 
+                {/* Lilith Mean */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.settings.display.lilithMean}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      settings: {
+                        ...formData.settings,
+                        display: { ...formData.settings.display, lilithMean: e.target.checked }
+                      }
+                    })}
+                    className="w-4 h-4 rounded border-white/20 bg-white/10 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  />
+                  <span className="text-sm text-white group-hover:text-purple-300 transition-colors">
+                    ⚸ Lilith (Mean)
+                  </span>
+                </label>
+
                 {/* Lilith True */}
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
@@ -886,22 +910,22 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                   </span>
                 </label>
 
-                {/* Lunar Nodes True */}
+                {/* Lunar Nodes Mean */}
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
-                    checked={formData.settings.display.nodesTrue}
+                    checked={formData.settings.display.nodesMean}
                     onChange={(e) => setFormData({
                       ...formData,
                       settings: {
                         ...formData.settings,
-                        display: { ...formData.settings.display, nodesTrue: e.target.checked }
+                        display: { ...formData.settings.display, nodesMean: e.target.checked }
                       }
                     })}
                     className="w-4 h-4 rounded border-white/20 bg-white/10 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
                   />
                   <span className="text-sm text-white group-hover:text-purple-300 transition-colors">
-                    ☊☋ Nodos Lunares (True)
+                    ☊☋ Nodos Lunares
                   </span>
                 </label>
               </div>

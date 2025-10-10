@@ -7,8 +7,9 @@ export type DisplayOptions = {
   fortuna: boolean;
   vertex: boolean;
   chiron: boolean;
+  lilithMean: boolean; // Mean Lilith
   lilithTrue: boolean; // True Lilith
-  nodesTrue: boolean; // True Nodes
+  nodesMean: boolean; // Mean Nodes (solo Mean, True removido)
 };
 
 export type ExtraOptions = {
@@ -79,8 +80,9 @@ export const DEFAULT_SETTINGS: ExtraOptions = {
     fortuna: true,
     vertex: true,
     chiron: true,
+    lilithMean: true,
     lilithTrue: true,
-    nodesTrue: true,
+    nodesMean: true,
   },
   asteroids: {
     ceres: false,
