@@ -53,6 +53,13 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     color: 'indigo'
   },
   {
+    id: 'house-systems',
+    name: 'Sistemas de Casas',
+    icon: '🏛️',
+    description: 'Métodos de división de casas astrológicas',
+    color: 'blue'
+  },
+  {
     id: 'planets',
     name: 'Planetas',
     icon: '🪐',

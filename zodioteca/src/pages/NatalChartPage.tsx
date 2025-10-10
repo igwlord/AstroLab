@@ -21,6 +21,8 @@ import { logger } from '../utils/logger';
 import { saveChartLocal } from '../services/chartStorage';
 import { detectPolarizations } from '../utils/polarizationDetector';
 import { Save, Check } from 'lucide-react';
+import { useSettingsStore } from '../store/useSettings';
+import { HOUSE_SYSTEMS, type HouseSystem } from '../types/houseSystem';
 
 // ⚡ Lazy imports para reducir bundle inicial (401 KB + 200 KB = 601 KB ahorrados)
 // Solo se cargan cuando el usuario hace click en "Descargar PDF"
@@ -38,15 +40,39 @@ export default function NatalChartPage() {
   const [statistics, setStatistics] = useState<ChartStatistics | null>(null);
   const [personName, setPersonName] = useState<string>('');
   const [displayOptions, setDisplayOptions] = useState(DEFAULT_SETTINGS.display);
+  const [aspectsLevel, setAspectsLevel] = useState<'basic' | 'standard' | 'complete'>('standard');
+  const houseSystem = useSettingsStore(state => state.astro.houseSystem);
   const [showForm, setShowForm] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'positions' | 'dominances' | 'polarizations'>('chart');
   const chartRef = useRef<HTMLDivElement>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
+  
+  // Guardar datos del form para poder recalcular con diferente sistema
+  const [savedFormData, setSavedFormData] = useState<FormValue | null>(null);
+  
+  // Datos extendidos de la carta para mostrar como Astro-Seek
+  const [chartMetadata, setChartMetadata] = useState<{
+    localDate: string;
+    utcDate: string;
+    lst: string;
+    timezone: string;
+    latitude: string;
+    longitude: string;
+    city: string;
+    country: string;
+    countryCode: string;
+    houseSystem: string;
+  } | null>(null);
 
   const handleSubmit = async (formData: FormValue) => {
     logger.log('📋 Form data received:', formData);
+    
+    // Guardar formData para poder recalcular después
+    setSavedFormData(formData);
     
     // Guardar nombre completo de la persona
     const fullName = [formData.name, formData.surname].filter(Boolean).join(' ').trim();
@@ -111,7 +137,8 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
         birthDateUTC,
         location.lat,
         location.lon,
-        locationName
+        locationName,
+        houseSystem
       );
 
       // 🔍 VERIFICACIÓN AUTOMÁTICA DE CÁLCULOS
@@ -139,6 +166,54 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
       // Calcular estadísticas de la carta
       const stats = calculateChartStatistics(chart.planets);
       
+      // Calcular Local Sidereal Time (LST)
+      const calculateLST = (date: Date, longitude: number): string => {
+        const jd = (date.getTime() / 86400000) + 2440587.5;
+        const t = (jd - 2451545.0) / 36525.0;
+        let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t - (t * t * t) / 38710000.0;
+        gmst = gmst % 360;
+        if (gmst < 0) gmst += 360;
+        let lst = gmst + longitude;
+        lst = lst % 360;
+        if (lst < 0) lst += 360;
+        const hours = Math.floor(lst / 15);
+        const minutes = Math.floor((lst % 15) * 4);
+        const seconds = Math.floor(((lst % 15) * 4 - minutes) * 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      };
+      
+      // Formatear coordenadas
+      const formatCoordinate = (value: number, isLatitude: boolean): string => {
+        const abs = Math.abs(value);
+        const degrees = Math.floor(abs);
+        const minutes = Math.floor((abs - degrees) * 60);
+        const direction = isLatitude 
+          ? (value >= 0 ? 'N' : 'S')
+          : (value >= 0 ? 'E' : 'O');
+        return `${degrees}°${minutes}'${direction}`;
+      };
+      
+      // Guardar metadata extendida
+      const localDate = new Date(birth.year, birth.month, birth.day, hour, minute, 0);
+      setChartMetadata({
+        localDate: localDate.toLocaleString('es-ES', { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit' 
+        }),
+        utcDate: birthDateUTC.toLocaleString('es-ES', { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit', timeZone: 'UTC' 
+        }),
+        lst: calculateLST(birthDateUTC, location.lon),
+        timezone: `UTC${offset >= 0 ? '+' : ''}${offset}`,
+        latitude: formatCoordinate(location.lat, true),
+        longitude: formatCoordinate(location.lon, false),
+        city: location.city || location.region || 'No especificada',
+        country: location.countryCode || 'No especificado',
+        countryCode: location.countryCode || '',
+        houseSystem: houseSystem.charAt(0).toUpperCase() + houseSystem.slice(1).replace('-', ' ')
+      });
+      
       setResult(chart);
       setStatistics(stats);
       setShowForm(false);
@@ -147,6 +222,113 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     } catch (error) {
       logger.error('Error calculating chart:', error);
       alert('Error al calcular la carta natal. Por favor verifica los datos.');
+    }
+  };
+
+  // Recalcular carta con nuevo sistema de casas
+  const handleRecalculate = async (newHouseSystem: typeof houseSystem) => {
+    if (!savedFormData) return;
+    
+    setIsRecalculating(true);
+    logger.log('🔄 Recalculando carta con sistema:', newHouseSystem);
+    
+    try {
+      const { birth, location } = savedFormData;
+      const hour = birth.time?.hour ?? 12;
+      const minute = birth.time?.minute ?? 0;
+      
+      const timezoneOffsets: Record<string, number> = {
+        'America/Argentina/Buenos_Aires': -3,
+        'America/Mexico_City': -6,
+        'America/Bogota': -5,
+        'America/Santiago': -4,
+        'America/Lima': -5,
+        'Europe/Madrid': 1,
+        'America/New_York': -5,
+        'America/Los_Angeles': -8,
+        'UTC': 0,
+      };
+      
+      const offset = timezoneOffsets[location.tzId || 'UTC'] || 0;
+      const birthDateUTC = new Date(
+        Date.UTC(birth.year, birth.month, birth.day, hour - offset, minute, 0)
+      );
+      
+      const locationName = location.city || location.region || location.countryCode || 'Ubicación desconocida';
+      
+      // Validar coordenadas
+      if (!location.lat || !location.lon) {
+        alert('Error: No se pudieron obtener las coordenadas');
+        return;
+      }
+      
+      // Calcular con nuevo sistema
+      const chart = await calculateNatalChart(
+        birthDateUTC,
+        location.lat,
+        location.lon,
+        locationName,
+        newHouseSystem
+      );
+      
+      const stats = calculateChartStatistics(chart.planets);
+      
+      // Actualizar metadata con nuevo sistema
+      const localDate = new Date(birth.year, birth.month, birth.day, hour, minute, 0);
+      const calculateLST = (date: Date, longitude: number): string => {
+        const jd = (date.getTime() / 86400000) + 2440587.5;
+        const t = (jd - 2451545.0) / 36525.0;
+        let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t - (t * t * t) / 38710000.0;
+        gmst = gmst % 360;
+        if (gmst < 0) gmst += 360;
+        let lst = gmst + longitude;
+        lst = lst % 360;
+        if (lst < 0) lst += 360;
+        const hours = Math.floor(lst / 15);
+        const minutes = Math.floor((lst % 15) * 4);
+        const seconds = Math.floor(((lst % 15) * 4 - minutes) * 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      };
+      
+      const formatCoordinate = (value: number, isLatitude: boolean): string => {
+        const abs = Math.abs(value);
+        const degrees = Math.floor(abs);
+        const minutes = Math.floor((abs - degrees) * 60);
+        const direction = isLatitude 
+          ? (value >= 0 ? 'N' : 'S')
+          : (value >= 0 ? 'E' : 'O');
+        return `${degrees}°${minutes}'${direction}`;
+      };
+      
+      setChartMetadata({
+        localDate: localDate.toLocaleString('es-ES', { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit' 
+        }),
+        utcDate: birthDateUTC.toLocaleString('es-ES', { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit', timeZone: 'UTC' 
+        }),
+        lst: calculateLST(birthDateUTC, location.lon),
+        timezone: `UTC${offset >= 0 ? '+' : ''}${offset}`,
+        latitude: formatCoordinate(location.lat, true),
+        longitude: formatCoordinate(location.lon, false),
+        city: location.city || location.region || 'No especificada',
+        country: location.countryCode || 'No especificado',
+        countryCode: location.countryCode || '',
+        houseSystem: newHouseSystem.charAt(0).toUpperCase() + newHouseSystem.slice(1).replace('-', ' ')
+      });
+      
+      setResult(chart);
+      setStatistics(stats);
+      setShowForm(false);
+      
+      logger.log('✅ Carta recalculada exitosamente');
+    } catch (error) {
+      logger.error('Error recalculando:', error);
+      alert('Error al recalcular la carta. Intenta de nuevo.');
+    } finally {
+      setIsRecalculating(false);
     }
   };
 
@@ -303,30 +485,81 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             </div>
           )}
           
-          {/* Header */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-purple-900 dark:text-purple-100 mb-0.5 sm:mb-1 md:mb-2 truncate">
-                  {personName}
-                </h2>
-                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-purple-700 dark:text-purple-300 mb-1 sm:mb-2 md:mb-3">
-                  Carta Natal
-                </h3>
-                <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">
-                  📅 {new Date(result.date).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-                <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
-                  📍 {result.location}
-                </p>
+          {/* Header Expandido - Estilo Astro-Seek */}
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
+                <div>
+                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-100 mb-1">
+                    {personName}
+                  </h2>
+                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-700 dark:text-purple-300">
+                    Carta Natal
+                  </h3>
+                </div>
+                
+                {chartMetadata && (
+                  <div className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 space-y-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                    {/* Grid de 2 columnas: etiqueta | valor */}
+                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                      {/* Fecha de nacimiento (hora local) */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Fecha de nacimiento (hora local):
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100">
+                        {chartMetadata.localDate} ({chartMetadata.timezone})
+                      </div>
+
+                      {/* Hora universal (UT/GMT) */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Hora universal (UT/GMT):
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100">
+                        {chartMetadata.utcDate}
+                      </div>
+
+                      {/* Hora sideral local (LST) */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Hora sideral local (LST):
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100">
+                        {chartMetadata.lst}
+                      </div>
+
+                      {/* Sistema de casas */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Sistema de casas:
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100">
+                        {chartMetadata.houseSystem}
+                      </div>
+
+                      {/* Latitud, Longitud */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Latitud, Longitud:
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100">
+                        {chartMetadata.latitude}, {chartMetadata.longitude}
+                      </div>
+
+                      {/* Ciudad, País */}
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                        Ciudad, País:
+                      </div>
+                      <div className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        {chartMetadata.city}, {chartMetadata.country}
+                        {chartMetadata.countryCode && (
+                          <span className="text-[9px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-medium">
+                            {chartMetadata.countryCode}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="print:hidden flex gap-1.5 sm:gap-2 md:gap-3 justify-end shrink-0">
+              <div className="print:hidden flex flex-col gap-2 shrink-0">
+                <div className="flex gap-1.5 sm:gap-2 justify-end">
                 <button
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF}
@@ -388,6 +621,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   </svg>
                   <span className="hidden md:inline">Nueva</span>
                 </button>
+                </div>
               </div>
             </div>
           </div>
@@ -404,7 +638,20 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {activeChartTab === 'chart' && (
             <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-3">
               {/* Rueda - Más grande y prioritaria */}
-              <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+              <div className="flex-1 md:flex-[2] bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700 relative">
+                {/* Botón de Configuración - Arriba a la derecha */}
+                <button
+                  onClick={() => setShowConfigModal(true)}
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-10 px-2 py-1.5 sm:px-3 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5 text-xs sm:text-sm shadow-lg"
+                  title="Configuración de la Carta"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="hidden sm:inline">Config</span>
+                </button>
+                
                 <NatalChartWheelPro 
                 data={adaptChartData({
                   id: crypto.randomUUID(),
@@ -441,6 +688,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                 showPlanetDegrees={true}
                 showDataTable={false}
                 displayOptions={displayOptions}
+                aspectsLevel={aspectsLevel}
               />
             </div>
 
@@ -2455,6 +2703,199 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               </AccordionSection>
             </>
           )}
+        </div>
+      )}
+
+      {/* Modal de Configuración en Vivo */}
+      {showConfigModal && result && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setShowConfigModal(false)}
+        >
+          <div 
+            className="relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-violet-900/95 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-purple-400/30 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Modal */}
+            <div className="bg-gradient-to-r from-purple-600/90 to-indigo-600/90 backdrop-blur-md border-b border-white/20 p-4 flex items-center justify-between sticky top-0 z-10 rounded-t-2xl">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="text-lg font-bold text-white">Configuración en Vivo</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfigModal(false)}
+                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="Cerrar"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Contenido del Modal */}
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-white/70">
+                Cambia la configuración y haz click en "Aplicar" para recalcular
+              </p>
+
+              {/* Sistema de Casas */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">
+                  🏠 Sistema de Casas
+                </h4>
+
+                <select
+                  value={houseSystem}
+                  onChange={(e) => {
+                    const newSystem = e.target.value as HouseSystem;
+                    useSettingsStore.getState().setHouseSystem(newSystem);
+                    handleRecalculate(newSystem);
+                  }}
+                  disabled={isRecalculating}
+                  className="w-full px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white
+                             focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 
+                             transition-all text-sm backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {Object.entries(HOUSE_SYSTEMS).map(([id, system]) => (
+                    <option key={id} value={id} className="bg-purple-900 text-white">
+                      {system.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    {HOUSE_SYSTEMS[houseSystem].description}
+                  </p>
+                  <div className="flex items-center justify-between gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-white/50">Precisión:</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                        HOUSE_SYSTEMS[houseSystem].accuracy === 'alta'
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-yellow-500/20 text-yellow-300'
+                      }`}>
+                        {HOUSE_SYSTEMS[houseSystem].accuracy === 'alta' ? '⭐ Alta' : '📊 Media'}
+                      </span>
+                    </div>
+                    <a
+                      href={`/glossary?categoria=house-systems&sistema=${houseSystem}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-purple-300 hover:text-purple-100 hover:bg-white/10 rounded-lg transition-all group"
+                    >
+                      <span>📖</span>
+                      <span className="hidden sm:inline">Leer más</span>
+                      <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+
+                {isRecalculating && (
+                  <div className="flex items-center gap-2 text-white/80 text-sm">
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Recalculando carta...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Nivel de Aspectos */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">
+                  📊 Nivel de Aspectos
+                </h4>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setAspectsLevel('basic')}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      aspectsLevel === 'basic'
+                        ? 'bg-purple-600 text-white shadow-lg scale-105'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
+                    }`}
+                  >
+                    Básico
+                  </button>
+                  <button
+                    onClick={() => setAspectsLevel('standard')}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      aspectsLevel === 'standard'
+                        ? 'bg-purple-600 text-white shadow-lg scale-105'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
+                    }`}
+                  >
+                    Estándar
+                  </button>
+                  <button
+                    onClick={() => setAspectsLevel('complete')}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      aspectsLevel === 'complete'
+                        ? 'bg-purple-600 text-white shadow-lg scale-105'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
+                    }`}
+                  >
+                    Completo
+                  </button>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    {aspectsLevel === 'basic' && '5 aspectos mayores (Conjunción, Oposición, Trígono, Cuadratura, Sextil)'}
+                    {aspectsLevel === 'standard' && '7 aspectos principales + Semicuadratura, Sesquicuadratura'}
+                    {aspectsLevel === 'complete' && 'Todos los aspectos incluyendo Quincuncio, Biquintil, Septil, Novil'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Display Options */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">
+                  👁️ Mostrar/Ocultar en la Rueda
+                </h4>
+
+                {/* Toggle Switches - Solo opciones definidas */}
+                {[
+                  { key: 'fortuna', label: '⊕ Parte de la Fortuna' },
+                  { key: 'vertex', label: '⚹ Vértex' },
+                  { key: 'lilithMean', label: '⚸ Lilith (Mean)' },
+                  { key: 'lilithTrue', label: '⚸ Lilith (True)' },
+                  { key: 'nodesMean', label: '☊☋ Nodos Lunares (Mean)' },
+                  { key: 'nodesTrue', label: '☊☋ Nodos Lunares (True)' }
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={displayOptions[key as keyof typeof displayOptions]}
+                      onChange={(e) => setDisplayOptions({
+                        ...displayOptions,
+                        [key]: e.target.checked
+                      })}
+                      className="w-4 h-4 rounded border-white/20 bg-white/10 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-white group-hover:text-purple-300 transition-colors">
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <p className="text-xs text-white/50 italic">
+                  💡 Los cambios se aplican inmediatamente a la rueda astrológica
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

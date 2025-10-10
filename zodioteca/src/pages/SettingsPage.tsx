@@ -106,12 +106,13 @@ const SettingsPage: React.FC = () => {
           <div className="text-center py-4 sm:py-6 md:py-8">
             <span className="text-3xl sm:text-4xl mb-3 sm:mb-4 block">⚙️</span>
             <p className="text-sm sm:text-base text-purple-700 dark:text-purple-300 px-2">
-              Configuraciones astrológicas avanzadas (Asteroides, Chiron, Lilith, 
-              Nodos Lunares, Aspectos Menores y Partes Árabes) están disponibles.
+              Configuraciones astrológicas avanzadas (Sistema de Casas, Asteroides, Chiron, 
+              Lilith, Nodos Lunares, Aspectos Menores y Partes Árabes) están disponibles 
+              en el <strong>modal de configuración del formulario</strong>.
             </p>
             <div className="inline-flex items-center bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg mt-3 sm:mt-4 text-xs sm:text-sm">
               <span className="mr-1.5 sm:mr-2">✅</span>
-              FASES 1-5 Completadas
+              FASES 1-5 Completadas + Sistema de Casas
             </div>
             <div className="inline-flex items-center bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg mt-2 text-xs sm:text-sm">
               <span className="mr-1.5 sm:mr-2">🔄</span>

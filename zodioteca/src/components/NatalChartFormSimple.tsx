@@ -17,6 +17,8 @@ import { logger } from '../utils/logger';
 import type { FormValue, NatalChartFormProps } from '../types/natalForm';
 import { DEFAULT_SETTINGS } from '../types/natalForm';
 import { CITIES_DB, type CityData } from '../data/cities';
+import { useSettingsStore } from '../store/useSettings';
+import { HOUSE_SYSTEMS } from '../types/houseSystem';
 
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -150,6 +152,15 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
   const [useManualCoordinates, setUseManualCoordinates] = useState(false);
   const cityInputRef = useRef<HTMLInputElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  
+  // Sistema de casas - inicializar desde el store solo una vez
+  const [houseSystem, setHouseSystemState] = useState(() => useSettingsStore.getState().astro.houseSystem);
+  
+  // Actualizar el store global cuando cambie localmente
+  const setHouseSystem = (newSystem: 'placidus' | 'koch' | 'whole-sign' | 'equal-house' | 'porphyry' | 'campanus') => {
+    setHouseSystemState(newSystem);
+    useSettingsStore.getState().setHouseSystem(newSystem);
+  };
 
   // Helper para calcular posición del dropdown
   const updateDropdownPosition = () => {
@@ -893,6 +904,43 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
                     ☊☋ Nodos Lunares (True)
                   </span>
                 </label>
+              </div>
+
+              {/* Sistema de Casas */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider">
+                  🏠 Sistema de Casas
+                </h4>
+
+                <select
+                  value={houseSystem}
+                  onChange={(e) => setHouseSystem(e.target.value as 'placidus' | 'koch' | 'whole-sign' | 'equal-house' | 'porphyry' | 'campanus')}
+                  className="w-full px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white
+                             focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 
+                             transition-all text-sm backdrop-blur-sm"
+                >
+                  {Object.entries(HOUSE_SYSTEMS).map(([id, system]) => (
+                    <option key={id} value={id} className="bg-purple-900 text-white">
+                      {system.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    {HOUSE_SYSTEMS[houseSystem].description}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs text-white/50">Precisión:</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                      HOUSE_SYSTEMS[houseSystem].accuracy === 'alta'
+                        ? 'bg-green-500/20 text-green-300'
+                        : 'bg-yellow-500/20 text-yellow-300'
+                    }`}>
+                      {HOUSE_SYSTEMS[houseSystem].accuracy === 'alta' ? '⭐ Alta' : '📊 Media'}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="pt-3 border-t border-white/10">

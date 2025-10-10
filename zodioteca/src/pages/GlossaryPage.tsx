@@ -8,6 +8,7 @@ import { GLOSSARY_CATEGORIES } from '../types/glossary';
 import { ZODIAC_SIGNS } from '../types/zodiacSign';
 import { PLANETS } from '../types/planet';
 import { HOUSES } from '../types/house';
+import { HOUSE_SYSTEMS_GLOSSARY } from '../types/houseSystem';
 import { ASPECTS } from '../types/aspect';
 import { MOON_SIGNS } from '../types/moonSign';
 import { ASCENDANTS } from '../types/ascendant';
@@ -27,6 +28,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const ZodiacSignsGrid = lazy(() => import('../components/ZodiacSignsGrid'));
 const PlanetsGrid = lazy(() => import('../components/PlanetsGrid'));
 const HousesGrid = lazy(() => import('../components/HousesGrid'));
+const HouseSystemsGrid = lazy(() => import('../components/HouseSystemsGrid'));
 const AspectsGrid = lazy(() => import('../components/AspectsGrid'));
 const MoonSignsGrid = lazy(() => import('../components/MoonSignsGrid'));
 const AscendantsGrid = lazy(() => import('../components/AscendantsGrid'));
@@ -130,6 +132,20 @@ const GlossaryPage: React.FC = () => {
         categoryName: catInfo.name,
         categoryIcon: catInfo.icon,
         snippet: house.description.substring(0, 100) + '...',
+        matchType: 'title'
+      });
+    });
+
+    // Indexar sistemas de casas
+    Object.values(HOUSE_SYSTEMS_GLOSSARY).forEach(system => {
+      const catInfo = getCategoryInfo('house-systems');
+      content.push({
+        id: `house-system-${system.id}`,
+        title: system.name,
+        category: 'house-systems',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: `${system.subtitle} • ${system.type} • ${system.era}`,
         matchType: 'title'
       });
     });
@@ -600,6 +616,11 @@ const GlossaryPage: React.FC = () => {
           /* Mostrar grid de casas */
           <div>
             <HousesGrid />
+          </div>
+        ) : selectedCategory === 'house-systems' ? (
+          /* Mostrar grid de sistemas de casas */
+          <div>
+            <HouseSystemsGrid />
           </div>
         ) : selectedCategory === 'aspects' ? (
           /* Mostrar grid de aspectos */

@@ -366,7 +366,8 @@ export async function getDailyAstrologicalWeather(forceRefresh = false): Promise
       now,
       0,  // Latitud 0 (Ecuador)
       0,  // Longitud 0 (Greenwich)
-      'Tránsitos del Día'
+      'Tránsitos del Día',
+      'placidus'  // Sistema de casas por defecto para clima astrológico
     );
     
     // Extraer planetas

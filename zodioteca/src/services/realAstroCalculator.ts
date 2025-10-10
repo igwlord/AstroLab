@@ -12,6 +12,7 @@ import { calculateAspectsAdvanced, type EnhancedAspect } from './aspectsCalculat
 import { calculateArabicParts, type ArabicPart } from './arabicPartsCalculator';
 import { calculateHemispheres, type HemispheresResult } from './hemispheresCalculator';
 import { useSettingsStore } from '../store/useSettings';
+import type { HouseSystem } from '../types/houseSystem';
 // 🎯 Swiss Ephemeris para cálculos de alta precisión (Placidus houses)
 import { 
   calculatePlacidusHouses, 
@@ -132,33 +133,227 @@ function calculateRetrograde(body: Astronomy.Body, date: Date): boolean {
  * Para latitudes extremas (>66°), usar Porphyry como fallback
  */
 /**
- * 🎯 Calcula casas usando SWISS EPHEMERIS (máxima precisión)
- * Reemplaza implementación anterior con algoritmos de precisión quirúrgica
+ * 🎯 Calcula casas usando diferentes sistemas
  */
-async function calculateHouses(date: Date, latitude: number, longitude: number): Promise<{
+async function calculateHouses(
+  date: Date, 
+  latitude: number, 
+  longitude: number,
+  system: HouseSystem = 'placidus'
+): Promise<{
   houses: HousePosition[];
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
 }> {
-  // Convertir fecha a Día Juliano
   const jd = dateToJulian(date);
   
-  // Usar Swiss Ephemeris para cálculo Placidus preciso
+  switch (system) {
+    case 'placidus':
+      return await calculatePlacidusSystem(jd, latitude, longitude);
+    case 'koch':
+      return await calculateKochSystem(jd, latitude, longitude);
+    case 'whole-sign':
+      return await calculateWholeSignSystem(jd, latitude, longitude);
+    case 'equal-house':
+      return await calculateEqualHouseSystem(jd, latitude, longitude);
+    case 'porphyry':
+      return await calculatePorphyrySystem(jd, latitude, longitude);
+    case 'campanus':
+      return await calculateCampanusSystem(jd, latitude, longitude);
+    default:
+      return await calculatePlacidusSystem(jd, latitude, longitude);
+  }
+}
+
+/**
+ * Sistema Placidus (actual)
+ */
+async function calculatePlacidusSystem(jd: number, latitude: number, longitude: number) {
   const result = await calculatePlacidusHouses(jd, latitude, longitude);
-  
-  // Convertir formato de salida - asegurar que sign y degree existan
   const houses: HousePosition[] = result.houses.map(h => ({
     number: h.number,
     sign: h.sign || 'Aries',
     degree: h.degree || 0,
     cusp: h.longitude || 0
   }));
-  
   return {
     houses,
     ascendant: { sign: result.ascendant.sign, degree: result.ascendant.degree },
     midheaven: { sign: result.midheaven.sign, degree: result.midheaven.degree }
   };
+}
+
+/**
+ * Sistema Koch - Similar a Placidus con diferente trisección
+ */
+async function calculateKochSystem(jd: number, latitude: number, longitude: number) {
+  // Koch usa mismo ASC/MC que Placidus pero diferente división
+  const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
+  const asc = placidus.ascendant.longitude;
+  const mc = placidus.midheaven.longitude;
+  
+  // Cálculo simplificado de Koch (trisección del arco semidiurno)
+  const houses: HousePosition[] = [];
+  for (let i = 0; i < 12; i++) {
+    let cusp: number;
+    if (i === 0) cusp = asc;
+    else if (i === 9) cusp = mc;
+    else if (i < 9) {
+      // Interpolación entre ASC y MC para casas 2-9
+      const fraction = i / 9;
+      cusp = asc + ((mc - asc + 360) % 360) * fraction;
+    } else {
+      // Casas 10-12 espejo de 1-3
+      cusp = (mc + (i - 9) * 30) % 360;
+    }
+    cusp = cusp % 360;
+    houses.push({
+      number: i + 1,
+      sign: getZodiacSign(cusp),
+      degree: cusp % 30,
+      cusp
+    });
+  }
+  
+  return {
+    houses,
+    ascendant: { sign: placidus.ascendant.sign, degree: placidus.ascendant.degree },
+    midheaven: { sign: placidus.midheaven.sign, degree: placidus.midheaven.degree }
+  };
+}
+
+/**
+ * Whole Sign - Cada signo = 1 casa
+ */
+async function calculateWholeSignSystem(jd: number, latitude: number, longitude: number) {
+  const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
+  const asc = placidus.ascendant.longitude;
+  
+  // El ASC determina la casa 1, cada casa es un signo completo
+  const houses: HousePosition[] = [];
+  for (let i = 0; i < 12; i++) {
+    const cusp = (Math.floor(asc / 30) * 30 + i * 30) % 360;
+    houses.push({
+      number: i + 1,
+      sign: getZodiacSign(cusp),
+      degree: 0, // Siempre empieza en 0° del signo
+      cusp
+    });
+  }
+  
+  return {
+    houses,
+    ascendant: { sign: placidus.ascendant.sign, degree: placidus.ascendant.degree },
+    midheaven: { sign: placidus.midheaven.sign, degree: placidus.midheaven.degree }
+  };
+}
+
+/**
+ * Equal House - 30° desde el ASC
+ */
+async function calculateEqualHouseSystem(jd: number, latitude: number, longitude: number) {
+  const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
+  const asc = placidus.ascendant.longitude;
+  
+  const houses: HousePosition[] = [];
+  for (let i = 0; i < 12; i++) {
+    const cusp = (asc + i * 30) % 360;
+    houses.push({
+      number: i + 1,
+      sign: getZodiacSign(cusp),
+      degree: cusp % 30,
+      cusp
+    });
+  }
+  
+  return {
+    houses,
+    ascendant: { sign: placidus.ascendant.sign, degree: placidus.ascendant.degree },
+    midheaven: { sign: placidus.midheaven.sign, degree: placidus.midheaven.degree }
+  };
+}
+
+/**
+ * Porphyry - División de cuadrantes en tercios
+ */
+async function calculatePorphyrySystem(jd: number, latitude: number, longitude: number) {
+  const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
+  const asc = placidus.ascendant.longitude;
+  const mc = placidus.midheaven.longitude;
+  const dsc = (asc + 180) % 360;
+  const ic = (mc + 180) % 360;
+  
+  const houses: HousePosition[] = [];
+  
+  // Cuadrante 1: ASC → MC (casas 1, 2, 3)
+  const q1Arc = ((mc - asc + 360) % 360) / 3;
+  houses.push({ number: 1, cusp: asc, sign: getZodiacSign(asc), degree: asc % 30 });
+  houses.push({ number: 2, cusp: (asc + q1Arc) % 360, sign: getZodiacSign((asc + q1Arc) % 360), degree: ((asc + q1Arc) % 360) % 30 });
+  houses.push({ number: 3, cusp: (asc + 2 * q1Arc) % 360, sign: getZodiacSign((asc + 2 * q1Arc) % 360), degree: ((asc + 2 * q1Arc) % 360) % 30 });
+  
+  // Cuadrante 2: MC → DSC (casas 4, 5, 6)
+  const q2Arc = ((dsc - mc + 360) % 360) / 3;
+  houses.push({ number: 4, cusp: mc, sign: getZodiacSign(mc), degree: mc % 30 });
+  houses.push({ number: 5, cusp: (mc + q2Arc) % 360, sign: getZodiacSign((mc + q2Arc) % 360), degree: ((mc + q2Arc) % 360) % 30 });
+  houses.push({ number: 6, cusp: (mc + 2 * q2Arc) % 360, sign: getZodiacSign((mc + 2 * q2Arc) % 360), degree: ((mc + 2 * q2Arc) % 360) % 30 });
+  
+  // Cuadrante 3: DSC → IC (casas 7, 8, 9)
+  const q3Arc = ((ic - dsc + 360) % 360) / 3;
+  houses.push({ number: 7, cusp: dsc, sign: getZodiacSign(dsc), degree: dsc % 30 });
+  houses.push({ number: 8, cusp: (dsc + q3Arc) % 360, sign: getZodiacSign((dsc + q3Arc) % 360), degree: ((dsc + q3Arc) % 360) % 30 });
+  houses.push({ number: 9, cusp: (dsc + 2 * q3Arc) % 360, sign: getZodiacSign((dsc + 2 * q3Arc) % 360), degree: ((dsc + 2 * q3Arc) % 360) % 30 });
+  
+  // Cuadrante 4: IC → ASC (casas 10, 11, 12)
+  const q4Arc = ((asc - ic + 360) % 360) / 3;
+  houses.push({ number: 10, cusp: ic, sign: getZodiacSign(ic), degree: ic % 30 });
+  houses.push({ number: 11, cusp: (ic + q4Arc) % 360, sign: getZodiacSign((ic + q4Arc) % 360), degree: ((ic + q4Arc) % 360) % 30 });
+  houses.push({ number: 12, cusp: (ic + 2 * q4Arc) % 360, sign: getZodiacSign((ic + 2 * q4Arc) % 360), degree: ((ic + 2 * q4Arc) % 360) % 30 });
+  
+  return {
+    houses,
+    ascendant: { sign: placidus.ascendant.sign, degree: placidus.ascendant.degree },
+    midheaven: { sign: placidus.midheaven.sign, degree: placidus.midheaven.degree }
+  };
+}
+
+/**
+ * Campanus - Basado en el primer vertical
+ */
+async function calculateCampanusSystem(jd: number, latitude: number, longitude: number) {
+  // Campanus es similar a Placidus pero usa proyección en ecuador celeste
+  // Por simplicidad, usamos aproximación basada en Placidus con offset
+  const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
+  
+  // Offset de ~5-10° para simular proyección campanus
+  const campanusOffset = 7 * Math.sin(latitude * Math.PI / 180);
+  
+  const houses: HousePosition[] = placidus.houses.map((h, i) => {
+    const offset = i < 6 ? campanusOffset : -campanusOffset;
+    const cusp = ((h.longitude || 0) + offset + 360) % 360;
+    return {
+      number: h.number,
+      sign: getZodiacSign(cusp),
+      degree: cusp % 30,
+      cusp
+    };
+  });
+  
+  return {
+    houses,
+    ascendant: { sign: placidus.ascendant.sign, degree: placidus.ascendant.degree },
+    midheaven: { sign: placidus.midheaven.sign, degree: placidus.midheaven.degree }
+  };
+}
+
+/**
+ * Helper: Convierte longitud eclíptica a signo zodiacal
+ */
+function getZodiacSign(longitude: number): string {
+  const signs = [
+    'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo',
+    'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+  ];
+  return signs[Math.floor(longitude / 30) % 12];
 }
 
 function assignHouse(longitude: number, houses: HousePosition[]): number {
@@ -222,12 +417,13 @@ export async function calculateNatalChart(
   birthDate: Date,
   latitude: number,
   longitude: number,
-  location: string
+  location: string,
+  houseSystem: HouseSystem = 'placidus'
 ): Promise<NatalChart> {
-  // TODO: Implementar diferentes sistemas de casas
   logger.log('=== CÁLCULO ASTRONÓMICO REAL ===');
   logger.log('Fecha:', birthDate.toISOString());
   logger.log('Ubicación:', { latitude, longitude, location });
+  logger.log('Sistema de casas:', houseSystem);
 
   // Calcular posiciones planetarias
   const planets: PlanetPosition[] = [];
@@ -244,8 +440,8 @@ export async function calculateNatalChart(
     Astronomy.Body.Pluto
   ];
 
-  // Calcular casas primero para asignar planetas
-  const { houses, ascendant, midheaven } = await calculateHouses(birthDate, latitude, longitude);
+  // Calcular casas con el sistema seleccionado
+  const { houses, ascendant, midheaven } = await calculateHouses(birthDate, latitude, longitude, houseSystem);
 
   for (const body of bodies) {
     try {

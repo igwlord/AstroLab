@@ -18,6 +18,7 @@ interface NatalChartWheelProProps {
   showPlanetDegrees?: boolean; // Mostrar deg° min′ junto a planetas
   showDataTable?: boolean; // Tabla inferior con datos detallados
   displayOptions?: DisplayOptions; // Opciones de qué mostrar en la rueda
+  aspectsLevel?: 'basic' | 'standard' | 'complete'; // Nivel de aspectos a mostrar
 }
 
 const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
@@ -26,9 +27,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   showPlanetDegrees = true,
   showDataTable = true,
   displayOptions,
+  aspectsLevel = 'standard',
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
-  const [aspectsLevel, setAspectsLevel] = React.useState<'basic' | 'standard' | 'complete'>('standard');
   const { isDark } = useThemeStore();
   
   const cx = size / 2;
@@ -795,46 +796,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   return (
     <>
       <div className="natal-chart-wheel-pro flex flex-col items-center">
-        {/* Control de niveles de aspectos - Movido arriba */}
-        <div className="flex gap-2 mb-4 flex-wrap justify-center print:hidden">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
-            Aspectos:
-          </span>
-          <button
-            onClick={() => setAspectsLevel('basic')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              aspectsLevel === 'basic'
-                ? 'bg-purple-600 text-white shadow-md'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            📊 Básico
-          </button>
-          <button
-            onClick={() => setAspectsLevel('standard')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              aspectsLevel === 'standard'
-                ? 'bg-purple-600 text-white shadow-md'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            📈 Estándar
-          </button>
-          <button
-            onClick={() => setAspectsLevel('complete')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              aspectsLevel === 'complete'
-                ? 'bg-purple-600 text-white shadow-md'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            🔬 Completo
-          </button>
-          
-          {/* Botón de zoom móvil */}
+        {/* Botón de zoom móvil */}
+        <div className="flex gap-2 mb-4 flex-wrap justify-center print:hidden md:hidden">
           <button
             onClick={() => setIsZoomModalOpen(true)}
-            className="md:hidden px-3 py-1.5 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
+            className="px-3 py-1.5 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
           >
             🔍 Ver en grande
           </button>
@@ -1068,6 +1034,8 @@ export default React.memo(NatalChartWheelPro, (prevProps, nextProps) => {
     prevProps.size === nextProps.size &&
     JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
     prevProps.showPlanetDegrees === nextProps.showPlanetDegrees &&
-    prevProps.showDataTable === nextProps.showDataTable
+    prevProps.showDataTable === nextProps.showDataTable &&
+    JSON.stringify(prevProps.displayOptions) === JSON.stringify(nextProps.displayOptions) &&
+    prevProps.aspectsLevel === nextProps.aspectsLevel
   );
 });

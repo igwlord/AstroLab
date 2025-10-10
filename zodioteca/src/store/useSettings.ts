@@ -1,8 +1,7 @@
 import { logger } from '../utils/logger';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export type HouseSystem = 'placidus' | 'koch' | 'equal' | 'campanus' | 'regiomontanus' | 'whole-sign';
+import type { HouseSystem } from '../types/houseSystem';
 export type Theme = 'light' | 'dark' | 'auto';
 export type Language = 'es' | 'en';
 
