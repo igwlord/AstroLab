@@ -399,8 +399,11 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 opacity="0.9"
                 style={{ 
                   fontSize: size < 450 ? '18px' : '26px',
-                  fontWeight: 'bold',
-                  fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
+                  fontWeight: 400,
+                  fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+                  WebkitTextStrokeWidth: '1px',
+                  WebkitTextStrokeColor: '#ffffff',
+                  paintOrder: 'stroke fill'
                 }}
               >
                 {sign.symbol}
@@ -543,8 +546,11 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
                 filter={planetFilter}
                 style={{ 
                   fontSize: `${planetSize + 4}px`,
-                  fontWeight: 'bold',
-                  fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
+                  fontWeight: 400,
+                  fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+                  WebkitTextStrokeWidth: '1px',
+                  WebkitTextStrokeColor: planet.color,
+                  paintOrder: 'stroke fill'
                 }}
               >
                 {planet.symbol}

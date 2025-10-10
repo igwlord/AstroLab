@@ -226,13 +226,13 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           fill={THEME.signSymbols}
           textAnchor="middle"
           dominantBaseline="middle"
-          fontWeight="900"
+          fontWeight={400}
           style={{ 
             filter: 'drop-shadow(0 0 3px rgba(212, 175, 55, 0.5))',
-            fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
-            strokeWidth: '0.5px',
-            stroke: THEME.signSymbols,
-            paintOrder: 'stroke fill',
+            fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+            WebkitTextStrokeWidth: '0.5px',
+            WebkitTextStrokeColor: THEME.signSymbols,
+            paintOrder: 'stroke fill'
           }}
         >
           {SIGN_SYMBOLS[i]}
@@ -623,7 +623,10 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           fontWeight="bold"
           style={{ 
             filter: 'drop-shadow(0 0 3px rgba(230, 213, 255, 0.5))',
-            fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+            fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif',
+            WebkitTextStrokeWidth: '0.5px',
+            WebkitTextStrokeColor: THEME.planets.glyph,
+            paintOrder: 'stroke fill'
           }}
         >
           {symbol}

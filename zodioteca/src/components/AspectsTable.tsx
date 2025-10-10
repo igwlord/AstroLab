@@ -167,20 +167,20 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
                   {typeAspects.map((aspect, idx) => (
                     <tr key={idx} className="border-b border-current opacity-30 last:border-0 hover:bg-white/50 dark:hover:bg-black/20">
                       <td className="py-2 px-2 font-semibold">
-                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif' }}>
                           {planetSymbols[aspect.planet1] || '•'}
                           <title>{aspect.planet1}</title>
                         </span>
                         {aspect.planet1}
                       </td>
                       <td className="text-center py-2 px-2">
-                        <span className="text-xl font-bold" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                        <span className="text-xl font-bold" style={{ fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif' }}>
                           {info.symbol}
                           <title>{aspect.type}</title>
                         </span>
                       </td>
                       <td className="py-2 px-2 font-semibold">
-                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif' }}>
+                        <span className="text-base mr-1" style={{ fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif' }}>
                           {planetSymbols[aspect.planet2] || '•'}
                           <title>{aspect.planet2}</title>
                         </span>
@@ -212,7 +212,7 @@ const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlane
                   className="text-xl" 
                   style={{ 
                     color: info.color,
-                    fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif'
+                    fontFamily: '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", Arial, sans-serif'
                   }}
                   title={name}
                 >
