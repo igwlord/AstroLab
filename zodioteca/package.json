@@ -28,6 +28,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3",
+    "react-zoom-pan-pinch": "^3.7.0",
     "swisseph-wasm": "^0.0.2",
     "vaul": "^1.1.2",
     "zustand": "^5.0.8"

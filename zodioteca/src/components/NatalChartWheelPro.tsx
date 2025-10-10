@@ -3,6 +3,7 @@ import type { ChartData } from '../types/chartWheel';
 import { normalize, deltaPos, absToRad, polar, degMin } from '../utils/chartGeometry';
 import { useThemeStore } from '../store/useTheme';
 import { normalizeAspectKey, getAspectStyle, ASPECTS_STANDARD, getAspectUI } from '../constants/aspectsStandard';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 /**
  * NatalChartWheelPro - Implementación EXACTA según rudea astro modelo.md
@@ -31,6 +32,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
   const { isDark } = useThemeStore();
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
   const cx = size / 2;
   const cy = size / 2;
@@ -503,6 +505,51 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     [filteredPlanets]
   );
 
+  // ============================================
+  // SCROLL INDICATORS: Detectar overflow y mostrar gradientes
+  // ============================================
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      const leftGradient = document.getElementById('scroll-gradient-left');
+      const rightGradient = document.getElementById('scroll-gradient-right');
+
+      if (!leftGradient || !rightGradient) return;
+
+      // Mostrar gradiente izquierdo si hay scroll hacia la izquierda
+      if (scrollLeft > 10) {
+        leftGradient.style.opacity = '1';
+      } else {
+        leftGradient.style.opacity = '0';
+      }
+
+      // Mostrar gradiente derecho si hay scroll hacia la derecha
+      if (scrollLeft < scrollWidth - clientWidth - 10) {
+        rightGradient.style.opacity = '1';
+      } else {
+        rightGradient.style.opacity = '0';
+      }
+    };
+
+    // Ejecutar al montar para estado inicial
+    handleScroll();
+
+    // Escuchar eventos de scroll
+    container.addEventListener('scroll', handleScroll);
+    
+    // Escuchar resize para detectar si aparece/desaparece overflow
+    const resizeObserver = new ResizeObserver(handleScroll);
+    resizeObserver.observe(container);
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, [showDataTable, data.aspects]);
+
   const renderPlanets = () => {
     const planetGlyphs: React.ReactElement[] = [];
 
@@ -622,6 +669,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
   // ============================================
   // 6. TABLA DE ASPECTOS PROFESIONAL (estilo Astro-Seek exacto)
+  // RESPONSIVE: Cards en móvil (<768px) + Tabla en desktop (≥768px)
   // ============================================
   const renderAspectsGrid = () => {
     if (!showDataTable || !data.aspects || data.aspects.length === 0) return null;
@@ -633,14 +681,14 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
     return (
       <div 
-        className="mt-8 mx-auto p-6 rounded-2xl shadow-2xl"
+        className="mt-8 mx-auto p-4 sm:p-6 rounded-2xl shadow-2xl"
         style={{
           background: 'radial-gradient(circle at 50% 30%, #1A0033, #0B0018)',
           maxWidth: '900px',
         }}
       >
         <h3 
-          className="text-xl font-bold mb-6 text-center"
+          className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-center"
           style={{ 
             color: '#FFD700',
             textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
@@ -649,15 +697,136 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           Tabla de Aspectos
         </h3>
         
-        {/* Tabla en formato Astro-Seek */}
-        <div className="overflow-x-auto">
-          <table 
-            className="mx-auto"
-            style={{ 
-              borderCollapse: 'separate',
-              borderSpacing: '2px',
+        {/* 📱 VISTA MÓVIL: Lista compacta de aspectos activos (<768px) */}
+        <div className="md:hidden space-y-2">
+          {data.aspects.map((aspect, idx) => {
+            const k = normalizeAspectKey(aspect.type);
+            if (!k) return null;
+            
+            const aspectUI = getAspectUI(k);
+            const color = aspectUI.color;
+            
+            return (
+              <div
+                key={idx}
+                className="rounded-lg p-3 border-2 transition-all duration-150 active:scale-[0.98]"
+                style={{
+                  backgroundColor: `${color}12`,
+                  borderColor: `${color}35`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Planeta 1 */}
+                  <div className="flex items-center gap-2 min-w-[90px]">
+                    <span 
+                      className="text-2xl"
+                      style={{ 
+                        color: '#FFD700',
+                        fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+                      }}
+                    >
+                      {PLANET_SYMBOLS[aspect.planet1] || '●'}
+                    </span>
+                    <span className="text-xs font-semibold text-white/90">
+                      {aspect.planet1}
+                    </span>
+                  </div>
+
+                  {/* Aspecto (centro compacto) */}
+                  <div className="flex items-center gap-2 flex-1 justify-center">
+                    <span 
+                      className="text-3xl"
+                      style={{ 
+                        color: color,
+                        textShadow: `0 0 10px ${color}70`,
+                        filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.4))'
+                      }}
+                    >
+                      {aspectUI.symbol}
+                    </span>
+                    <div className="flex flex-col items-start">
+                      <span 
+                        className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                        style={{ 
+                          color: color,
+                          backgroundColor: `${color}20`,
+                        }}
+                      >
+                        {aspect.type}
+                      </span>
+                      <span className="text-[9px] text-white/50 mt-0.5">
+                        {Math.abs(aspect.orb).toFixed(1)}°
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Planeta 2 */}
+                  <div className="flex items-center gap-2 min-w-[90px] justify-end">
+                    <span className="text-xs font-semibold text-white/90">
+                      {aspect.planet2}
+                    </span>
+                    <span 
+                      className="text-2xl"
+                      style={{ 
+                        color: '#FFD700',
+                        fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+                      }}
+                    >
+                      {PLANET_SYMBOLS[aspect.planet2] || '●'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 🖥️ VISTA DESKTOP: Tabla matricial 12×12 (≥768px) */}
+        <div className="hidden md:block relative">
+          {/* Contenedor con scroll indicators */}
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto scroll-smooth"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(212, 175, 55, 0.5) rgba(26, 26, 46, 0.3)',
             }}
           >
+            {/* Gradiente izquierdo (indica scroll hacia izquierda) */}
+            <div 
+              className="absolute left-0 top-0 bottom-0 w-12 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+              style={{
+                background: isDark 
+                  ? 'linear-gradient(to right, rgba(11, 0, 24, 0.98), transparent)'
+                  : 'linear-gradient(to right, rgba(255, 248, 245, 0.98), transparent)',
+              }}
+              id="scroll-gradient-left"
+            />
+            
+            {/* Gradiente derecho (indica scroll hacia derecha) */}
+            <div 
+              className="absolute right-0 top-0 bottom-0 w-12 pointer-events-none z-10 opacity-100 transition-opacity duration-300"
+              style={{
+                background: isDark
+                  ? 'linear-gradient(to left, rgba(11, 0, 24, 0.98), transparent)'
+                  : 'linear-gradient(to left, rgba(255, 248, 245, 0.98), transparent)',
+              }}
+              id="scroll-gradient-right"
+            >
+              {/* Hint visual: "Desplaza →" */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs font-semibold animate-pulse"
+                style={{ color: isDark ? '#FFD700' : '#9333EA' }}>
+                <span>→</span>
+              </div>
+            </div>
+            
+            <table 
+              className="mx-auto"
+              style={{ 
+                borderCollapse: 'separate',
+                borderSpacing: '2px',
+              }}
+            >
             {/* Encabezado superior (planetas horizontales) */}
             <thead>
               <tr>
@@ -799,6 +968,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             </tbody>
           </table>
         </div>
+        </div>
         
         {/* Nota sobre elementos visibles */}
         {displayOptions && (
@@ -843,13 +1013,17 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   return (
     <>
       <div className="natal-chart-wheel-pro flex flex-col items-center">
-        {/* Botón de zoom móvil */}
-        <div className="flex gap-2 mb-4 flex-wrap justify-center print:hidden md:hidden">
+        {/* Instrucciones y botón modal para móviles */}
+        <div className="flex flex-col gap-2 mb-3 print:hidden md:hidden w-full max-w-lg">
+          <div className="flex gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-xs text-purple-900 dark:text-purple-300 font-medium">
+            <span>💡</span>
+            <span>Pellizca para zoom • Arrastra para mover • Toca dos veces para restablecer</span>
+          </div>
           <button
             onClick={() => setIsZoomModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
+            className="px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-2 border-purple-400"
           >
-            🔍 Ver en grande
+            🔍 Abrir en pantalla completa
           </button>
         </div>
 
@@ -941,139 +1115,227 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             </a>
           </div>
 
-          {/* SVG centrado - clickeable en móvil */}
-          <div 
-            className="flex justify-center w-full cursor-pointer md:cursor-default"
-            onClick={() => {
-              if (window.innerWidth < 768) {
-                setIsZoomModalOpen(true);
-              }
-            }}
-          >
-            <svg
-              width={size}
-              height={size}
-              viewBox={`0 0 ${size} ${size}`}
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ background: 'transparent' }}
-              className="max-w-full h-auto"
-              shapeRendering="geometricPrecision"
-              role="img"
-              aria-label="Carta natal astrológica con planetas, casas, signos zodiacales y aspectos"
+          {/* SVG centrado con zoom interactivo */}
+          <div className="flex justify-center w-full">
+            <TransformWrapper
+              initialScale={1}
+              minScale={0.5}
+              maxScale={3}
+              centerOnInit={true}
+              wheel={{ step: 0.1 }}
+              pinch={{ step: 5 }}
+              doubleClick={{ mode: 'reset' }}
+              panning={{ velocityDisabled: false }}
             >
-            {/* Fondo degradado - modo oscuro (violeta) / modo claro (pastel) */}
-            <defs>
-              <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
-                {isDark ? (
-                  <>
-                    <stop offset="0%" stopColor="#1a1a2e" />
-                    <stop offset="100%" stopColor="#0a0a18" />
-                  </>
-                ) : (
-                  <>
-                    <stop offset="0%" stopColor="#FFF8F5" />
-                    <stop offset="30%" stopColor="#FFE5D9" />
-                    <stop offset="70%" stopColor="#D4F1F4" />
-                    <stop offset="100%" stopColor="#F8E6F1" />
-                  </>
-                )}
-              </radialGradient>
-            </defs>
-            <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
+              {({ zoomIn, zoomOut, resetTransform }) => (
+                <>
+                  {/* Controles de zoom - flotantes arriba a la derecha */}
+                  <div className="absolute top-2 right-2 z-10 flex gap-1 bg-white/90 dark:bg-gray-800/90 rounded-lg p-1 shadow-lg backdrop-blur-sm print:hidden">
+                    <button
+                      onClick={() => zoomIn()}
+                      className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors"
+                      title="Acercar (Zoom In)"
+                      aria-label="Acercar zoom"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={() => zoomOut()}
+                      className="w-8 h-8 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors"
+                      title="Alejar (Zoom Out)"
+                      aria-label="Alejar zoom"
+                    >
+                      −
+                    </button>
+                    <button
+                      onClick={() => resetTransform()}
+                      className="w-8 h-8 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold transition-colors"
+                      title="Restablecer vista"
+                      aria-label="Restablecer zoom"
+                    >
+                      ⟲
+                    </button>
+                  </div>
 
-            {/* Círculos concéntricos principales - SOLO los necesarios */}
-            <g id="structure-circles">
-              {/* Círculo de aspectos (centro) */}
-              <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
-              
-              {/* Anillo de CASAS (cerca del centro) */}
-              <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-              <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-              
-              {/* Anillo de SIGNOS (exterior) */}
-              <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-              <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-            </g>
+                  {/* Contenedor con zoom y pan */}
+                  <TransformComponent
+                    wrapperClass="!w-full !h-auto"
+                    contentClass="!w-full !h-auto flex justify-center"
+                  >
+                    <svg
+                      width={size}
+                      height={size}
+                      viewBox={`0 0 ${size} ${size}`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ background: 'transparent' }}
+                      className="max-w-full h-auto"
+                      shapeRendering="geometricPrecision"
+                      role="img"
+                      aria-label="Carta natal astrológica con planetas, casas, signos zodiacales y aspectos"
+                    >
+                      {/* Fondo degradado - modo oscuro (violeta) / modo claro (pastel) */}
+                      <defs>
+                        <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
+                          {isDark ? (
+                            <>
+                              <stop offset="0%" stopColor="#1a1a2e" />
+                              <stop offset="100%" stopColor="#0a0a18" />
+                            </>
+                          ) : (
+                            <>
+                              <stop offset="0%" stopColor="#FFF8F5" />
+                              <stop offset="30%" stopColor="#FFE5D9" />
+                              <stop offset="70%" stopColor="#D4F1F4" />
+                              <stop offset="100%" stopColor="#F8E6F1" />
+                            </>
+                          )}
+                        </radialGradient>
+                      </defs>
+                      <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient)" />
 
-            {renderTicks()}
-            {renderSigns()}
-            {renderHouses()}
-            {renderAspects()}
-            {renderPlanets()}
-          </svg>
-        </div>
+                      {/* Círculos concéntricos principales - SOLO los necesarios */}
+                      <g id="structure-circles">
+                        {/* Círculo de aspectos (centro) */}
+                        <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
+                        
+                        {/* Anillo de CASAS (cerca del centro) */}
+                        <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                        <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                        
+                        {/* Anillo de SIGNOS (exterior) */}
+                        <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                        <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                      </g>
+
+                      {renderTicks()}
+                      {renderSigns()}
+                      {renderHouses()}
+                      {renderAspects()}
+                      {renderPlanets()}
+                    </svg>
+                  </TransformComponent>
+                </>
+              )}
+            </TransformWrapper>
+          </div>
         </div>
 
         {renderAspectsGrid()}
       </div>
 
-      {/* Modal de Zoom para móviles */}
+      {/* Modal de Zoom con controles interactivos */}
       {isZoomModalOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
           onClick={() => setIsZoomModalOpen(false)}
         >
-          <div className="relative w-full h-full flex items-center justify-center">
-            <button
-              onClick={() => setIsZoomModalOpen(false)}
-              className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 backdrop-blur-sm transition-all"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            
-            <div className="overflow-auto max-h-full max-w-full" onClick={(e) => e.stopPropagation()}>
-              <svg
-                width={800}
-                height={800}
-                viewBox={`0 0 ${size} ${size}`}
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ background: 'transparent' }}
-                className="min-w-[600px]"
-                shapeRendering="geometricPrecision"
-                role="img"
-                aria-label="Carta natal astrológica ampliada con planetas, casas, signos zodiacales y aspectos"
-              >
-                <defs>
-                  <radialGradient id="bg-gradient-zoom" cx="50%" cy="50%" r="50%">
-                    {isDark ? (
-                      <>
-                        <stop offset="0%" stopColor="#1a1a2e" />
-                        <stop offset="100%" stopColor="#0a0a18" />
-                      </>
-                    ) : (
-                      <>
-                        <stop offset="0%" stopColor="#FFF8F5" />
-                        <stop offset="30%" stopColor="#FFE5D9" />
-                        <stop offset="70%" stopColor="#D4F1F4" />
-                        <stop offset="100%" stopColor="#F8E6F1" />
-                      </>
-                    )}
-                  </radialGradient>
-                </defs>
-                <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient-zoom)" />
+          <TransformWrapper
+            initialScale={1}
+            minScale={0.5}
+            maxScale={4}
+            centerOnInit={true}
+            wheel={{ step: 0.15 }}
+            pinch={{ step: 5 }}
+            doubleClick={{ mode: 'reset' }}
+          >
+            {({ zoomIn, zoomOut, resetTransform }) => (
+              <div className="relative w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                {/* Botón cerrar */}
+                <button
+                  onClick={() => setIsZoomModalOpen(false)}
+                  className="absolute top-4 right-4 z-20 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 backdrop-blur-sm transition-all"
+                  aria-label="Cerrar modal"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
 
-                <g id="structure-circles">
-                  <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
-                  <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-                  <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-                  <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-                  <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
-                </g>
+                {/* Controles de zoom en modal */}
+                <div className="absolute top-4 left-4 z-20 flex gap-2 bg-white/20 rounded-lg p-2 backdrop-blur-sm">
+                  <button
+                    onClick={() => zoomIn()}
+                    className="w-10 h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-colors"
+                    title="Acercar"
+                    aria-label="Acercar zoom"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => zoomOut()}
+                    className="w-10 h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-colors"
+                    title="Alejar"
+                    aria-label="Alejar zoom"
+                  >
+                    −
+                  </button>
+                  <button
+                    onClick={() => resetTransform()}
+                    className="w-10 h-10 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 text-white font-bold transition-colors"
+                    title="Restablecer"
+                    aria-label="Restablecer zoom"
+                  >
+                    ⟲
+                  </button>
+                </div>
+                
+                <TransformComponent
+                  wrapperClass="!w-full !h-full"
+                  contentClass="!w-full !h-full flex items-center justify-center"
+                >
+                  <svg
+                    width={800}
+                    height={800}
+                    viewBox={`0 0 ${size} ${size}`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ background: 'transparent' }}
+                    className="max-w-full max-h-full"
+                    shapeRendering="geometricPrecision"
+                    role="img"
+                    aria-label="Carta natal astrológica ampliada con planetas, casas, signos zodiacales y aspectos"
+                  >
+                    <defs>
+                      <radialGradient id="bg-gradient-zoom" cx="50%" cy="50%" r="50%">
+                        {isDark ? (
+                          <>
+                            <stop offset="0%" stopColor="#1a1a2e" />
+                            <stop offset="100%" stopColor="#0a0a18" />
+                          </>
+                        ) : (
+                          <>
+                            <stop offset="0%" stopColor="#FFF8F5" />
+                            <stop offset="30%" stopColor="#FFE5D9" />
+                            <stop offset="70%" stopColor="#D4F1F4" />
+                            <stop offset="100%" stopColor="#F8E6F1" />
+                          </>
+                        )}
+                      </radialGradient>
+                    </defs>
+                    <circle cx={cx} cy={cy} r={R} fill="url(#bg-gradient-zoom)" />
 
-                {renderTicks()}
-                {renderSigns()}
-                {renderHouses()}
-                {renderAspects()}
-                {renderPlanets()}
-              </svg>
-            </div>
-            
-            <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/70 text-sm">
-              Pellizca para hacer zoom • Arrastra para mover
-            </p>
-          </div>
+                    <g id="structure-circles">
+                      <circle cx={cx} cy={cy} r={R_ASPECTS} fill="none" stroke={THEME.ticks} strokeWidth={0.8} opacity={0.15} />
+                      <circle cx={cx} cy={cy} r={R_HOUSES_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                      <circle cx={cx} cy={cy} r={R_HOUSES_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                      <circle cx={cx} cy={cy} r={R_SIGNS_INNER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                      <circle cx={cx} cy={cy} r={R_SIGNS_OUTER} fill="none" stroke={THEME.ticks} strokeWidth={2} opacity={0.4} />
+                    </g>
+
+                    {renderTicks()}
+                    {renderSigns()}
+                    {renderHouses()}
+                    {renderAspects()}
+                    {renderPlanets()}
+                  </svg>
+                </TransformComponent>
+
+                {/* Instrucciones */}
+                <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/80 text-sm bg-black/50 px-4 py-2 rounded-lg backdrop-blur-sm">
+                  💡 Pellizca o usa +/− • Arrastra para mover • Doble toque para restablecer
+                </p>
+              </div>
+            )}
+          </TransformWrapper>
         </div>
       )}
     </>
