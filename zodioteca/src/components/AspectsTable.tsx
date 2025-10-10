@@ -58,23 +58,23 @@ const StatsSummary: React.FC<{ aspects: Aspect[] }> = React.memo(({ aspects }) =
 StatsSummary.displayName = 'StatsSummary';
 
 const AspectsTable: React.FC<AspectsTableProps> = ({ aspects, planets: propPlanets = [] }) => {
-  // Símbolos de planetas
+  // Símbolos de planetas con variation selector U+FE0E para forzar renderizado de texto
   const planetSymbols: Record<string, string> = {
-    'Sol': '☉',
-    'Luna': '☽',
-    'Mercurio': '☿',
-    'Venus': '♀',
-    'Marte': '♂',
-    'Júpiter': '♃',
-    'Saturno': '♄',
-    'Urano': '♅',
-    'Neptuno': '♆',
-    'Plutón': '♇',
-    'Quirón': '⚷',
-    'Lilith': '⚸',
-    'Nodo Norte': '☊',
-    'Nodo Sur': '☋',
-    'Parte Fortuna': '⊕',
+    'Sol': '☉︎',
+    'Luna': '☽︎',
+    'Mercurio': '☿︎',
+    'Venus': '♀︎',
+    'Marte': '♂︎',
+    'Júpiter': '♃︎',
+    'Saturno': '♄︎',
+    'Urano': '♅︎',
+    'Neptuno': '♆︎',
+    'Plutón': '♇︎',
+    'Quirón': '⚷︎',
+    'Lilith': '⚸︎',
+    'Nodo Norte': '☊︎',
+    'Nodo Sur': '☋︎',
+    'Parte Fortuna': '⊕︎',
     'Vértex': 'Vx'
   };
 

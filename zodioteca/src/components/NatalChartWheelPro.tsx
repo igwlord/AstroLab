@@ -60,39 +60,39 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const PLANET_SIZE = Math.max(12, Math.min(0.026 * size, 22));
   const PLANET_LABEL_SIZE = Math.max(7, Math.min(0.018 * size, 12));
 
-  // Símbolos - Estilo moderno bold (más parecidos a la imagen)
-  const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+  // Símbolos - Con variation selector U+FE0E para forzar presentación de texto (no emoji)
+  const SIGN_SYMBOLS = ['♈︎', '♉︎', '♊︎', '♋︎', '♌︎', '♍︎', '♎︎', '♏︎', '♐︎', '♑︎', '♒︎', '♓︎'];
   const PLANET_SYMBOLS: Record<string, string> = {
-    Sol: '☉',
-    Luna: '☽',
-    Mercurio: '☿',
-    Venus: '♀',
-    Marte: '♂',
-    Júpiter: '♃',
-    Saturno: '♄',
-    Urano: '♅',
-    Neptuno: '♆',
-    Plutón: '♇',
+    Sol: '☉︎',
+    Luna: '☽︎',
+    Mercurio: '☿︎',
+    Venus: '♀︎',
+    Marte: '♂︎',
+    Júpiter: '♃︎',
+    Saturno: '♄︎',
+    Urano: '♅︎',
+    Neptuno: '♆︎',
+    Plutón: '♇︎',
     // Puntos Avanzados (español e inglés para compatibilidad)
-    'Nodo Norte': '☊',
-    'Nodo Sur': '☋',
-    'Nodo Norte (Mean)': '☊',
-    'Nodo Sur (Mean)': '☋',
-    'Nodo Norte (True)': '☊',
-    'Nodo Sur (True)': '☋',
-    Quirón: '⚷',
-    Chiron: '⚷', // Alias inglés
-    'Parte de la Fortuna': '⊕',
+    'Nodo Norte': '☊︎',
+    'Nodo Sur': '☋︎',
+    'Nodo Norte (Mean)': '☊︎',
+    'Nodo Sur (Mean)': '☋︎',
+    'Nodo Norte (True)': '☊︎',
+    'Nodo Sur (True)': '☋︎',
+    Quirón: '⚷︎',
+    Chiron: '⚷︎', // Alias inglés
+    'Parte de la Fortuna': '⊕︎',
     Vértex: 'Vx',
     'Anti-Vértex': 'AVx',
     // Asteroides
-    Ceres: '⚳',
-    Pallas: '⚴',
-    Juno: '⚵',
-    Vesta: '⚶',
+    Ceres: '⚳︎',
+    Pallas: '⚴︎',
+    Juno: '⚵︎',
+    Vesta: '⚶︎',
     // Lilith (español e inglés)
-    Lilith: '⚸',
-    'Lilith (Mean)': '⚸',
+    Lilith: '⚸︎',
+    'Lilith (Mean)': '⚸︎',
   };
 
   // PALETA DRAMÁTICA VIOLETA/DORADO

@@ -1,0 +1,23 @@
+/* Zodiac Symbols - Inline SVG Fallback */
+/* Used when fonts fail to load - renders symbols as SVG */
+
+.zodiac-symbol {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+/* SVG paths for each zodiac symbol */
+.zodiac-aries::before { content: '♈'; }
+.zodiac-taurus::before { content: '♉'; }
+.zodiac-gemini::before { content: '♊'; }
+.zodiac-cancer::before { content: '♋'; }
+.zodiac-leo::before { content: '♌'; }
+.zodiac-virgo::before { content: '♍'; }
+.zodiac-libra::before { content: '♎'; }
+.zodiac-scorpio::before { content: '♏'; }
+.zodiac-sagittarius::before { content: '♐'; }
+.zodiac-capricorn::before { content: '♑'; }
+.zodiac-aquarius::before { content: '♒'; }
+.zodiac-pisces::before { content: '♓'; }

@@ -144,19 +144,20 @@ const DailyChartWheel: React.FC<DailyChartWheelProps> = ({
   // Colores SÓLIDOS sin transparencia - Paleta HSL vibrante
   // ============================================
   
+  // Símbolos con variation selector U+FE0E para forzar renderizado de texto (no emoji)
   const zodiacSigns = [
-    { name: 'Aries', symbol: '♈', emoji: '🐏', color: '#E53935', element: 'fuego' },      // Rojo sólido
-    { name: 'Tauro', symbol: '♉', emoji: '🐂', color: '#FB8C00', element: 'tierra' },     // Naranja sólido
-    { name: 'Géminis', symbol: '♊', emoji: '👯', color: '#FDD835', element: 'aire' },     // Amarillo sólido
-    { name: 'Cáncer', symbol: '♋', emoji: '🦀', color: '#7CB342', element: 'agua' },      // Verde sólido
-    { name: 'Leo', symbol: '♌', emoji: '🦁', color: '#43A047', element: 'fuego' },        // Verde esmeralda
-    { name: 'Virgo', symbol: '♍', emoji: '👸', color: '#00897B', element: 'tierra' },     // Verde azulado
-    { name: 'Libra', symbol: '♎', emoji: '⚖️', color: '#00ACC1', element: 'aire' },       // Cyan sólido
-    { name: 'Escorpio', symbol: '♏', emoji: '🦂', color: '#1E88E5', element: 'agua' },    // Azul sólido
-    { name: 'Sagitario', symbol: '♐', emoji: '🏹', color: '#3949AB', element: 'fuego' },  // Índigo sólido
-    { name: 'Capricornio', symbol: '♑', emoji: '🐐', color: '#5E35B1', element: 'tierra' }, // Púrpura sólido
-    { name: 'Acuario', symbol: '♒', emoji: '🏺', color: '#8E24AA', element: 'aire' },     // Magenta sólido
-    { name: 'Piscis', symbol: '♓', emoji: '🐟', color: '#D81B60', element: 'agua' },      // Rosa sólido
+    { name: 'Aries', symbol: '♈︎', emoji: '🐏', color: '#E53935', element: 'fuego' },      // Rojo sólido
+    { name: 'Tauro', symbol: '♉︎', emoji: '🐂', color: '#FB8C00', element: 'tierra' },     // Naranja sólido
+    { name: 'Géminis', symbol: '♊︎', emoji: '👯', color: '#FDD835', element: 'aire' },     // Amarillo sólido
+    { name: 'Cáncer', symbol: '♋︎', emoji: '🦀', color: '#7CB342', element: 'agua' },      // Verde sólido
+    { name: 'Leo', symbol: '♌︎', emoji: '🦁', color: '#43A047', element: 'fuego' },        // Verde esmeralda
+    { name: 'Virgo', symbol: '♍︎', emoji: '👸', color: '#00897B', element: 'tierra' },     // Verde azulado
+    { name: 'Libra', symbol: '♎︎', emoji: '⚖️', color: '#00ACC1', element: 'aire' },       // Cyan sólido
+    { name: 'Escorpio', symbol: '♏︎', emoji: '🦂', color: '#1E88E5', element: 'agua' },    // Azul sólido
+    { name: 'Sagitario', symbol: '♐︎', emoji: '🏹', color: '#3949AB', element: 'fuego' },  // Índigo sólido
+    { name: 'Capricornio', symbol: '♑︎', emoji: '🐐', color: '#5E35B1', element: 'tierra' }, // Púrpura sólido
+    { name: 'Acuario', symbol: '♒︎', emoji: '🏺', color: '#8E24AA', element: 'aire' },     // Magenta sólido
+    { name: 'Piscis', symbol: '♓︎', emoji: '🐟', color: '#D81B60', element: 'agua' },      // Rosa sólido
   ];
   
   // ============================================

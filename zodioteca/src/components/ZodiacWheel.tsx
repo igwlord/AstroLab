@@ -2,8 +2,9 @@ import React from 'react';
 import type { ZodiacFrequency } from '../types/zodiacFrequency';
 import SolarPlayer from './SolarPlayer';
 
-// Símbolos zodiacales EXACTOS de NatalChartWheelPro
-const SIGN_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+// Símbolos zodiacales con variation selector U+FE0E para forzar presentación de texto (no emoji)
+// Esto garantiza renderizado consistente en Android/Firefox
+const SIGN_SYMBOLS = ['♈︎', '♉︎', '♊︎', '♋︎', '♌︎', '♍︎', '♎︎', '♏︎', '♐︎', '♑︎', '♒︎', '♓︎'];
 
 interface ZodiacWheelProps {
   frequencies: ZodiacFrequency[];
