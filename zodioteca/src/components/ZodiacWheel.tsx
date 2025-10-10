@@ -91,7 +91,7 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
               }}
             >
               {/* Símbolo SVG con MISMO estilo que NatalChartWheelPro */}
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center gap-0.5">
                 <svg 
                   viewBox="0 0 100 100" 
                   className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 transition-all duration-300 ${isSelected ? 'scale-110' : ''}`}
@@ -120,9 +120,9 @@ const ZodiacWheel: React.FC<ZodiacWheelProps> = ({ frequencies, selectedId, onSe
                   </text>
                 </svg>
                 
-                {/* Nombre del signo con mejor contraste */}
+                {/* Nombre del signo con mejor contraste - MÁS CERCA */}
                 <span 
-                  className={`text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-1 transition-all duration-300 ${isSelected ? 'text-white scale-105' : 'text-white/90'}`}
+                  className={`text-[8px] sm:text-[9px] md:text-[10px] font-bold transition-all duration-300 ${isSelected ? 'text-white scale-105' : 'text-white/90'}`}
                   style={{
                     textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)',
                     letterSpacing: '0.5px',

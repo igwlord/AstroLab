@@ -184,10 +184,10 @@ export const ZODIAC_FREQUENCIES: ZodiacFrequencies = [
     frequency: 417,
     audioFile: '/media/417.mp3',
     color: {
-      primary: 'Púrpura oscuro',
-      secondary: 'Negro',
-      gradient: 'from-purple-900 via-violet-800 to-purple-950',
-      hex: '#581C87'
+      primary: 'Púrpura medio',
+      secondary: 'Violeta',
+      gradient: 'from-purple-700 via-violet-600 to-purple-800',
+      hex: '#7C3AED'
     },
     exercise: {
       title: 'Transformación Profunda',
