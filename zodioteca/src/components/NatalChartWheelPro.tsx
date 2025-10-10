@@ -97,7 +97,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const THEME = {
     background: isDark ? 'radial-gradient(circle, #1a1a2e 0%, #0a0a18 100%)' : 'radial-gradient(circle, #FFF8F5 0%, #FFE5D9 100%)',
     ticks: isDark ? '#d4af37' : '#9333EA', // Dorado (oscuro) / Púrpura (claro)
-    ticksOpacity: [0.5, 0.75, 1.0], // 1°, 5°, 10° - Aumentado para mejor visibilidad
+    ticksOpacity: [0.45, 0.68, 1.0], // 1°, 5°, 10° - Reducido para anti-moiré en 4K
     degLabels: isDark ? '#f4e5b8' : '#4B5563', // Dorado claro (oscuro) / Gris oscuro (claro)
     signDividers: isDark ? '#8b7355' : '#7C3AED', // Dorado oscuro / Púrpura
     signSymbols: isDark ? '#ffd700' : '#7C3AED', // Dorado brillante / Púrpura
@@ -227,7 +227,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           fontWeight="900"
           style={{ 
             filter: 'drop-shadow(0 0 3px rgba(212, 175, 55, 0.5))',
-            fontFamily: 'Arial, sans-serif',
+            fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
             strokeWidth: '0.5px',
             stroke: THEME.signSymbols,
             paintOrder: 'stroke fill',
@@ -435,6 +435,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       const orbFactor = Math.max(0, 1 - Math.abs(aspect.orb) / 8);
       const finalOpacity = cfg.opacity * (0.5 + orbFactor * 0.5);
 
+      // Grosor dinámico adaptativo: aspectos exactos = más gruesos; reducido en móviles
+      const maxBoost = size < 900 ? 0.4 : 0.6;
+      const widthBoost = Math.abs(aspect.orb) < 1.0 ? (1 - Math.abs(aspect.orb)) * maxBoost : 0;
+      const finalStrokeWidth = cfg.strokeWidth + widthBoost;
+
       aspectLines.push(
         <line
           key={`aspect-${idx}`}
@@ -443,7 +448,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           x2={x2}
           y2={y2}
           stroke={cfg.color}
-          strokeWidth={cfg.strokeWidth}
+          strokeWidth={finalStrokeWidth}
           strokeDasharray={cfg.dashArray}
           opacity={finalOpacity}
           strokeLinecap="round"
@@ -460,6 +465,44 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   // ============================================
   // 5. PLANETAS (con grados y minutos + ANTI-COLISIÓN estilo Astro-Seek)
   // ============================================
+  
+  // Memoizar planetas filtrados para evitar recomputación en cada render
+  const filteredPlanets = React.useMemo(() => {
+    if (!displayOptions) return data.planets.slice();
+    
+    return data.planets.filter(planet => {
+      const name = planet.name.toLowerCase();
+      
+      // Fortuna
+      if (name.includes('fortuna') && !displayOptions.fortuna) return false;
+      
+      // Vertex (pero NO anti-vertex, que se oculta siempre)
+      if (name.includes('vértex') && !name.includes('anti') && !displayOptions.vertex) return false;
+      if (name.includes('vertex') && !name.includes('anti') && !displayOptions.vertex) return false;
+      
+      // Chiron
+      if (name.includes('chiron') && !displayOptions.chiron) return false;
+      if (name.includes('quirón') && !displayOptions.chiron) return false;
+      
+      // Lilith Mean
+      if (name.includes('lilith') && name.includes('mean') && !displayOptions.lilithMean) return false;
+      
+      // Lilith True
+      if (name.includes('lilith') && name.includes('true') && !displayOptions.lilithTrue) return false;
+      
+      // Nodes Mean (solo Mean, True removido)
+      if ((name.includes('nodo') || name.includes('node')) && !displayOptions.nodesMean) return false;
+      
+      return true;
+    });
+  }, [data.planets, displayOptions]);
+
+  // Memoizar planetas ordenados (evita sort en cada render)
+  const sortedPlanets = React.useMemo(
+    () => [...filteredPlanets].sort((a, b) => a.longitude - b.longitude),
+    [filteredPlanets]
+  );
+
   const renderPlanets = () => {
     const planetGlyphs: React.ReactElement[] = [];
 
@@ -471,38 +514,6 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     }
 
     const planetsWithLayers: PlanetWithLayer[] = [];
-    
-    // Filtrar planetas basados en displayOptions
-    let filteredPlanets = [...data.planets];
-    if (displayOptions) {
-      filteredPlanets = filteredPlanets.filter(planet => {
-        const name = planet.name.toLowerCase();
-        
-        // Fortuna
-        if (name.includes('fortuna') && !displayOptions.fortuna) return false;
-        
-        // Vertex (pero NO anti-vertex, que se oculta siempre)
-        if (name.includes('vértex') && !name.includes('anti') && !displayOptions.vertex) return false;
-        if (name.includes('vertex') && !name.includes('anti') && !displayOptions.vertex) return false;
-        
-        // Chiron
-        if (name.includes('chiron') && !displayOptions.chiron) return false;
-        if (name.includes('quirón') && !displayOptions.chiron) return false;
-        
-        // Lilith Mean
-        if (name.includes('lilith') && name.includes('mean') && !displayOptions.lilithMean) return false;
-        
-        // Lilith True
-        if (name.includes('lilith') && name.includes('true') && !displayOptions.lilithTrue) return false;
-        
-        // Nodes Mean (solo Mean, True removido)
-        if ((name.includes('nodo') || name.includes('node')) && !displayOptions.nodesMean) return false;
-        
-        return true;
-      });
-    }
-    
-    const sortedPlanets = filteredPlanets.sort((a, b) => a.longitude - b.longitude);
 
     sortedPlanets.forEach((planet, index) => {
       // Calcular distancia angular con vecinos
@@ -518,8 +529,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
         360 - Math.abs(planet.longitude - next.longitude)
       );
 
-      // Si está muy cerca de vecinos (< 12°), usar capas alternas
-      const COLLISION_THRESHOLD = 12;
+      // Umbral de colisión dinámico: menos planetas visibles ⇒ umbral mayor ⇒ separa más
+      // Muchos planetas ⇒ umbral cercano a base ⇒ compacta lo justo
+      const base = 10, slope = 0.35, cap = 17;
+      const visibleCount = sortedPlanets.length;
+      const COLLISION_THRESHOLD = Math.min(cap, base + Math.max(0, 12 - visibleCount) * slope);
       let layer = 0;
 
       if (distPrev < COLLISION_THRESHOLD || distNext < COLLISION_THRESHOLD) {
@@ -542,13 +556,14 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
     });
 
     // PASO 2: Renderizar planetas con sus capas asignadas
-    planetsWithLayers.forEach(({ planet, radius }) => {
+    planetsWithLayers.forEach(({ planet, radius, layer }) => {
       const rad = absToRad(planet.longitude);
       const [x, y] = polar(cx, cy, radius, rad);
 
       const symbol = PLANET_SYMBOLS[planet.name] || '●';
+      const { deg, min } = degMin(planet.longitude);
 
-      // Glifo del planeta
+      // Glifo del planeta con título accesible
       planetGlyphs.push(
         <text
           key={`planet-${planet.name}`}
@@ -559,24 +574,32 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           textAnchor="middle"
           dominantBaseline="middle"
           fontWeight="bold"
-          style={{ filter: 'drop-shadow(0 0 3px rgba(230, 213, 255, 0.5))' }}
+          style={{ 
+            filter: 'drop-shadow(0 0 3px rgba(230, 213, 255, 0.5))',
+            fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+          }}
         >
           {symbol}
+          <title>
+            {planet.name} {deg}°{String(min).padStart(2, '0')}′{planet.retrograde ? ' Rx' : ''}
+          </title>
         </text>
       );
 
       // Mostrar grados y minutos si está activado (SIN símbolo de signo)
       if (showPlanetDegrees) {
-        const { deg, min } = degMin(planet.longitude);
-
         const label = `${deg}°${min.toString().padStart(2, '0')}′`;
-        const labelY = y + PLANET_SIZE * 0.9;
+        
+        // Desfase RADIAL de etiquetas según capa (sigue la dirección del planeta)
+        const radialOffset = layer === 2 ? 0.012 * R : layer === 0 ? -0.008 * R : 0;
+        const textRadius = radius + radialOffset;
+        const [xLbl, yLbl] = polar(cx, cy, textRadius, rad);
 
         planetGlyphs.push(
           <text
             key={`planet-label-${planet.name}`}
-            x={x}
-            y={labelY}
+            x={xLbl}
+            y={yLbl + PLANET_SIZE * 0.9}
             fontSize={PLANET_LABEL_SIZE}
             fill={THEME.planets.label}
             textAnchor="middle"
@@ -605,7 +628,8 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
 
     // Símbolos de aspectos se obtienen inline vía getAspectUI(normalizeAspectKey(...))
 
-    const planetNames = data.planets.map(p => p.name);
+    // Usar los MISMOS planetas visibles que en la rueda (1:1 coherencia visual)
+    const planetNames = filteredPlanets.map(p => p.name);
 
     return (
       <div 
@@ -654,7 +678,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                     }}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ fontSize: '20px', color: '#FFD700' }}>
+                      <span style={{ 
+                        fontSize: '20px', 
+                        color: '#FFD700',
+                        fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+                      }}>
                         {PLANET_SYMBOLS[planet] || '●'}
                       </span>
                       <span style={{ fontSize: '9px', color: '#D4AF37' }}>
@@ -688,7 +716,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '20px', color: '#FFD700' }}>
+                        <span style={{ 
+                          fontSize: '20px', 
+                          color: '#FFD700',
+                          fontFamily: '"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif',
+                        }}>
                           {PLANET_SYMBOLS[planet1] || '●'}
                         </span>
                         <span style={{ fontSize: '9px', color: '#D4AF37' }}>
@@ -767,6 +799,13 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             </tbody>
           </table>
         </div>
+        
+        {/* Nota sobre elementos visibles */}
+        {displayOptions && (
+          <p className="mt-4 text-center text-xs" style={{ color: '#A38BFF', opacity: 0.8 }}>
+            💡 Mostrando aspectos de elementos visibles en la rueda. Activa más opciones arriba.
+          </p>
+        )}
         
         {/* Leyenda de aspectos */}
         <div 
@@ -918,6 +957,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
               xmlns="http://www.w3.org/2000/svg"
               style={{ background: 'transparent' }}
               className="max-w-full h-auto"
+              shapeRendering="geometricPrecision"
+              role="img"
+              aria-label="Carta natal astrológica con planetas, casas, signos zodiacales y aspectos"
             >
             {/* Fondo degradado - modo oscuro (violeta) / modo claro (pastel) */}
             <defs>
@@ -989,6 +1031,9 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                 xmlns="http://www.w3.org/2000/svg"
                 style={{ background: 'transparent' }}
                 className="min-w-[600px]"
+                shapeRendering="geometricPrecision"
+                role="img"
+                aria-label="Carta natal astrológica ampliada con planetas, casas, signos zodiacales y aspectos"
               >
                 <defs>
                   <radialGradient id="bg-gradient-zoom" cx="50%" cy="50%" r="50%">
