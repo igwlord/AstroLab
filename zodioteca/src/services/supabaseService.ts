@@ -71,13 +71,46 @@ class SupabaseService {
   async signUp(email: string, password: string) {
     try {
       logger.log('📝 Registrando usuario:', email);
+      logger.log('🔍 Email exacto que se enviará a Supabase:', JSON.stringify({ email }));
       
       const { data, error } = await this.client.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(), // Normalizar email
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
+          data: {
+            registered_at: new Date().toISOString(),
+          },
+        },
       });
 
-      if (error) throw error;
+      if (error) {
+        logger.error('❌ Error de Supabase:', error);
+        
+        // Detectar email duplicado
+        if (error.message.includes('already') || 
+            error.message.includes('exist') ||
+            error.message.includes('duplicate')) {
+          throw new Error('❌ Este email ya está registrado. Intenta iniciar sesión.');
+        }
+        throw error;
+      }
+
+      logger.log('📧 Respuesta de Supabase:', {
+        user: data.user?.email,
+        hasSession: !!data.session,
+        userId: data.user?.id,
+      });
+
+      // Si Supabase devuelve user pero no session, puede ser que el email ya existe
+      if (data.user && !data.session) {
+        logger.warn('⚠️ Usuario creado pero sin sesión - puede que ya exista');
+        // En algunos casos Supabase permite crear pero no retorna error
+        return { 
+          user: data.user, 
+          error: 'Verifica tu email para confirmar la cuenta o intenta iniciar sesión si ya tienes cuenta.' 
+        };
+      }
 
       logger.log('✅ Usuario registrado:', data.user?.email);
       return { user: data.user, error: null };

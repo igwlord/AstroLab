@@ -57,10 +57,14 @@ export default function AuthModal({ onClose }: AuthModalProps) {
           return;
         }
 
+        // Debug: Verificar qué email se está enviando
+        console.log('🔍 Registrando con email:', email);
+        
         const { error: signUpError } = await signUp(email, password);
         if (signUpError) {
           setError(signUpError);
         } else {
+          console.log('✅ Registro exitoso para:', email);
           onClose(); // Cerrar modal
           navigate('/welcome'); // Redirigir a página de bienvenida
         }
