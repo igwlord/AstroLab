@@ -1119,20 +1119,20 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <>
-                  {/* Botón de pantalla completa (lupa) - Solo móvil, al lado de config */}
-                  <button
-                    onClick={() => setIsZoomModalOpen(true)}
-                    className="md:hidden absolute top-1 left-7 z-10 w-6 h-6 flex items-center justify-center rounded bg-purple-600 active:bg-purple-800 text-white shadow-md print:hidden transition-colors"
-                    title="Pantalla completa"
-                    aria-label="Abrir en pantalla completa"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </button>
-
-                  {/* Controles de zoom - más compactos en móvil */}
+                  {/* Controles de zoom - con lupa integrada en móvil */}
                   <div className="absolute top-1 right-1 md:top-2 md:right-2 z-10 flex gap-0.5 md:gap-1 bg-white/90 dark:bg-gray-800/90 rounded md:rounded-lg p-0.5 md:p-1 shadow-md md:shadow-lg backdrop-blur-sm print:hidden">
+                    {/* Botón de pantalla completa (lupa) - Solo móvil, dentro del grupo */}
+                    <button
+                      onClick={() => setIsZoomModalOpen(true)}
+                      className="md:hidden w-6 h-6 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white transition-colors"
+                      title="Pantalla completa"
+                      aria-label="Abrir en pantalla completa"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </button>
+                    
                     <button
                       onClick={() => zoomIn()}
                       className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded text-xs md:text-base bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold transition-colors"

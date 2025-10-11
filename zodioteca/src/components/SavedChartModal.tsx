@@ -15,6 +15,7 @@ import PolarizationsChartView from './PolarizationsChartView';
 import { detectChartShape } from '../utils/chartShapeAnalyzer';
 import type { PlanetPosition } from '../types/chartShape';
 import type { NatalChart } from '../services/realAstroCalculator';
+import { exportChartToPDF } from '../services/pdfExportService';
 
 // Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
 const getSignOffset = (sign: string): number => {
@@ -74,9 +75,18 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
     }
   };
 
-  const handleExportPDF = () => {
-    // TODO: Implementar exportación a PDF
-    alert('📄 Exportación a PDF próximamente...');
+  const handleExportPDF = async () => {
+    try {
+      await exportChartToPDF(chart, {
+        includeAllTabs: true,
+        quality: 0.95
+      });
+      // Mostrar confirmación
+      alert('✅ PDF generado exitosamente!');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      alert('❌ Error al generar el PDF. Por favor, intenta de nuevo.');
+    }
   };
 
   // Formatear fecha - Evitar conversión UTC que causa cambio de día
@@ -198,10 +208,22 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
                   {/* Tab: Posiciones - Mismo componente que en crear carta */}
                   {activeTab === 'positions' && (() => {
                     // Obtener ASC y MC desde houses (casa 1 y casa 10)
-                    const ascendant = chart.data.houses?.[0]?.cusp ?? 
-                                     chart.data.houses?.find((h: {number?: number; cusp?: number}) => h.number === 1)?.cusp ?? 0;
-                    const midheaven = chart.data.houses?.[9]?.cusp ?? 
-                                      chart.data.houses?.find((h: {number?: number; cusp?: number}) => h.number === 10)?.cusp ?? 0;
+                    // Las houses pueden tener diferentes estructuras dependiendo de cómo se guardaron
+                    type HouseData = {number?: number; cusp?: number; longitude?: number; degree?: number; sign?: string};
+                    const house1 = chart.data.houses?.[0] ?? chart.data.houses?.find((h: HouseData) => h.number === 1);
+                    const house10 = chart.data.houses?.[9] ?? chart.data.houses?.find((h: HouseData) => h.number === 10);
+                    
+                    // Calcular ascendant: puede estar en cusp, longitude, o calculado desde degree + signOffset
+                    const ascendant = house1?.cusp ?? 
+                                     house1?.longitude ?? 
+                                     (house1?.degree !== undefined && house1?.sign ? 
+                                       house1.degree + getSignOffset(house1.sign) : 0);
+                    
+                    // Calcular midheaven: puede estar en cusp, longitude, o calculado desde degree + signOffset  
+                    const midheaven = house10?.cusp ?? 
+                                     house10?.longitude ?? 
+                                     (house10?.degree !== undefined && house10?.sign ? 
+                                       house10.degree + getSignOffset(house10.sign) : 0);
                     
                     return (
                       <div className="py-2">
@@ -269,38 +291,41 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
                   })()}
                 </div>
 
-                {/* Footer con acciones - Más compacto */}
+                {/* Footer con acciones - Solo iconos en móvil */}
                 <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 sm:px-4 py-2 sm:py-3">
-                  <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
-                    {/* Acciones principales */}
-                    <div className="flex-1 flex flex-wrap gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Acciones principales - lado izquierdo */}
+                    <div className="flex items-center gap-2">
                       {onEdit && (
                         <button
                           onClick={handleEdit}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                          title="Editar carta"
                         >
-                          <Edit3 className="w-3.5 h-3.5" />
-                          <span>Editar</span>
+                          <Edit3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">Editar</span>
                         </button>
                       )}
                       
                       <button
                         onClick={handleExportPDF}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+                        title="Exportar PDF"
                       >
-                        <FileDown className="w-3.5 h-3.5" />
-                        <span>PDF</span>
+                        <FileDown className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                        <span className="hidden sm:inline">PDF</span>
                       </button>
                     </div>
 
-                    {/* Acción destructiva */}
+                    {/* Acción destructiva - lado derecho */}
                     {onDelete && (
                       <button
                         onClick={handleDelete}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+                        title="Eliminar carta"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Eliminar</span>
+                        <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                        <span className="hidden sm:inline">Eliminar</span>
                       </button>
                     )}
                   </div>
