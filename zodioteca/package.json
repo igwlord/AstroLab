@@ -16,6 +16,7 @@
     "benchmark": "tsx test/benchmark.ts"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@types/html2canvas": "^0.5.35",
     "@types/luxon": "^3.7.1",
     "astronomia": "^4.2.0",

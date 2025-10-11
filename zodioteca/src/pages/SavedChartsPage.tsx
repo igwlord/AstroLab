@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { useI18n } from '../i18n';
 import { useGoogleDrive } from '../context/GoogleDriveContext';
 import { logger } from '../utils/logger';
-import ChartModal from '../components/ChartModal';
+import SavedChartModal from '../components/SavedChartModal';
 import {
   getLocalCharts,
   deleteChartLocal,
@@ -189,9 +189,14 @@ const SavedChartsPage: FC = () => {
 
   return (
     <>
-      {/* Modal de visualización */}
+      {/* Modal de visualización mejorado */}
       {viewingChart && (
-        <ChartModal chart={viewingChart} onClose={() => setViewingChart(null)} />
+        <SavedChartModal
+          chart={viewingChart}
+          isOpen={true}
+          onClose={() => setViewingChart(null)}
+          onDelete={handleDelete}
+        />
       )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
