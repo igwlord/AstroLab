@@ -18,7 +18,7 @@ export interface SupabaseChart {
   user_id: string;
   name: string;
   date: string;
-  data: any; // JSON con toda la data de la carta
+  data: SavedChart; // JSON con toda la data de la carta
   created_at: string;
   updated_at: string;
 }

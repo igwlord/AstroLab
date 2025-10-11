@@ -7,8 +7,10 @@ import { I18nProvider } from './i18n';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
-import FloatingMiniPlayer from './components/FloatingMiniPlayer';
 import { ServiceWorkerUpdatePrompt } from './utils/sw-update-prompt';
+
+// ⚡ FASE 3: Lazy load componentes pesados adicionales
+const FloatingMiniPlayer = lazy(() => import('./components/FloatingMiniPlayer'));
 
 // Lazy loading para páginas - reduce bundle inicial ~40-50%
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -151,7 +153,9 @@ function App() {
                   <ServiceWorkerUpdatePrompt />
                   <AppRoutes />
                   {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
-                  <FloatingMiniPlayer isMobile={false} />
+                  <Suspense fallback={null}>
+                    <FloatingMiniPlayer isMobile={false} />
+                  </Suspense>
                 </ErrorBoundary>
               </Router>
             </AudioPlayerProvider>

@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { HOUSE_SYSTEMS_GLOSSARY } from '../types/houseSystem';
 import type { HouseSystemGlossary } from '../types/houseSystem';
-import HouseSystemModal from './HouseSystemModal';
+import LoadingSpinner from './LoadingSpinner';
+
+// ⚡ FASE 3: Lazy load HouseSystemModal (16.96 KB)
+const HouseSystemModal = lazy(() => import('./HouseSystemModal'));
 
 const HouseSystemsGrid: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -306,11 +309,13 @@ const HouseSystemsGrid: React.FC = () => {
 
       {/* Modal detallado */}
       {selectedSystem && (
-        <HouseSystemModal
-          system={selectedSystem}
-          isOpen={isModalOpen}
-          onClose={closeModal}
-        />
+        <Suspense fallback={<LoadingSpinner />}>
+          <HouseSystemModal
+            system={selectedSystem}
+            isOpen={isModalOpen}
+            onClose={closeModal}
+          />
+        </Suspense>
       )}
     </div>
   );

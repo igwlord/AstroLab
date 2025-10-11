@@ -1,14 +1,20 @@
-import { useState, useRef } from 'react';
-import NatalChartFormSimple from '../components/NatalChartFormSimple';
+import { useState, useRef, lazy, Suspense } from 'react';
 import NatalChartWheelPro from '../components/NatalChartWheelPro';
-import ChartDataTable from '../components/ChartDataTable';
 import ChartViewTabs from '../components/ChartViewTabs';
 import AspectsTableGrid from '../components/AspectsTableGrid';
-import ChartShapeWheel from '../components/ChartShapeWheel';
-import ChartShapeStats from '../components/ChartShapeStats';
-import PositionsTable from '../components/PositionsTable';
-import DominancesTable from '../components/DominancesTable';
-import PolarizationsChartView from '../components/PolarizationsChartView';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+// ⚡ OPTIMIZACIÓN FASE 1 + FASE 2 + FASE 4: Lazy load de componentes pesados
+// Fase 1: ChartShapeWheel, ChartShapeStats, DominancesTable, PolarizationsChartView (~40 KB)
+// Fase 2: ChartDataTable (solo desktop, ~16 KB)
+// Fase 4B: NatalChartFormSimple (~43 KB), PositionsTable (~39 KB)
+const NatalChartFormSimple = lazy(() => import('../components/NatalChartFormSimple'));
+const PositionsTable = lazy(() => import('../components/PositionsTable'));
+const ChartShapeWheel = lazy(() => import('../components/ChartShapeWheel'));
+const ChartShapeStats = lazy(() => import('../components/ChartShapeStats'));
+const DominancesTable = lazy(() => import('../components/DominancesTable'));
+const PolarizationsChartView = lazy(() => import('../components/PolarizationsChartView'));
+const ChartDataTable = lazy(() => import('../components/ChartDataTable'));
 import { detectChartShape } from '../utils/chartShapeAnalyzer';
 import type { PlanetPosition } from '../types/chartShape';
 import { adaptChartData } from '../utils/chartAdapter';
@@ -500,9 +506,11 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
   return (
     <div className="py-2 sm:py-4 md:py-8 print:py-0">
       {showForm ? (
-        <NatalChartFormSimple 
-          onSubmit={handleSubmit}
-        />
+        <Suspense fallback={<LoadingSpinner />}>
+          <NatalChartFormSimple 
+            onSubmit={handleSubmit}
+          />
+        </Suspense>
       ) : result && (
         <div ref={chartRef} className="print-content max-w-6xl mx-auto px-2 sm:px-3 md:px-6 space-y-2 sm:space-y-3 md:space-y-6 print:px-2 print:space-y-4">
           {/* Banner de generación de PDF */}
@@ -768,8 +776,9 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
 
             {/* Tabla de datos compacta (solo desktop) - Estrecha y simple */}
             <div className="hidden md:block md:w-[160px] lg:w-[180px] flex-shrink-0">
-              <ChartDataTable 
-                planets={[
+              <Suspense fallback={<LoadingSpinner />}>
+                <ChartDataTable 
+                  planets={[
                   // Planetas principales
                   ...result.planets.map(p => ({
                     name: p.name,
@@ -855,8 +864,9 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   return polarity;
                 })()}
               />
-              </div>
+              </Suspense>
             </div>
+          </div>
           )}
 
           {/* TAB: ASPECTOS */}
@@ -873,10 +883,15 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
             const shapePattern = detectChartShape(planetPositions);
             
             return (
-              <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
-                {/* Rueda de forma - Agrandada */}
-                <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl p-2 sm:p-3 lg:p-4 shadow-lg border border-purple-100 dark:border-purple-700">
-                  <ChartShapeWheel 
+              <Suspense fallback={
+                <div className="flex items-center justify-center py-20">
+                  <LoadingSpinner />
+                </div>
+              }>
+                <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                  {/* Rueda de forma - Agrandada */}
+                  <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl p-2 sm:p-3 lg:p-4 shadow-lg border border-purple-100 dark:border-purple-700">
+                    <ChartShapeWheel 
                     data={adaptChartData({
                       id: crypto.randomUUID(),
                       data: {
@@ -911,31 +926,50 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   <ChartShapeStats pattern={shapePattern} />
                 </div>
               </div>
+              </Suspense>
             );
           })()}
 
           {/* TAB: POSICIONES */}
           {activeChartTab === 'positions' && (
-            <PositionsTable 
-              planets={result.planets.map(p => ({
-                ...p,
-                ecliptic: p.degree + getSignOffset(p.sign),
-                latitude: 0,
-                speed: 0
-              }))}
-              ascendant={result.ascendant}
-              midheaven={result.midheaven}
-            />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <LoadingSpinner />
+              </div>
+            }>
+              <PositionsTable 
+                planets={result.planets.map(p => ({
+                  ...p,
+                  ecliptic: p.degree + getSignOffset(p.sign),
+                  latitude: 0,
+                  speed: 0
+                }))}
+                ascendant={result.ascendant}
+                midheaven={result.midheaven}
+              />
+            </Suspense>
           )}
 
           {/* TAB: DOMINANCIAS */}
           {activeChartTab === 'dominances' && (
-            <DominancesTable planets={result.planets} />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <LoadingSpinner />
+              </div>
+            }>
+              <DominancesTable planets={result.planets} />
+            </Suspense>
           )}
 
           {/* TAB: POLARIZACIONES */}
           {activeChartTab === 'polarizations' && (
-            <PolarizationsChartView chart={result} />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <LoadingSpinner />
+              </div>
+            }>
+              <PolarizationsChartView chart={result} />
+            </Suspense>
           )}
 
           {/* Trio Principal: SOL, LUNA, ASCENDENTE */}

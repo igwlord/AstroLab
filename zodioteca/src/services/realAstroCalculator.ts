@@ -13,11 +13,8 @@ import { calculateArabicParts, type ArabicPart } from './arabicPartsCalculator';
 import { calculateHemispheres, type HemispheresResult } from './hemispheresCalculator';
 import { useSettingsStore } from '../store/useSettings';
 import type { HouseSystem } from '../types/houseSystem';
-// 🎯 Swiss Ephemeris para cálculos de alta precisión (Placidus houses)
-import { 
-  calculatePlacidusHouses, 
-  dateToJulian 
-} from './swissEphemerisCalculator';
+// 🎯 Swiss Ephemeris lazy loaded para evitar duplicar carga de 12 MB
+// Se carga dinámicamente cuando se necesita calcular casas Placidus
 
 export interface PlanetPosition {
   name: string;
@@ -145,6 +142,8 @@ async function calculateHouses(
   ascendant: { sign: string; degree: number };
   midheaven: { sign: string; degree: number };
 }> {
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { dateToJulian } = await import('./swissEphemerisCalculator');
   const jd = dateToJulian(date);
   
   switch (system) {
@@ -169,8 +168,10 @@ async function calculateHouses(
  * Sistema Placidus (actual)
  */
 async function calculatePlacidusSystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   const result = await calculatePlacidusHouses(jd, latitude, longitude);
-  const houses: HousePosition[] = result.houses.map(h => ({
+  const houses: HousePosition[] = result.houses.map((h: any) => ({
     number: h.number,
     sign: h.sign || 'Aries',
     degree: h.degree || 0,
@@ -187,6 +188,8 @@ async function calculatePlacidusSystem(jd: number, latitude: number, longitude: 
  * Sistema Koch - Similar a Placidus con diferente trisección
  */
 async function calculateKochSystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   // Koch usa mismo ASC/MC que Placidus pero diferente división
   const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
   const asc = placidus.ascendant.longitude;
@@ -226,6 +229,8 @@ async function calculateKochSystem(jd: number, latitude: number, longitude: numb
  * Whole Sign - Cada signo = 1 casa
  */
 async function calculateWholeSignSystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
   const asc = placidus.ascendant.longitude;
   
@@ -252,6 +257,8 @@ async function calculateWholeSignSystem(jd: number, latitude: number, longitude:
  * Equal House - 30° desde el ASC
  */
 async function calculateEqualHouseSystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
   const asc = placidus.ascendant.longitude;
   
@@ -277,6 +284,8 @@ async function calculateEqualHouseSystem(jd: number, latitude: number, longitude
  * Porphyry - División de cuadrantes en tercios
  */
 async function calculatePorphyrySystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
   const asc = placidus.ascendant.longitude;
   const mc = placidus.midheaven.longitude;
@@ -320,6 +329,8 @@ async function calculatePorphyrySystem(jd: number, latitude: number, longitude: 
  * Campanus - Basado en el primer vertical
  */
 async function calculateCampanusSystem(jd: number, latitude: number, longitude: number) {
+  // ⚡ Dynamic import
+  const { calculatePlacidusHouses } = await import('./swissEphemerisCalculator');
   // Campanus es similar a Placidus pero usa proyección en ecuador celeste
   // Por simplicidad, usamos aproximación basada en Placidus con offset
   const placidus = await calculatePlacidusHouses(jd, latitude, longitude);
@@ -327,7 +338,7 @@ async function calculateCampanusSystem(jd: number, latitude: number, longitude: 
   // Offset de ~5-10° para simular proyección campanus
   const campanusOffset = 7 * Math.sin(latitude * Math.PI / 180);
   
-  const houses: HousePosition[] = placidus.houses.map((h, i) => {
+  const houses: HousePosition[] = placidus.houses.map((h: any, i: number) => {
     const offset = i < 6 ? campanusOffset : -campanusOffset;
     const cusp = ((h.longitude || 0) + offset + 360) % 360;
     return {
@@ -567,7 +578,8 @@ export async function calculateNatalChart(
     try {
       const { calculateAdvancedChart } = await import('./advancedAstroCalculator');
       
-      // Convertir fecha a Día Juliano usando dateToJulian que ya tenemos
+      // ⚡ Dynamic import - Convertir fecha a Día Juliano
+      const { dateToJulian } = await import('./swissEphemerisCalculator');
       const julianDay = dateToJulian(birthDate);
       
       const houseCusps = houses.map(h => h.cusp);

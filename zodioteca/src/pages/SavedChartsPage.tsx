@@ -1,11 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import type { FC } from 'react';
 import { useI18n } from '../i18n';
 import { useSupabase } from '../context/SupabaseContext';
 import { supabase } from '../services/supabaseService';
 import { logger } from '../utils/logger';
-import SavedChartModal from '../components/SavedChartModal';
 import AuthModal from '../components/AuthModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+// ⚡ FASE 3: Lazy load SavedChartModal (15.85 KB)
+const SavedChartModal = lazy(() => import('../components/SavedChartModal'));
 import {
   getLocalCharts,
   deleteChartLocal,
@@ -216,12 +219,14 @@ const SavedChartsPage: FC = () => {
     <>
       {/* Modal de visualización mejorado */}
       {viewingChart && (
-        <SavedChartModal
-          chart={viewingChart}
-          isOpen={true}
-          onClose={() => setViewingChart(null)}
-          onDelete={handleDelete}
-        />
+        <Suspense fallback={<LoadingSpinner />}>
+          <SavedChartModal
+            chart={viewingChart}
+            isOpen={true}
+            onClose={() => setViewingChart(null)}
+            onDelete={handleDelete}
+          />
+        </Suspense>
       )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">

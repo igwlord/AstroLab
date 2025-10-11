@@ -6,14 +6,11 @@ import { logger } from '../utils/logger';
  * - Lilith Mean (Luna Negra promedio)
  * - Lilith True (Luna Negra verdadera)
  * 
- * 🎯 USA SWISS EPHEMERIS para máxima precisión
+ * 🎯 USA SWISS EPHEMERIS para máxima precisión (lazy loaded)
  */
 
-import { 
-  calculateChironPrecise, 
-  calculateLilithMeanPrecise, 
-  dateToJulian 
-} from './swissEphemerisCalculator';
+// ⚡ LAZY IMPORT - No cargar SwissEph hasta que se necesite
+// Esto evita duplicar la carga del archivo de 12 MB
 
 export interface SensitivePoint {
   name: string;
@@ -61,6 +58,9 @@ function calculateHouseForLongitude(longitude: number, houseCusps: number[]): nu
  * Compara posiciones en fechas cercanas (±1 día)
  */
 async function isChironRetrograde(date: Date): Promise<boolean> {
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { dateToJulian, calculateChironPrecise } = await import('./swissEphemerisCalculator');
+  
   const jd = dateToJulian(date);
   const chiron1 = await calculateChironPrecise(jd - 1);
   const chiron2 = await calculateChironPrecise(jd + 1);
@@ -81,6 +81,9 @@ export async function calculateChiron(
   date: Date,
   houseCusps: number[]
 ): Promise<SensitivePoint> {
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { dateToJulian, calculateChironPrecise } = await import('./swissEphemerisCalculator');
+  
   const jd = dateToJulian(date);
   const chiron = await calculateChironPrecise(jd);
   const house = calculateHouseForLongitude(chiron.longitude, houseCusps);
@@ -113,6 +116,9 @@ export async function calculateLilith(
   if (type === 'true') {
     logger.warn('⚠️ Lilith True no implementada con Swiss Ephemeris. Usando Mean.');
   }
+  
+  // ⚡ Dynamic import - solo carga SwissEph cuando se necesita
+  const { dateToJulian, calculateLilithMeanPrecise } = await import('./swissEphemerisCalculator');
   
   const jd = dateToJulian(date);
   const lilith = await calculateLilithMeanPrecise(jd);

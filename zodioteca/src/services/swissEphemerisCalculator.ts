@@ -5,32 +5,76 @@ import { logger } from '../utils/logger';
  * Reemplaza cálculos complejos de Placidus, Lilith y Chiron
  * 
  * Basado en Swiss Ephemeris oficial - el estándar de oro en astrología
+ * 
+ * ⚡ OPTIMIZACIÓN: Lazy loading - Se carga solo cuando se necesita
  */
 
 // @ts-expect-error - astronomia no tiene tipos TypeScript
 import { julian } from 'astronomia';
-import SwissEph from 'swisseph-wasm';
 
 /**
  * Instancia global de Swiss Ephemeris (se inicializa una sola vez)
  * Performance tip: Reuse instances for multiple calculations
+ * 
+ * ⚡ LAZY LOADING: SwissEph se importa dinámicamente en initSwissEph()
+ * Ahorra ~12 MB en la carga inicial de la app
  */
 let sweInstance: any | null = null;
 let sweInitialized = false;
+let sweInitPromise: Promise<any> | null = null; // Cache de la promesa de inicialización
 
 /**
  * Inicializa Swiss Ephemeris WASM (solo se ejecuta una vez)
+ * 
+ * ⚡ OPTIMIZACIÓN LAZY LOADING:
+ * - Importa swisseph-wasm dinámicamente solo cuando se necesita
+ * - Cache de la promesa para evitar múltiples cargas simultáneas
+ * - Ahorra ~12 MB en el bundle inicial
  */
 async function initSwissEph(): Promise<any> {
-  if (!sweInitialized || !sweInstance) {
-    const swe = new SwissEph();
-    await swe.initSwissEph();
-    sweInstance = (swe as any).SweModule;
-    sweInitialized = true;
-    const version = sweInstance.ccall('swe_version', 'string', [], []);
-    logger.log('✅ Swiss Ephemeris WASM initialized:', version);
+  // Si ya está inicializado, retornar instancia
+  if (sweInitialized && sweInstance) {
+    logger.log('✅ Swiss Ephemeris ya estaba cargado (usando caché) - INSTANTÁNEO! 🚀');
+    return sweInstance;
   }
-  return sweInstance;
+  
+  // Si ya hay una inicialización en progreso, esperar a que termine
+  if (sweInitPromise) {
+    logger.log('⏳ Esperando inicialización de Swiss Ephemeris en progreso...');
+    return sweInitPromise;
+  }
+  
+  // Crear nueva promesa de inicialización
+  sweInitPromise = (async () => {
+    try {
+      const startTime = performance.now();
+      logger.log('⚡ Cargando Swiss Ephemeris WASM (lazy loading - primera vez)...');
+      logger.log('📦 Descargando ~12 MB de datos de efemérides...');
+      
+      // 🚀 DYNAMIC IMPORT - Solo se descarga cuando se ejecuta esta línea
+      const SwissEphModule = await import('swisseph-wasm');
+      const SwissEph = SwissEphModule.default;
+      
+      const swe = new SwissEph();
+      await swe.initSwissEph();
+      sweInstance = (swe as any).SweModule;
+      sweInitialized = true;
+      
+      const endTime = performance.now();
+      const loadTimeSeconds = ((endTime - startTime) / 1000).toFixed(2);
+      
+      const version = sweInstance.ccall('swe_version', 'string', [], []);
+      logger.log(`✅ Swiss Ephemeris WASM initialized en ${loadTimeSeconds}s:`, version);
+      
+      return sweInstance;
+    } catch (error) {
+      logger.error('❌ Error inicializando Swiss Ephemeris:', error);
+      sweInitPromise = null; // Reset para permitir reintentos
+      throw error;
+    }
+  })();
+  
+  return sweInitPromise;
 }
 
 /**
