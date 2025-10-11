@@ -11,21 +11,37 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ onClose }: AuthModalProps) {
-  const { signIn, signUp } = useSupabase();
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const { signIn, signUp, resetPassword } = useSupabase();
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      if (mode === 'signup') {
+      if (mode === 'reset') {
+        // Modo recuperar contraseña
+        const { error: resetError } = await resetPassword(email);
+        if (resetError) {
+          setError(resetError);
+        } else {
+          setSuccess('📧 Email de recuperación enviado. Revisa tu bandeja de entrada.');
+          setEmail('');
+          // Volver a login después de 3 segundos
+          setTimeout(() => {
+            setMode('signin');
+            setSuccess('');
+          }, 3000);
+        }
+      } else if (mode === 'signup') {
         // Validar contraseñas
         if (password !== confirmPassword) {
           setError('Las contraseñas no coinciden');
@@ -63,6 +79,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin');
     setError('');
+    setSuccess('');
     setPassword('');
     setConfirmPassword('');
   };
@@ -84,12 +101,14 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         {/* Título */}
         <div className="mb-6 text-center">
           <h2 className="text-3xl font-bold text-white">
-            {mode === 'signin' ? '🔐 Iniciar Sesión' : '📝 Crear Cuenta'}
+            {mode === 'signin' && '🔐 Iniciar Sesión'}
+            {mode === 'signup' && '📝 Crear Cuenta'}
+            {mode === 'reset' && '🔑 Recuperar Contraseña'}
           </h2>
           <p className="mt-2 text-sm text-white/70">
-            {mode === 'signin'
-              ? 'Accede a tus cartas guardadas en la nube'
-              : 'Crea tu cuenta para sincronizar tus cartas'}
+            {mode === 'signin' && 'Accede a tus cartas guardadas en la nube'}
+            {mode === 'signup' && 'Crea tu cuenta para sincronizar tus cartas'}
+            {mode === 'reset' && 'Te enviaremos un email para restablecer tu contraseña'}
           </p>
         </div>
 
@@ -111,22 +130,24 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             />
           </div>
 
-          {/* Contraseña */}
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-white/90">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-purple-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-              placeholder="••••••••"
-            />
-          </div>
+          {/* Contraseña (solo en signin y signup) */}
+          {mode !== 'reset' && (
+            <div>
+              <label htmlFor="password" className="mb-1 block text-sm font-medium text-white/90">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-purple-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
 
           {/* Confirmar contraseña (solo en signup) */}
           {mode === 'signup' && (
@@ -150,6 +171,13 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             </div>
           )}
 
+          {/* Success */}
+          {success && (
+            <div className="rounded-lg bg-green-500/20 border border-green-500/50 px-4 py-3 text-sm text-green-200">
+              {success}
+            </div>
+          )}
+
           {/* Error */}
           {error && (
             <div className="rounded-lg bg-red-500/20 border border-red-500/50 px-4 py-3 text-sm text-red-200">
@@ -163,23 +191,53 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             disabled={loading}
             className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 font-semibold text-white transition-all hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Procesando...' : mode === 'signin' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+            {loading && 'Procesando...'}
+            {!loading && mode === 'signin' && 'Iniciar Sesión'}
+            {!loading && mode === 'signup' && 'Crear Cuenta'}
+            {!loading && mode === 'reset' && 'Enviar Email'}
           </button>
         </form>
 
-        {/* Toggle entre signin/signup */}
-        <div className="mt-6 text-center">
+        {/* Enlaces */}
+        <div className="mt-6 space-y-3 text-center">
+          {/* Olvidé mi contraseña (solo en signin) */}
+          {mode === 'signin' && (
+            <button
+              onClick={() => {
+                setMode('reset');
+                setError('');
+                setSuccess('');
+              }}
+              className="block w-full text-sm text-white/60 transition-colors hover:text-white"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          )}
+
+          {/* Toggle entre signin/signup/reset */}
           <button
-            onClick={toggleMode}
+            onClick={() => {
+              if (mode === 'reset') {
+                setMode('signin');
+              } else {
+                toggleMode();
+              }
+            }}
             className="text-sm text-white/70 transition-colors hover:text-white"
           >
-            {mode === 'signin' ? (
+            {mode === 'signin' && (
               <>
                 ¿No tienes cuenta? <span className="font-semibold text-purple-300">Regístrate</span>
               </>
-            ) : (
+            )}
+            {mode === 'signup' && (
               <>
                 ¿Ya tienes cuenta? <span className="font-semibold text-purple-300">Inicia sesión</span>
+              </>
+            )}
+            {mode === 'reset' && (
+              <>
+                <span className="font-semibold text-purple-300">← Volver al inicio</span>
               </>
             )}
           </button>

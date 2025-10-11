@@ -25,6 +25,7 @@ interface SupabaseContextType {
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
 
   // UI
   showAuthModal: boolean;
@@ -138,6 +139,24 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const handleResetPassword = useCallback(async (email: string) => {
+    try {
+      logger.log('📧 Solicitando reset de contraseña...');
+      const { error } = await supabase.resetPassword(email);
+      
+      if (error) {
+        return { error };
+      }
+
+      logger.log('✅ Email de recuperación enviado');
+      return { error: null };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al enviar email';
+      logger.error('❌ Error en resetPassword:', message);
+      return { error: message };
+    }
+  }, []);
+
   // ============================================
   // PROVIDER VALUE
   // ============================================
@@ -150,6 +169,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     signUp: handleSignUp,
     signIn: handleSignIn,
     signOut: handleSignOut,
+    resetPassword: handleResetPassword,
     showAuthModal,
     setShowAuthModal,
   };

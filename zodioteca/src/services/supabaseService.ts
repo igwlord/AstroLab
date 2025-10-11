@@ -130,6 +130,48 @@ class SupabaseService {
   }
 
   /**
+   * Enviar email para restablecer contraseña
+   */
+  async resetPassword(email: string) {
+    try {
+      logger.log('📧 Enviando email de recuperación a:', email);
+      const { error } = await this.client.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      logger.log('✅ Email de recuperación enviado');
+      return { error: null };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('❌ Error al enviar email de recuperación:', message);
+      return { error: message };
+    }
+  }
+
+  /**
+   * Actualizar contraseña (después de recibir el link)
+   */
+  async updatePassword(newPassword: string) {
+    try {
+      logger.log('🔒 Actualizando contraseña...');
+      const { error } = await this.client.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      logger.log('✅ Contraseña actualizada');
+      return { error: null };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('❌ Error al actualizar contraseña:', message);
+      return { error: message };
+    }
+  }
+
+  /**
    * Obtener usuario actual
    */
   getCurrentUser() {
