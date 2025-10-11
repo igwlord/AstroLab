@@ -4,9 +4,13 @@ import NatalChartWheelPro from '../components/NatalChartWheelPro';
 import ChartDataTable from '../components/ChartDataTable';
 import ChartViewTabs from '../components/ChartViewTabs';
 import AspectsTableGrid from '../components/AspectsTableGrid';
+import ChartShapeWheel from '../components/ChartShapeWheel';
+import ChartShapeStats from '../components/ChartShapeStats';
 import PositionsTable from '../components/PositionsTable';
 import DominancesTable from '../components/DominancesTable';
 import PolarizationsChartView from '../components/PolarizationsChartView';
+import { detectChartShape } from '../utils/chartShapeAnalyzer';
+import type { PlanetPosition } from '../types/chartShape';
 import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
@@ -46,7 +50,7 @@ export default function NatalChartPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
-  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'positions' | 'dominances' | 'polarizations'>('chart');
+  const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'shape' | 'positions' | 'dominances' | 'polarizations'>('chart');
   const chartRef = useRef<HTMLDivElement>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
@@ -830,6 +834,56 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {activeChartTab === 'aspects' && (
             <AspectsTableGrid aspects={result.aspects || []} />
           )}
+
+          {/* TAB: FORMA DEL HORÓSCOPO (CHART SHAPE) */}
+          {activeChartTab === 'shape' && (() => {
+            const planetPositions: PlanetPosition[] = result.planets.map(p => ({
+              name: p.name,
+              longitude: p.degree + getSignOffset(p.sign),
+            }));
+            const shapePattern = detectChartShape(planetPositions);
+            
+            return (
+              <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+                {/* Rueda de forma - Agrandada */}
+                <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl p-2 sm:p-3 lg:p-4 shadow-lg border border-purple-100 dark:border-purple-700">
+                  <ChartShapeWheel 
+                    data={adaptChartData({
+                      id: crypto.randomUUID(),
+                      data: {
+                        id: crypto.randomUUID(),
+                        personName: personName || 'Persona sin nombre',
+                        birthData: {
+                          date: result.date.toISOString(),
+                          time: new Date(result.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                          location: result.location,
+                          latitude: result.latitude,
+                          longitude: result.longitude,
+                          timezone: result.timezone || 'UTC'
+                        },
+                        planets: result.planets,
+                        houses: result.houses,
+                        aspects: result.aspects || [],
+                      },
+                      metadata: {
+                        createdAt: new Date().toISOString(),
+                        modifiedAt: new Date().toISOString(),
+                        syncedAt: null,
+                        source: 'local'
+                      },
+                      syncStatus: 'local-only'
+                    })}
+                    size={600}
+                  />
+                </div>
+
+                {/* Panel de estadísticas - Layout mejorado */}
+                <div className="w-full xl:w-96 2xl:w-[420px] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-purple-100 dark:border-purple-700 overflow-y-auto max-h-[500px] sm:max-h-[650px] xl:max-h-[800px]">
+                  <ChartShapeStats pattern={shapePattern} />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* TAB: POSICIONES */}
           {activeChartTab === 'positions' && (
