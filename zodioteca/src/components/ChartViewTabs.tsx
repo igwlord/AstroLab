@@ -32,10 +32,10 @@ const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, a
   }, [activeTab]);
 
   return (
-    <div className="relative mb-3 sm:mb-4 lg:mb-6">
+    <div className="relative mb-2 sm:mb-3 lg:mb-4">
       <div 
         ref={scrollContainerRef}
-        className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3 justify-center px-1 sm:px-2"
+        className="flex flex-wrap gap-1 sm:gap-1.5 lg:gap-2 justify-center px-1 sm:px-2"
       >
         {tabs.map(tab => (
           <button
@@ -43,11 +43,11 @@ const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, a
             ref={activeTab === tab.id ? activeTabRef : null}
             onClick={() => onTabChange(tab.id)}
             className={`
-              relative px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 
-              rounded-md sm:rounded-lg lg:rounded-xl 
-              font-semibold text-[10px] sm:text-xs lg:text-sm
-              transition-all duration-300 flex items-center gap-1 sm:gap-1.5 lg:gap-2 
-              flex-shrink-0 min-h-[36px] sm:min-h-[40px] lg:min-h-[44px]
+              relative px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 
+              rounded-md sm:rounded-lg lg:rounded-lg 
+              font-semibold text-[10px] sm:text-xs lg:text-xs
+              transition-all duration-300 flex items-center gap-1 sm:gap-1.5 lg:gap-1.5 
+              flex-shrink-0 min-h-[32px] sm:min-h-[36px] lg:min-h-[38px]
               ${activeTab === tab.id
                 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/50 scale-105'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-purple-200 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md active:scale-[0.98]'
@@ -56,7 +56,7 @@ const ChartViewTabs: React.FC<ChartViewTabsProps> = ({ activeTab, onTabChange, a
             aria-label={tab.label}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >
-            <span className="text-xs sm:text-sm lg:text-lg">{tab.icon}</span>
+            <span className="text-xs sm:text-sm lg:text-base">{tab.icon}</span>
             <span className="whitespace-nowrap">{tab.label}</span>
             {tab.count !== undefined && tab.count > 0 && (
               <span className={`

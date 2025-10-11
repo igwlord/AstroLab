@@ -1018,101 +1018,101 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       <div className="natal-chart-wheel-pro flex flex-col items-center">
 
         {/* Contenedor con leyenda y rueda */}
-        <div className="flex gap-6 justify-center items-start w-full flex-col lg:flex-row">
+        <div className="flex gap-3 justify-start items-start w-full flex-col lg:flex-row max-w-7xl mx-auto">
           {/* Leyenda de aspectos - Solo visible en desktop */}
-          <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-xl p-4 shadow-lg border border-purple-300 dark:border-purple-700 min-w-[220px]">
-            <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
-              <span>🎨</span>
-              Colores de Aspectos
+          <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-lg p-3 shadow-md border border-purple-300 dark:border-purple-700 w-[180px] flex-shrink-0">
+            <h4 className="text-xs font-bold text-purple-900 dark:text-purple-100 mb-2 flex items-center gap-1.5">
+              <span className="text-sm">🎨</span>
+              <span>Colores de Aspectos</span>
             </h4>
             
             {/* Aspectos Básicos */}
-            <div className="space-y-2 mb-3">
-              <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Básicos</p>
-              <div className="flex items-center gap-2">
-                <span className="text-sm opacity-60" style={{ color: THEME.aspects.conjunction }}>☌</span>
-                <div className="w-8 h-0.5" style={{ backgroundColor: THEME.aspects.conjunction }}></div>
-                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Conjunción</span>
+            <div className="space-y-1.5 mb-2">
+              <p className="text-[10px] font-semibold text-gray-800 dark:text-gray-400 uppercase tracking-wide">Básicos</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs opacity-60" style={{ color: THEME.aspects.conjunction }}>☌</span>
+                <div className="w-6 h-0.5" style={{ backgroundColor: THEME.aspects.conjunction }}></div>
+                <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Conjunción</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.opposition.color }}>☍</span>
-                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.opposition.color }}></div>
-                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Oposición</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.opposition.color }}>☍</span>
+                <div className="w-6 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.opposition.color }}></div>
+                <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Oposición</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.square.color }}>□</span>
-                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.square.color }}></div>
-                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Cuadratura</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.square.color }}>□</span>
+                <div className="w-6 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.square.color }}></div>
+                <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Cuadratura</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.trine.color }}>△</span>
-                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.trine.color }}></div>
-                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Trígono</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.trine.color }}>△</span>
+                <div className="w-6 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.trine.color }}></div>
+                <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Trígono</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.sextile.color }}>✶</span>
-                <div className="w-8 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.sextile.color }}></div>
-                <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Sextil</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.sextile.color }}>✶</span>
+                <div className="w-6 h-0.5" style={{ backgroundColor: ASPECTS_STANDARD.sextile.color }}></div>
+                <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Sextil</span>
               </div>
             </div>
 
             {/* Aspectos Estándar */}
             {(aspectsLevel === 'standard' || aspectsLevel === 'complete') && (
-              <div className="space-y-2 mb-3 pt-3 border-t border-gray-300 dark:border-gray-700">
-                <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Estándar</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.semisquare.color }}>∠</span>
-                  <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.semisquare.color} strokeWidth="2" strokeDasharray="3,2" />
+              <div className="space-y-1.5 mb-2 pt-2 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-[10px] font-semibold text-gray-800 dark:text-gray-400 uppercase tracking-wide">Estándar</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.semisquare.color }}>∠</span>
+                  <svg width="24" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="24" y2="1" stroke={ASPECTS_STANDARD.semisquare.color} strokeWidth="2" strokeDasharray="3,2" />
                   </svg>
-                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Semicuadratura</span>
+                  <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Semicuadratura</span>
                 </div>
               </div>
             )}
 
             {/* Aspectos Completos */}
             {aspectsLevel === 'complete' && (
-              <div className="space-y-2 pt-3 border-t border-gray-300 dark:border-gray-700">
-                <p className="text-xs font-semibold text-gray-800 dark:text-gray-400 uppercase">Menores</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.semisextile.color }}>⚺</span>
-                  <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.semisextile.color} strokeWidth="2" strokeDasharray="2,3" />
+              <div className="space-y-1.5 pt-2 border-t border-gray-300 dark:border-gray-700">
+                <p className="text-[10px] font-semibold text-gray-800 dark:text-gray-400 uppercase tracking-wide">Menores</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.semisextile.color }}>⚺</span>
+                  <svg width="24" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="24" y2="1" stroke={ASPECTS_STANDARD.semisextile.color} strokeWidth="2" strokeDasharray="2,3" />
                   </svg>
-                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Semisextil</span>
+                  <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Semisextil</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm opacity-60" style={{ color: ASPECTS_STANDARD.quincunx.color }}>⚻</span>
-                  <svg width="32" height="2" className="flex-shrink-0">
-                    <line x1="0" y1="1" x2="32" y2="1" stroke={ASPECTS_STANDARD.quincunx.color} strokeWidth="2" strokeDasharray="2,3" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs opacity-60" style={{ color: ASPECTS_STANDARD.quincunx.color }}>⚻</span>
+                  <svg width="24" height="2" className="flex-shrink-0">
+                    <line x1="0" y1="1" x2="24" y2="1" stroke={ASPECTS_STANDARD.quincunx.color} strokeWidth="2" strokeDasharray="2,3" />
                   </svg>
-                  <span className="text-xs text-gray-900 dark:text-gray-300 font-medium">Quincuncio</span>
+                  <span className="text-[11px] text-gray-900 dark:text-gray-300 font-medium">Quincuncio</span>
                 </div>
               </div>
             )}
 
             {/* Nota sobre grosor */}
-            <div className="mt-4 p-2 bg-purple-100 dark:bg-purple-900/20 rounded text-[10px] text-gray-800 dark:text-gray-400 font-medium">
+            <div className="mt-2 p-1.5 bg-purple-100 dark:bg-purple-900/20 rounded text-[9px] text-gray-800 dark:text-gray-400 font-medium leading-tight">
               💡 Líneas más gruesas = aspectos más importantes
             </div>
             
             {/* Link al glosario */}
             <a 
               href="/glossary?categoria=aspects" 
-              className="mt-2 block text-center text-[10px] text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 font-semibold underline transition-colors"
+              className="mt-1.5 block text-center text-[9px] text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 font-semibold underline transition-colors"
             >
               📖 Leer más sobre aspectos
             </a>
           </div>
 
           {/* SVG centrado con zoom interactivo */}
-          <div className="flex justify-center w-full">
+          <div className="flex justify-center w-full lg:flex-1">
             <TransformWrapper
               initialScale={1}
               minScale={0.5}
               maxScale={3}
               centerOnInit={true}
-              wheel={{ step: 0.1 }}
+              wheel={{ disabled: true }}
               pinch={{ step: 5 }}
               doubleClick={{ mode: 'reset' }}
               panning={{ velocityDisabled: false }}
@@ -1236,7 +1236,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
             minScale={0.5}
             maxScale={4}
             centerOnInit={true}
-            wheel={{ step: 0.15 }}
+            wheel={{ disabled: true }}
             pinch={{ step: 5 }}
             doubleClick={{ mode: 'reset' }}
           >

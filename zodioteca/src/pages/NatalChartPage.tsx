@@ -347,12 +347,19 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     
     setIsSaving(true);
     try {
+      // ✅ CORRECCIÓN: Usar fecha local en vez de UTC para evitar cambio de día
+      const localDate = new Date(result.date);
+      const year = localDate.getFullYear();
+      const month = String(localDate.getMonth() + 1).padStart(2, '0');
+      const day = String(localDate.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
       saveChartLocal(
         {
           id: '', // Se genera automáticamente
           personName,
           birthData: {
-            date: result.date.toISOString().split('T')[0],
+            date: dateString, // ✅ Fecha local en formato YYYY-MM-DD
             time: result.date.toTimeString().slice(0, 5),
             latitude: result.latitude,
             longitude: result.longitude,

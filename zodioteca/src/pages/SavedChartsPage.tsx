@@ -392,7 +392,11 @@ const SavedChartsPage: FC = () => {
                 {chart.data.personName || 'Sin nombre'}
               </h3>
               <p className="text-sm text-purple-600 mb-2">
-                {new Date(chart.data.birthData.date).toLocaleDateString()} · {chart.data.birthData.time}
+                {(() => {
+                  const [year, month, day] = chart.data.birthData.date.split('-').map(Number);
+                  const localDate = new Date(year, month - 1, day);
+                  return localDate.toLocaleDateString('es-ES');
+                })()} · {chart.data.birthData.time}
               </p>
               <p className="text-xs text-gray-500 mb-4">
                 {chart.data.birthData.location || `${chart.data.birthData.latitude.toFixed(2)}°, ${chart.data.birthData.longitude.toFixed(2)}°`}
@@ -400,9 +404,9 @@ const SavedChartsPage: FC = () => {
 
               {/* Timestamps */}
               <div className="text-xs text-gray-500 mb-4 space-y-1">
-                <div>Creado: {new Date(chart.metadata.createdAt).toLocaleDateString()}</div>
+                <div>Creado: {new Date(chart.metadata.createdAt).toLocaleDateString('es-ES')}</div>
                 {chart.metadata.syncedAt && (
-                  <div>Sync: {new Date(chart.metadata.syncedAt).toLocaleDateString()}</div>
+                  <div>Sync: {new Date(chart.metadata.syncedAt).toLocaleDateString('es-ES')}</div>
                 )}
               </div>
 

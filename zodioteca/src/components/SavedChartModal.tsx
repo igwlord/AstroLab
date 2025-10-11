@@ -9,8 +9,19 @@ import NatalChartWheelPro from './NatalChartWheelPro';
 import ChartShapeWheel from './ChartShapeWheel';
 import ChartShapeStats from './ChartShapeStats';
 import DominancesTable from './DominancesTable';
+import AspectsTableGrid from './AspectsTableGrid';
+import PositionsTable from './PositionsTable';
+import PolarizationsChartView from './PolarizationsChartView';
 import { detectChartShape } from '../utils/chartShapeAnalyzer';
 import type { PlanetPosition } from '../types/chartShape';
+import type { NatalChart } from '../services/realAstroCalculator';
+
+// Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
+const getSignOffset = (sign: string): number => {
+  const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+  const index = signs.indexOf(sign);
+  return index >= 0 ? index * 30 : 0;
+};
 
 interface SavedChartModalProps {
   chart: ChartWithStatus;
@@ -68,12 +79,19 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
     alert('📄 Exportación a PDF próximamente...');
   };
 
-  // Formatear fecha
-  const formattedDate = new Date(chart.data.birthData.date).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  // Formatear fecha - Evitar conversión UTC que causa cambio de día
+  const formattedDate = useMemo(() => {
+    const dateStr = chart.data.birthData.date;
+    // Si viene en formato YYYY-MM-DD, parsearlo localmente
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day);
+    
+    return localDate.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }, [chart.data.birthData.date]);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -103,15 +121,15 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-7xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-2xl transition-all">
-                {/* Header */}
-                <div className="relative border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-yellow-50 dark:from-purple-900/20 dark:to-yellow-900/20 px-4 sm:px-6 py-4">
+              <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-2xl transition-all">
+                {/* Header - Más compacto */}
+                <div className="relative border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-yellow-50 dark:from-purple-900/20 dark:to-yellow-900/20 px-3 sm:px-4 py-2 sm:py-3">
                   <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                      <Dialog.Title className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                  <div className="flex-1 min-w-0">
+                      <Dialog.Title className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-0.5 truncate">
                         {chart.data.personName}
                       </Dialog.Title>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-xs text-gray-600 dark:text-gray-300">
                         <span className="flex items-center gap-1">
                           📅 {formattedDate}
                         </span>
@@ -120,148 +138,158 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
                           🕐 {chart.data.birthData.time}
                         </span>
                         <span className="hidden sm:inline">•</span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 truncate">
                           📍 {chart.data.birthData.location || 'Sin ubicación'}
                         </span>
                       </div>
-                  </div>                    {/* Close button */}
+                  </div>
+                    {/* Close button - Más pequeño */}
                     <button
                       onClick={onClose}
-                      className="ml-4 rounded-lg p-2 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      className="ml-2 rounded-lg p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
                       aria-label="Cerrar"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="px-4 sm:px-6 pt-4">
+                {/* Tabs - Más compactos */}
+                <div className="px-3 sm:px-4 pt-2">
                   <ChartViewTabs activeTab={activeTab} onTabChange={setActiveTab} />
                 </div>
 
-                {/* Content */}
-                <div className="px-4 sm:px-6 py-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
-                  {/* Tab: Carta */}
+                {/* Content - Más altura disponible */}
+                <div className="px-3 sm:px-4 py-2 max-h-[65vh] sm:max-h-[72vh] overflow-y-auto">
+                  {/* Tab: Carta - Solo rueda, sin tabla */}
                   {activeTab === 'chart' && (
-                    <div className="flex justify-center py-4">
-                      <NatalChartWheelPro data={adaptedChart} />
-                    </div>
-                  )}
-
-                  {/* Tab: Aspectos */}
-                  {activeTab === 'aspects' && adaptedChart.aspects && (
-                    <div className="py-4">
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                          Aspectos ({adaptedChart.aspects.length})
-                        </h3>
-                        {adaptedChart.aspects.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                            No se encontraron aspectos en esta carta
-                          </p>
-                        ) : (
-                          <div className="space-y-2">
-                            {adaptedChart.aspects.map((aspect, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between bg-white dark:bg-gray-700 rounded-lg p-3 text-sm"
-                              >
-                                <span className="font-medium text-gray-900 dark:text-white">
-                                  {aspect.planet1} - {aspect.planet2}
-                                </span>
-                                <span className="text-purple-600 dark:text-purple-400">
-                                  {aspect.type}
-                                </span>
-                                <span className="text-gray-600 dark:text-gray-300">
-                                  Orbe: {aspect.orb.toFixed(2)}°
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                    <div className="flex justify-center py-2">
+                      <div className="w-full max-w-4xl">
+                        <NatalChartWheelPro 
+                          data={adaptedChart} 
+                          showDataTable={false}
+                          showPlanetDegrees={true}
+                        />
                       </div>
                     </div>
                   )}
 
-                  {/* Tab: Forma */}
+                  {/* Tab: Aspectos - Mismo componente que en crear carta */}
+                  {activeTab === 'aspects' && (
+                    <div className="py-2">
+                      <AspectsTableGrid aspects={chart.data.aspects || []} />
+                    </div>
+                  )}
+
+                  {/* Tab: Forma - Mismo estilo que crear carta */}
                   {activeTab === 'shape' && shapePattern && (
-                    <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-5 xl:gap-6 py-4">
-                      <div className="flex-1 flex justify-center p-2 sm:p-3 lg:p-4">
-                        <ChartShapeWheel data={adaptedChart} />
+                    <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-5 xl:gap-6 py-2">
+                      {/* Rueda de forma - Agrandada */}
+                      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl p-2 sm:p-3 lg:p-4 shadow-lg border border-purple-100 dark:border-purple-700">
+                        <ChartShapeWheel data={adaptedChart} size={600} />
                       </div>
-                      <div className="w-full xl:w-96 2xl:w-[420px] max-h-[500px] sm:max-h-[650px] xl:max-h-[800px] overflow-y-auto">
+                      {/* Panel de estadísticas - Layout mejorado */}
+                      <div className="w-full xl:w-96 2xl:w-[420px] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-purple-100 dark:border-purple-700 overflow-y-auto max-h-[500px] sm:max-h-[650px] xl:max-h-[800px]">
                         <ChartShapeStats pattern={shapePattern} />
                       </div>
                     </div>
                   )}
 
-                  {/* Tab: Posiciones */}
-                  {activeTab === 'positions' && (
-                    <div className="py-4">
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                          Posiciones Planetarias
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {adaptedChart.planets.map((planet, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-white dark:bg-gray-700 rounded-lg p-3"
-                            >
-                              <div className="font-semibold text-gray-900 dark:text-white mb-1">
-                                {planet.name}
-                              </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-300">
-                                {planet.longitude.toFixed(2)}°
-                                {planet.retrograde && <span className="ml-1 text-red-500">℞</span>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Tab: Posiciones - Mismo componente que en crear carta */}
+                  {activeTab === 'positions' && (() => {
+                    // Obtener ASC y MC desde houses (casa 1 y casa 10)
+                    const ascendant = chart.data.houses?.[0]?.cusp ?? 
+                                     chart.data.houses?.find((h: {number?: number; cusp?: number}) => h.number === 1)?.cusp ?? 0;
+                    const midheaven = chart.data.houses?.[9]?.cusp ?? 
+                                      chart.data.houses?.find((h: {number?: number; cusp?: number}) => h.number === 10)?.cusp ?? 0;
+                    
+                    return (
+                      <div className="py-2">
+                        <PositionsTable 
+                          planets={chart.data.planets.map(p => {
+                            const hasLongitude = 'longitude' in p && typeof p.longitude === 'number';
+                            const hasSignDegree = 'sign' in p && 'degree' in p;
+                            
+                            return {
+                              ...p,
+                              ecliptic: hasLongitude 
+                                ? p.longitude as number
+                                : (hasSignDegree ? (p as {degree: number, sign: string}).degree + getSignOffset((p as {sign: string}).sign) : 0),
+                              latitude: 0,
+                              speed: 0
+                            };
+                          })}
+                          ascendant={ascendant}
+                          midheaven={midheaven}
+                        />
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  {/* Tab: Dominancias */}
+                  {/* Tab: Dominancias - Más compacto */}
                   {activeTab === 'dominances' && (
-                    <div className="py-4">
+                    <div className="py-2">
                       <DominancesTable 
                         planets={chart.data.planets}
                       />
                     </div>
                   )}
 
-                  {/* Tab: Polarizaciones */}
-                  {activeTab === 'polarizations' && (
-                    <div className="py-4 text-center text-gray-500 dark:text-gray-400">
-                      <p className="text-lg">🚧 Polarizaciones próximamente...</p>
-                      <p className="text-sm mt-2">Este análisis estará disponible en una futura actualización</p>
-                    </div>
-                  )}
+                  {/* Tab: Polarizaciones - Mismo sistema gráfico que crear carta */}
+                  {activeTab === 'polarizations' && (() => {
+                    // Adaptar datos de carta guardada al formato NatalChart
+                    const natalChart: NatalChart = {
+                      date: new Date(chart.data.birthData.date),
+                      location: chart.data.birthData.location || 'Ubicación desconocida',
+                      latitude: chart.data.birthData.latitude,
+                      longitude: chart.data.birthData.longitude,
+                      timezone: chart.data.birthData.timezone,
+                      planets: chart.data.planets,
+                      houses: chart.data.houses,
+                      ascendant: chart.data.houses?.[0] 
+                        ? { 
+                            sign: chart.data.houses[0].sign || 'Aries', 
+                            degree: chart.data.houses[0].degree || 0 
+                          }
+                        : { sign: 'Aries', degree: 0 },
+                      midheaven: chart.data.houses?.[9]
+                        ? { 
+                            sign: chart.data.houses[9].sign || 'Capricornio', 
+                            degree: chart.data.houses[9].degree || 0 
+                          }
+                        : { sign: 'Capricornio', degree: 0 },
+                      aspects: chart.data.aspects || []
+                    };
+
+                    return (
+                      <div className="py-2">
+                        <PolarizationsChartView chart={natalChart} />
+                      </div>
+                    );
+                  })()}
                 </div>
 
-                {/* Footer con acciones */}
-                <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 py-4">
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                {/* Footer con acciones - Más compacto */}
+                <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 sm:px-4 py-2 sm:py-3">
+                  <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                     {/* Acciones principales */}
-                    <div className="flex-1 flex flex-wrap gap-2">
+                    <div className="flex-1 flex flex-wrap gap-1.5">
                       {onEdit && (
                         <button
                           onClick={handleEdit}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-3.5 h-3.5" />
                           <span>Editar</span>
                         </button>
                       )}
                       
                       <button
                         onClick={handleExportPDF}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
                       >
-                        <FileDown className="w-4 h-4" />
-                        <span>Exportar PDF</span>
+                        <FileDown className="w-3.5 h-3.5" />
+                        <span>PDF</span>
                       </button>
                     </div>
 
@@ -269,9 +297,9 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
                     {onDelete && (
                       <button
                         onClick={handleDelete}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                         <span>Eliminar</span>
                       </button>
                     )}
