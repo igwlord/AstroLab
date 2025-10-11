@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../context/SupabaseContext';
 
 interface AuthModalProps {
@@ -11,6 +12,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ onClose }: AuthModalProps) {
+  const navigate = useNavigate();
   const { signIn, signUp, resetPassword } = useSupabase();
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [email, setEmail] = useState('');
@@ -59,7 +61,8 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         if (signUpError) {
           setError(signUpError);
         } else {
-          onClose(); // Cerrar modal si todo salió bien
+          onClose(); // Cerrar modal
+          navigate('/welcome'); // Redirigir a página de bienvenida
         }
       } else {
         const { error: signInError } = await signIn(email, password);

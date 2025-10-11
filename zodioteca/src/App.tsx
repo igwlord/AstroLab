@@ -12,6 +12,7 @@ import { ServiceWorkerUpdatePrompt } from './utils/sw-update-prompt';
 
 // Lazy loading para páginas - reduce bundle inicial ~40-50%
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
@@ -50,6 +51,13 @@ function AppRoutes() {
         <Route path="/login" element={
           <PublicRoute>
             <LoginPage />
+          </PublicRoute>
+        } />
+
+        {/* Welcome (después del registro) */}
+        <Route path="/welcome" element={
+          <PublicRoute>
+            <WelcomePage />
           </PublicRoute>
         } />
       
