@@ -132,6 +132,10 @@ export default function AuthModal({ onClose }: AuthModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-purple-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               placeholder="tu@email.com"
             />
