@@ -70,11 +70,37 @@ class SupabaseService {
    */
   async signUp(email: string, password: string) {
     try {
-      logger.log('📝 Registrando usuario:', email);
-      logger.log('🔍 Email exacto que se enviará a Supabase:', JSON.stringify({ email }));
+      const normalizedEmail = email.trim().toLowerCase();
+      logger.log('📝 Registrando usuario:', normalizedEmail);
+      
+      // ⚠️ VALIDACIÓN MANUAL: Verificar si el email ya existe
+      // Esto es necesario porque Supabase permite duplicados cuando "Confirm email" está OFF
+      try {
+        const { data: existingUser } = await this.client.auth.signInWithPassword({
+          email: normalizedEmail,
+          password: 'test_invalid_password_to_check_existence',
+        });
+        
+        // Si no lanza error, el email existe (aunque la contraseña sea incorrecta)
+        if (existingUser) {
+          logger.warn('⚠️ Email ya existe en la base de datos');
+          throw new Error('Este email ya está registrado. Intenta iniciar sesión o recupera tu contraseña.');
+        }
+      } catch (checkError: unknown) {
+        // Si el error es "Invalid login credentials", el email SÍ existe pero la contraseña es incorrecta
+        const errorMessage = checkError instanceof Error ? checkError.message : String(checkError);
+        if (errorMessage.includes('Invalid login credentials')) {
+          logger.warn('⚠️ Email ya registrado detectado por intento de login fallido');
+          throw new Error('Este email ya está registrado. Intenta iniciar sesión o recupera tu contraseña.');
+        }
+        // Si el error es "Email not confirmed" o "User not found", podemos continuar
+        logger.log('✅ Email disponible, continuando con registro');
+      }
+      
+      logger.log('🔍 Email exacto que se enviará a Supabase:', JSON.stringify({ email: normalizedEmail }));
       
       const { data, error } = await this.client.auth.signUp({
-        email: email.trim().toLowerCase(), // Normalizar email
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/welcome`,
