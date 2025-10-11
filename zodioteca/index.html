@@ -14,6 +14,17 @@
     <!-- Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     
+    <!-- ⚡ FASE 3: Performance Optimization - Resource Hints -->
+    <!-- DNS Prefetch: Resuelve DNS antes de hacer requests -->
+    <link rel="dns-prefetch" href="https://pzbfhdznmpiszanqoarw.supabase.co" />
+    <link rel="dns-prefetch" href="https://formsubmit.co" />
+    
+    <!-- Preconnect: Establece conexión temprana (DNS + TCP + TLS) -->
+    <link rel="preconnect" href="https://pzbfhdznmpiszanqoarw.supabase.co" crossorigin />
+    
+    <!-- Modulepreload: Precarga módulos críticos de JavaScript -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    
     <!-- SEO -->
     <title>AstroLab - Tu laboratorio astrológico personal</title>
     <meta name="description" content="Calcula cartas natales precisas con astronomía real, explora el glosario astrológico completo y medita con frecuencias holísticas. Tu laboratorio personal de astrología." />

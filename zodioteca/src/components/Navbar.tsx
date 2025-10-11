@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import ThemeToggle from './ThemeToggle';
 import BiographyModal from './BiographyModal';
-import FloatingMiniPlayer from './FloatingMiniPlayer';
+
+// ⚡ FASE 3: Lazy load FloatingMiniPlayer (16.94 KB)
+const FloatingMiniPlayer = lazy(() => import('./FloatingMiniPlayer'));
 
 const Navbar: React.FC = () => {
   const { t } = useI18n();
@@ -126,7 +128,9 @@ const Navbar: React.FC = () => {
                 ))}
                 
                 {/* Mini Player Mobile - Integrado en el menú */}
-                <FloatingMiniPlayer isMobile={true} />
+                <Suspense fallback={null}>
+                  <FloatingMiniPlayer isMobile={true} />
+                </Suspense>
                 
                 {/* Mobile Tools - Theme Toggle */}
                 <div className="border-t border-purple-500/30 pt-4 mt-4">
