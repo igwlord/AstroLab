@@ -81,12 +81,12 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center pt-16 pb-4 px-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
+        className="relative w-full max-w-4xl max-h-[calc(100vh-5rem)] sm:max-h-[88vh] my-auto overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
       >
         {/* Header con gradiente del elemento */}
         <div className={`relative bg-gradient-to-r ${elementStyle.gradient} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>

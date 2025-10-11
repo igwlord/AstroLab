@@ -62,13 +62,13 @@ const StandardModal: React.FC<StandardModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center pt-16 pb-4 px-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto"
       onClick={handleBackdropClick}
       style={{ willChange: 'opacity' }}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn bg-white dark:bg-gray-900"
+        className="relative w-full max-w-4xl max-h-[calc(100vh-5rem)] sm:max-h-[88vh] my-auto flex flex-col overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn bg-white dark:bg-gray-900"
         style={{ 
           willChange: 'transform, opacity'
         }}

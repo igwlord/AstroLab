@@ -34,6 +34,33 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
   const { isDark } = useThemeStore();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
+  // Bloquear scroll del body cuando el modal de zoom está abierto
+  React.useEffect(() => {
+    if (isZoomModalOpen) {
+      // Guardar posición actual del scroll
+      const scrollY = window.scrollY;
+      
+      // Bloquear scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+      
+      return () => {
+        // Restaurar scroll
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+        document.documentElement.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isZoomModalOpen]);
+  
   const cx = size / 2;
   const cy = size / 2;
   const R = size / 2;
@@ -1162,7 +1189,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   {/* Contenedor con zoom y pan */}
                   <TransformComponent
                     wrapperClass="!w-full !h-auto"
-                    contentClass="!w-full !h-auto flex justify-center"
+                    contentClass="!w-full !h-auto flex justify-center pt-16 md:pt-0"
                   >
                     <svg
                       width={size}
@@ -1228,8 +1255,11 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
       {/* Modal de Zoom con controles interactivos */}
       {isZoomModalOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4 overflow-hidden overscroll-none"
           onClick={() => setIsZoomModalOpen(false)}
+          onTouchMove={(e) => e.preventDefault()}
+          onWheel={(e) => e.preventDefault()}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
           <TransformWrapper
             initialScale={1}
@@ -1242,22 +1272,22 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
           >
             {({ zoomIn, zoomOut, resetTransform }) => (
               <div className="relative w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                {/* Botón cerrar */}
+                {/* Botón cerrar - MÁS GRANDE que los demás */}
                 <button
                   onClick={() => setIsZoomModalOpen(false)}
-                  className="absolute top-4 right-4 z-20 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 backdrop-blur-sm transition-all"
+                  className="absolute top-2 right-2 md:top-4 md:right-4 z-20 bg-red-600/90 hover:bg-red-700 active:bg-red-800 text-white rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center backdrop-blur-sm transition-all shadow-lg"
                   aria-label="Cerrar modal"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
 
-                {/* Controles de zoom en modal - más pequeños en móvil */}
+                {/* Controles de zoom en modal - más pequeños que el botón X */}
                 <div className="absolute top-2 left-2 md:top-4 md:left-4 z-20 flex gap-1 md:gap-2 bg-white/20 rounded-md md:rounded-lg p-1 md:p-2 backdrop-blur-sm">
                   <button
                     onClick={() => zoomIn()}
-                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-base md:text-lg transition-colors"
+                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-lg md:text-xl transition-colors"
                     title="Acercar"
                     aria-label="Acercar zoom"
                   >
@@ -1265,7 +1295,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   </button>
                   <button
                     onClick={() => zoomOut()}
-                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-base md:text-lg transition-colors"
+                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-lg md:text-xl transition-colors"
                     title="Alejar"
                     aria-label="Alejar zoom"
                   >
@@ -1273,7 +1303,7 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                   </button>
                   <button
                     onClick={() => resetTransform()}
-                    className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-bold text-sm md:text-base transition-colors"
+                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-bold text-base md:text-lg transition-colors"
                     title="Restablecer"
                     aria-label="Restablecer zoom"
                   >
@@ -1282,16 +1312,16 @@ const NatalChartWheelPro: React.FC<NatalChartWheelProProps> = ({
                 </div>
                 
                 <TransformComponent
-                  wrapperClass="!w-full !h-full"
+                  wrapperClass="!w-screen !h-screen"
                   contentClass="!w-full !h-full flex items-center justify-center"
                 >
                   <svg
-                    width={800}
-                    height={800}
+                    width={size}
+                    height={size}
                     viewBox={`0 0 ${size} ${size}`}
                     xmlns="http://www.w3.org/2000/svg"
                     style={{ background: 'transparent' }}
-                    className="max-w-full max-h-full"
+                    className="max-w-none"
                     shapeRendering="geometricPrecision"
                     role="img"
                     aria-label="Carta natal astrológica ampliada con planetas, casas, signos zodiacales y aspectos"

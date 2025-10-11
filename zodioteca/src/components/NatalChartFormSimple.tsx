@@ -607,31 +607,33 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
         {/* Info de ciudad seleccionada */}
         {selectedCity && (
           <div className="bg-purple-100 dark:bg-purple-600/20 rounded-lg p-3 border border-purple-300 dark:border-purple-400/30 space-y-2">
-            <div className="flex items-center gap-2 text-gray-800 dark:text-white text-sm font-medium">
-              <MapPin className="w-3.5 h-3.5" />
-              {selectedCity.name}, {selectedCity.country}
+            <div className="flex items-center gap-2 text-gray-800 dark:text-white text-sm font-medium min-w-0">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{selectedCity.name}, {selectedCity.country}</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
+              <div className="min-w-0">
                 <div className="text-gray-600 dark:text-white/60">Coordenadas</div>
-                <div className="text-gray-800 dark:text-white font-mono">
+                <div className="text-gray-800 dark:text-white font-mono text-[11px] break-all">
                   {selectedCity.lat.toFixed(4)}°, {selectedCity.lon.toFixed(4)}°
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-gray-600 dark:text-white/60">Timezone</div>
-                <div className="text-gray-800 dark:text-white font-mono">{selectedCity.tzId}</div>
+                <div className="text-gray-800 dark:text-white font-mono text-[11px] truncate" title={selectedCity.tzId}>
+                  {selectedCity.tzId}
+                </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-gray-600 dark:text-white/60">Coords DMS</div>
-                <div className="text-gray-800 dark:text-white font-mono text-[10px]">
+                <div className="text-gray-800 dark:text-white font-mono text-[10px] break-all">
                   {toDMS(selectedCity.lat, true)}<br/>
                   {toDMS(selectedCity.lon, false)}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-gray-600 dark:text-white/60">Offset {formData.birth.time && '(DST)'}</div>
-                <div className="text-gray-800 dark:text-white font-mono">{getTimezoneOffset() || 'N/A'}</div>
+                <div className="text-gray-800 dark:text-white font-mono text-[11px]">{getTimezoneOffset() || 'N/A'}</div>
               </div>
             </div>
           </div>
