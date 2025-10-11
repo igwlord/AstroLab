@@ -20,6 +20,7 @@ import { DIGNITIES } from '../types/dignity';
 import { POLARIZATIONS } from '../types/polarization';
 import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
 import { COORDINATE_SYSTEMS } from '../types/coordinateSystem';
+import CHART_SHAPES_GLOSSARY from '../data/chartShapesGlossary';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
 import GlossarySearch, { type SearchResult } from '../components/GlossarySearch';
 import GlossaryCategories from '../components/GlossaryCategories';
@@ -41,6 +42,7 @@ const RelationalGrid = lazy(() => import('../components/RelationalGrid'));
 const DignitiesGrid = lazy(() => import('../components/DignitiesGrid'));
 const PolarizationsGrid = lazy(() => import('../components/PolarizationsGrid'));
 const CoordinateSystemsGrid = lazy(() => import('../components/CoordinateSystemsGrid'));
+const ChartShapesGrid = lazy(() => import('../components/ChartShapesGrid'));
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
@@ -306,6 +308,20 @@ const GlossaryPage: React.FC = () => {
       });
     });
 
+    // Indexar formas de carta natal
+    CHART_SHAPES_GLOSSARY.forEach(shape => {
+      const catInfo = getCategoryInfo('chart-shapes');
+      content.push({
+        id: `chart-shape-${shape.id}`,
+        title: shape.name,
+        category: 'chart-shapes',
+        categoryName: catInfo.name,
+        categoryIcon: catInfo.icon,
+        snippet: shape.shortDescription,
+        matchType: 'title'
+      });
+    });
+
     // Indexar entradas del glosario genérico
     entries.forEach(entry => {
       const catInfo = getCategoryInfo(entry.category);
@@ -473,6 +489,9 @@ const GlossaryPage: React.FC = () => {
       } else if (category.id === 'polarizations') {
         // Para la categoría de polarizaciones, contamos las 8 polarizaciones
         counts[category.id] = POLARIZATIONS.length;
+      } else if (category.id === 'chart-shapes') {
+        // Para la categoría de formas de carta natal, contamos las 7 formas
+        counts[category.id] = 7;
       } else {
         counts[category.id] = entries.filter(entry => entry.category === category.id).length;
       }
@@ -560,8 +579,8 @@ const GlossaryPage: React.FC = () => {
         entryCounts={entryCounts}
       />
 
-      {/* Results header and actions (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades, polarizaciones, sistemas de casas o coordenadas) */}
-      {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && selectedCategory !== 'house-systems' && selectedCategory !== 'coordinates' && (
+      {/* Results header and actions (ocultar si es la categoría de signos, planetas, casas, aspectos, lunas, ascendentes, asteroides, celestial, dimensiones avanzadas, configuraciones, relacional, dignidades, polarizaciones, sistemas de casas, coordenadas o formas de carta natal) */}
+      {selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && selectedCategory !== 'house-systems' && selectedCategory !== 'coordinates' && selectedCategory !== 'chart-shapes' && (
         <div className="flex items-center justify-between mb-4 bg-purple-50 px-4 py-3 rounded-lg">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold text-purple-900">
@@ -693,6 +712,11 @@ const GlossaryPage: React.FC = () => {
           <div>
             <CoordinateSystemsGrid />
           </div>
+        ) : selectedCategory === 'chart-shapes' ? (
+          /* Mostrar grid de formas de carta natal */
+          <div>
+            <ChartShapesGrid />
+          </div>
         ) : filteredEntries.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-purple-400 mb-4">
@@ -722,7 +746,7 @@ const GlossaryPage: React.FC = () => {
       </Suspense>
 
       {/* Footer stats */}
-      {filteredEntries.length > 0 && selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && (
+      {filteredEntries.length > 0 && selectedCategory !== 'signs' && selectedCategory !== 'planets' && selectedCategory !== 'houses' && selectedCategory !== 'aspects' && selectedCategory !== 'lunar' && selectedCategory !== 'ascendants' && selectedCategory !== 'asteroids' && selectedCategory !== 'celestial' && selectedCategory !== 'advanced' && selectedCategory !== 'configurations' && selectedCategory !== 'relational' && selectedCategory !== 'dignities' && selectedCategory !== 'polarizations' && selectedCategory !== 'chart-shapes' && (
         <div className="mt-8 text-center py-4 border-t border-purple-200">
           <p className="text-sm text-purple-600 font-medium">
             Mostrando {filteredEntries.length} de {entries.length} términos totales

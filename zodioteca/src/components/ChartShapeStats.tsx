@@ -278,13 +278,13 @@ const ChartShapeStats: React.FC<ChartShapeStatsProps> = ({ pattern }) => {
         </div>
       </div>
 
-      {/* Link al glosario */}
+      {/* Link al glosario de formas de carta natal */}
       <div className="glossary-link mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <a
-          href="/glosario"
+          href="/glossary?categoria=chart-shapes"
           className="inline-flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-yellow-400 hover:text-purple-700 dark:hover:text-yellow-300 transition-colors"
         >
-          <span>📚 Leer más en el Glosario</span>
+          <span>📚 Leer más sobre Formas de Carta Natal</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

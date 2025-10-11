@@ -144,6 +144,13 @@ export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
     icon: '🔭',
     description: 'Sistemas de referencia celeste y coordenadas astronómicas',
     color: 'cyan'
+  },
+  {
+    id: 'chart-shapes',
+    name: 'Formas de Carta Natal',
+    icon: '🌀',
+    description: 'Patrones de Marc Edmund Jones: Racimo, Cuenco, Cubo, Locomotora, Balancín, Disperso, Irregular',
+    color: 'fuchsia'
   }
 ];
 
