@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { GoogleDriveWrapper } from './context/GoogleDriveContext';
+import { SupabaseProvider } from './context/SupabaseContext';
 import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import { I18nProvider } from './i18n';
 import Layout from './components/Layout';
@@ -133,7 +133,7 @@ function App() {
   return (
     <ErrorBoundary>
       <I18nProvider>
-        <GoogleDriveWrapper>
+        <SupabaseProvider>
           <AuthProvider>
             <AudioPlayerProvider>
               <Router>
@@ -145,7 +145,7 @@ function App() {
               </Router>
             </AudioPlayerProvider>
           </AuthProvider>
-        </GoogleDriveWrapper>
+        </SupabaseProvider>
       </I18nProvider>
     </ErrorBoundary>
   );

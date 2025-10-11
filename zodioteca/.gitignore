@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (credenciales sensibles)
+.env
+.env.local
+.env.production
+
 # Service Worker build artifacts (Vite PWA)
 dev-dist
 

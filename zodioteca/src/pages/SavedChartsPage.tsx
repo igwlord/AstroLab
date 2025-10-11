@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import { useI18n } from '../i18n';
-import { useGoogleDrive } from '../context/GoogleDriveContext';
+import { useSupabase } from '../context/SupabaseContext';
+import { supabase } from '../services/supabaseService';
 import { logger } from '../utils/logger';
 import SavedChartModal from '../components/SavedChartModal';
+import AuthModal from '../components/AuthModal';
 import {
   getLocalCharts,
   deleteChartLocal,
-  getChartsWithStatus,
-  syncChartToCloud,
-  syncAllCharts,
   exportChartsToJSON,
   importChartsFromJSON,
   type ChartWithStatus,
@@ -30,7 +29,8 @@ import {
 
 const SavedChartsPage: FC = () => {
   const { t } = useI18n();
-  const { isAuthenticated, isConnecting, login, logout, userEmail } = useGoogleDrive();
+  const { user, isAuthenticated, isLoading: isConnecting, signOut, showAuthModal, setShowAuthModal } = useSupabase();
+  const userEmail = user?.email || null;
   
   const [charts, setCharts] = useState<ChartWithStatus[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,8 +44,15 @@ const SavedChartsPage: FC = () => {
     setLoading(true);
     try {
       if (isAuthenticated) {
-        const chartsWithStatus = await getChartsWithStatus();
-        setCharts(chartsWithStatus);
+        // Cargar desde Supabase
+        const { data: serverCharts, error } = await supabase.getCharts();
+        if (error) {
+          logger.error('Error loading from Supabase:', error);
+          const localCharts = getLocalCharts();
+          setCharts(localCharts.map(c => ({ ...c, syncStatus: 'local-only' as SyncStatus })));
+        } else {
+          setCharts((serverCharts || []).map(c => ({ ...c, syncStatus: 'synced' as SyncStatus })));
+        }
       } else {
         const localCharts = getLocalCharts();
         setCharts(localCharts.map(c => ({ ...c, syncStatus: 'local-only' as SyncStatus })));
@@ -64,10 +71,22 @@ const SavedChartsPage: FC = () => {
 
   // Sincronizar todas
   const handleSyncAll = async () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setSyncing(true);
     try {
-      await syncAllCharts(charts);
-      await loadCharts();
+      const localCharts = getLocalCharts();
+      const { data: serverCharts, error } = await supabase.syncCharts(localCharts);
+      
+      if (error) {
+        alert('Error al sincronizar: ' + error);
+      } else {
+        setCharts((serverCharts || []).map(c => ({ ...c, syncStatus: 'synced' as SyncStatus })));
+        alert('✅ Sincronización completa');
+      }
     } catch (error) {
       logger.error('Error syncing:', error);
       alert('Error al sincronizar cartas');
@@ -78,14 +97,20 @@ const SavedChartsPage: FC = () => {
 
   // Sincronizar seleccionadas
   const handleSyncSelected = async () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setSyncing(true);
     try {
       const toSync = charts.filter(c => selectedCharts.has(c.id));
       for (const chart of toSync) {
-        await syncChartToCloud(chart);
+        await supabase.saveChart(chart);
       }
       setSelectedCharts(new Set());
       await loadCharts();
+      alert('✅ Cartas sincronizadas');
     } catch (error) {
       logger.error('Error syncing selected:', error);
       alert('Error al sincronizar cartas seleccionadas');
@@ -213,7 +238,7 @@ const SavedChartsPage: FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Botón Google Drive */}
+            {/* Botón Supabase Auth */}
             {isAuthenticated ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="text-right hidden sm:block">
@@ -221,16 +246,16 @@ const SavedChartsPage: FC = () => {
                   <div className="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400">Conectado</div>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={signOut}
                   className="p-1.5 sm:p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  aria-label="Desconectar Drive"
+                  aria-label="Cerrar Sesión"
                 >
                   <Cloud className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
                 </button>
               </div>
             ) : (
               <button
-                onClick={login}
+                onClick={() => setShowAuthModal(true)}
                 disabled={isConnecting}
                 className="flex items-center gap-1.5 sm:gap-2 bg-blue-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-xs sm:text-sm"
               >
@@ -239,7 +264,7 @@ const SavedChartsPage: FC = () => {
                 ) : (
                   <Cloud className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
-                <span className="hidden sm:inline">Conectar</span> Drive
+                <span className="hidden sm:inline">Iniciar</span> Sesión
               </button>
             )}
 
@@ -429,6 +454,9 @@ const SavedChartsPage: FC = () => {
           ))}
         </div>
       )}
+
+      {/* Modal de autenticación */}
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </div>
     </>
   );

@@ -27,6 +27,8 @@ import { detectPolarizations } from '../utils/polarizationDetector';
 import { Save, Check } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettings';
 import { HOUSE_SYSTEMS, type HouseSystem } from '../types/houseSystem';
+import { useSupabase } from '../context/SupabaseContext';
+import { supabase } from '../services/supabaseService';
 
 // ⚡ Lazy imports para reducir bundle inicial (401 KB + 200 KB = 601 KB ahorrados)
 // Solo se cargan cuando el usuario hace click en "Descargar PDF"
@@ -54,6 +56,9 @@ export default function NatalChartPage() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  
+  // Supabase auth
+  const { isAuthenticated } = useSupabase();
   
   // Guardar datos del form para poder recalcular con diferente sistema
   const [savedFormData, setSavedFormData] = useState<FormValue | null>(null);
@@ -342,7 +347,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     setJustSaved(false);
   };
 
-  const handleSaveChart = () => {
+  const handleSaveChart = async () => {
     if (!result) return;
     
     setIsSaving(true);
@@ -354,7 +359,8 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
       const day = String(localDate.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
       
-      saveChartLocal(
+      // Guardar localmente primero (inmediato)
+      const newChart = saveChartLocal(
         {
           id: '', // Se genera automáticamente
           personName,
@@ -379,10 +385,26 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
         personName
       );
       
+      logger.log('✅ Carta guardada localmente');
+      
+      // Auto-sincronizar con Supabase si el usuario está autenticado
+      if (isAuthenticated) {
+        try {
+          const { error } = await supabase.saveChart(newChart);
+          if (error) {
+            logger.error('⚠️ Error al sincronizar con Supabase:', error);
+            // No mostrar alerta, la carta ya está guardada localmente
+          } else {
+            logger.log('☁️ Carta sincronizada con Supabase');
+          }
+        } catch (syncError) {
+          logger.error('⚠️ Error de conexión con Supabase:', syncError);
+          // Usuario puede sincronizar manualmente después
+        }
+      }
+      
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 3000);
-      
-      logger.log('✅ Carta guardada localmente');
     } catch (error) {
       logger.error('Error saving chart:', error);
       alert('Error al guardar la carta');
