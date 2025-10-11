@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import FloatingMiniPlayer from './components/FloatingMiniPlayer';
+import { ServiceWorkerUpdatePrompt } from './utils/sw-update-prompt';
 
 // Lazy loading para páginas - reduce bundle inicial ~40-50%
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -138,6 +139,8 @@ function App() {
             <AudioPlayerProvider>
               <Router>
                 <ErrorBoundary>
+                  {/* Notificación de actualización de Service Worker */}
+                  <ServiceWorkerUpdatePrompt />
                   <AppRoutes />
                   {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
                   <FloatingMiniPlayer isMobile={false} />

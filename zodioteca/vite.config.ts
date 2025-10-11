@@ -74,7 +74,39 @@ export default defineConfig({
         // Excluir mp3 del precache - son muy grandes (10-16 MB cada uno)
         globPatterns: ['**/*.{js,css,html,svg,png,json,woff,woff2}'],
         globIgnores: ['**/media/**'],
+        // ⚡ STRATEGY: NetworkFirst for HTML/JS/CSS to get updates faster
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/assets/],
         runtimeCaching: [
+          {
+            // 🔥 HTML/JS/CSS: Siempre verificar red primero
+            urlPattern: /\.(?:html|js|css)$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'static-resources',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 días
+              }
+            }
+          },
+          {
+            // 🌐 API Supabase: NetworkFirst con timeout corto
+            urlPattern: /^https:\/\/pzbfhdznmpiszanqoarw\.supabase\.co\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-cache',
+              networkTimeoutSeconds: 5,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hora
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
           {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
             handler: 'NetworkFirst',
