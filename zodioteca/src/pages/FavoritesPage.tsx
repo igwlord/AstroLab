@@ -46,7 +46,6 @@ const FILTER_CHIPS: FilterChip[] = [
   { id: 'chart-aspect', label: 'Aspectos', icon: '📐' },
   { id: 'chart-shape', label: 'Formas', icon: '🔴' },
   { id: 'frequency-exercise', label: 'Ejercicios', icon: '🧘' },
-  { id: 'saved-chart', label: 'Cartas', icon: '📊' },
 ];
 
 // ============================================
@@ -278,8 +277,44 @@ const FavoritesPage: FC = () => {
             </div>
           )}
           
-          {/* Filtros */}
-          <div className="flex flex-wrap gap-2">
+          {/* Filtros - Dropdown en móvil, chips en desktop */}
+          
+          {/* Versión móvil (< 640px): Dropdown selector */}
+          <div className="sm:hidden">
+            <label htmlFor="filter-select" className="sr-only">
+              Filtrar favoritos
+            </label>
+            <select
+              id="filter-select"
+              value={selectedFilter}
+              onChange={(e) => setSelectedFilter(e.target.value as FilterType)}
+              className="w-full px-4 py-3 rounded-xl text-base font-medium 
+                bg-white/80 dark:bg-gray-800/80 
+                text-gray-900 dark:text-white
+                border-2 border-purple-200 dark:border-purple-700
+                focus:border-purple-500 dark:focus:border-purple-400
+                focus:ring-2 focus:ring-purple-500/20
+                shadow-sm
+                transition-all
+                cursor-pointer
+                appearance-none
+                bg-no-repeat
+                bg-[length:1.5em]
+                bg-[right_0.75rem_center]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`
+              }}
+            >
+              {FILTER_CHIPS.map((chip) => (
+                <option key={chip.id} value={chip.id}>
+                  {chip.icon} {chip.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Versión desktop (≥ 640px): Chips horizontales */}
+          <div className="hidden sm:flex flex-wrap gap-2">
             {FILTER_CHIPS.map((chip) => (
               <button
                 key={chip.id}

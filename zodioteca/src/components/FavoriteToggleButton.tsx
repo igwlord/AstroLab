@@ -221,7 +221,7 @@ const FavoriteToggleButton: FC<FavoriteToggleButtonProps> = ({
             rounded-lg
             whitespace-nowrap
             pointer-events-none
-            z-50
+            z-[100]
             animate-fadeIn
             shadow-lg
           `}

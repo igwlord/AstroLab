@@ -14,7 +14,7 @@
  */
 
 import { useState, useRef } from 'react';
-import type { FC, TouchEvent } from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FavoriteItem } from '../types/favorites';
 import { getFavoriteTypeLabel } from '../types/favorites';
@@ -60,24 +60,37 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
   const { remove, togglePin, touch } = useFavorites();
   
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const cardRef = useRef<HTMLDivElement>(null);
   
   // =========== SWIPE TO DELETE (Mobile) ===========
   
-  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setIsSwiping(false);
   };
   
-  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     const currentX = e.touches[0].clientX;
-    const diff = touchStartX.current - currentX;
+    const currentY = e.touches[0].clientY;
+    const diffX = touchStartX.current - currentX;
+    const diffY = Math.abs(touchStartY.current - currentY);
     
-    // Solo permitir swipe a la izquierda
-    if (diff > 0) {
-      setSwipeOffset(Math.min(diff, 100));
-    } else {
-      setSwipeOffset(0);
+    // Si el movimiento es más horizontal que vertical, es un swipe
+    if (Math.abs(diffX) > diffY && Math.abs(diffX) > 10) {
+      setIsSwiping(true);
+      // Prevenir scroll vertical cuando estamos haciendo swipe horizontal
+      e.preventDefault();
+      
+      // Solo permitir swipe a la izquierda
+      if (diffX > 0) {
+        setSwipeOffset(Math.min(diffX, 100));
+      } else {
+        setSwipeOffset(0);
+      }
     }
   };
   
@@ -86,9 +99,10 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     if (swipeOffset > 60) {
       handleRemove();
     } else {
-      // Volver a la posición original
+      // Volver a la posición original con animación
       setSwipeOffset(0);
     }
+    setIsSwiping(false);
   };
   
   // =========== ACCIONES ===========
@@ -140,6 +154,7 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     <div
       ref={cardRef}
       className={`relative overflow-hidden ${className}`}
+      style={{ touchAction: 'pan-y pinch-zoom' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -147,16 +162,29 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
       {/* Background de eliminación (swipe) */}
       {swipeOffset > 0 && (
         <div
-          className="absolute inset-0 bg-red-500 flex items-center justify-end px-6 text-white font-semibold rounded-xl z-0"
-          style={{ opacity: swipeOffset / 100 }}
+          className="absolute inset-0 bg-gradient-to-l from-red-500 to-red-600 flex items-center justify-end px-6 text-white font-bold rounded-xl z-0"
+          style={{ 
+            opacity: Math.min(swipeOffset / 80, 1),
+            pointerEvents: 'none'
+          }}
         >
-          🗑️ Eliminar
+          <span className="flex items-center gap-2 text-lg">
+            <span className="text-2xl">🗑️</span>
+            <span className="hidden sm:inline">Eliminar</span>
+          </span>
         </div>
       )}
       
       {/* Card principal */}
       <div
-        onClick={handleClick}
+        onClick={(e) => {
+          // Solo navegar si no estamos haciendo swipe
+          if (isSwiping || swipeOffset > 10) {
+            e.preventDefault();
+            return;
+          }
+          handleClick();
+        }}
         className={`
           relative z-10
           ${compact ? 'p-3' : 'p-4'}
@@ -168,14 +196,16 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
           transition-all duration-300 ease-out
           hover:border-purple-400 dark:hover:border-purple-500
           hover:shadow-lg hover:shadow-purple-200/50 dark:hover:shadow-purple-900/30
-          hover:scale-[1.02]
-          hover:-translate-y-0.5
+          ${swipeOffset === 0 ? 'hover:scale-[1.02] hover:-translate-y-0.5' : ''}
           active:scale-[0.98]
           active:translate-y-0
           group
         `}
         style={{
-          transform: `translateX(-${swipeOffset}px)`,
+          transform: swipeOffset > 0 
+            ? `translateX(-${swipeOffset}px)` 
+            : undefined,
+          transition: isSwiping ? 'none' : 'transform 0.3s ease-out',
         }}
         role="link"
         tabIndex={0}
