@@ -279,38 +279,79 @@ const FavoritesPage: FC = () => {
           
           {/* Filtros - Dropdown en móvil, chips en desktop */}
           
-          {/* Versión móvil (< 640px): Dropdown selector */}
-          <div className="sm:hidden">
+          {/* Versión móvil (< 640px): Dropdown compacto con estilo AstroLab */}
+          <div className="sm:hidden mb-4">
             <label htmlFor="filter-select" className="sr-only">
-              Filtrar favoritos
+              Filtrar favoritos por categoría
             </label>
-            <select
-              id="filter-select"
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value as FilterType)}
-              className="w-full px-4 py-3 rounded-xl text-base font-medium 
-                bg-white/80 dark:bg-gray-800/80 
-                text-gray-900 dark:text-white
-                border-2 border-purple-200 dark:border-purple-700
-                focus:border-purple-500 dark:focus:border-purple-400
-                focus:ring-2 focus:ring-purple-500/20
-                shadow-sm
-                transition-all
-                cursor-pointer
-                appearance-none
-                bg-no-repeat
-                bg-[length:1.5em]
-                bg-[right_0.75rem_center]"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`
-              }}
-            >
-              {FILTER_CHIPS.map((chip) => (
-                <option key={chip.id} value={chip.id}>
-                  {chip.icon} {chip.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              {/* Icono del filtro seleccionado */}
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xl pointer-events-none z-10">
+                {FILTER_CHIPS.find(c => c.id === selectedFilter)?.icon || '⭐'}
+              </div>
+              
+              <select
+                id="filter-select"
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value as FilterType)}
+                className="w-full pl-11 pr-10 py-2.5 rounded-xl text-sm font-semibold 
+                  bg-white/70 dark:bg-purple-900/30
+                  backdrop-blur-sm
+                  text-purple-900 dark:text-purple-100
+                  border-2 border-purple-200 dark:border-purple-700
+                  focus:border-purple-400 dark:focus:border-purple-500
+                  focus:ring-2 focus:ring-purple-400/30
+                  shadow-md shadow-purple-200/30 dark:shadow-purple-900/20
+                  transition-all duration-200
+                  cursor-pointer
+                  appearance-none
+                  bg-no-repeat
+                  bg-[length:1.1em]
+                  bg-[right_0.625rem_center]
+                  hover:border-purple-300 dark:hover:border-purple-600
+                  hover:shadow-lg hover:shadow-purple-300/40 dark:hover:shadow-purple-800/30
+                  active:scale-[0.98]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3e%3cpath stroke='%23a78bfa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'/%3e%3c/svg%3e")`
+                }}
+              >
+                {FILTER_CHIPS.map((chip) => (
+                  <option key={chip.id} value={chip.id}>
+                    {chip.label}
+                  </option>
+                ))}
+              </select>
+              
+              {/* Badge con contador - solo si hay filtro activo */}
+              {selectedFilter !== 'all' && filteredItems.length > 0 && (
+                <div className="absolute right-11 top-1/2 -translate-y-1/2 px-2 py-0.5 
+                  bg-gradient-to-r from-purple-600 to-violet-600 
+                  dark:from-purple-500 dark:to-violet-500 
+                  text-white text-[10px] font-bold rounded-full 
+                  shadow-md pointer-events-none z-10">
+                  {filteredItems.length}
+                </div>
+              )}
+            </div>
+            
+            {/* Botón "Ver todos" - solo cuando hay filtro activo */}
+            {selectedFilter !== 'all' && (
+              <button
+                onClick={() => setSelectedFilter('all')}
+                className="mt-2 w-full py-1.5 px-3 text-xs font-medium
+                  text-purple-700 dark:text-purple-300
+                  hover:text-purple-900 dark:hover:text-purple-100
+                  bg-purple-50/50 dark:bg-purple-900/20
+                  hover:bg-purple-100/70 dark:hover:bg-purple-800/30
+                  rounded-lg
+                  transition-colors duration-200
+                  flex items-center justify-center gap-1.5"
+              >
+                <span>✨</span>
+                <span>Ver todos los favoritos</span>
+                <span className="text-[10px] opacity-70">({stats.total})</span>
+              </button>
+            )}
           </div>
 
           {/* Versión desktop (≥ 640px): Chips horizontales */}

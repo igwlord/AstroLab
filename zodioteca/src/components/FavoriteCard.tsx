@@ -65,7 +65,7 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
   const touchStartY = useRef(0);
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // =========== SWIPE TO DELETE (Mobile) ===========
+  // =========== SWIPE TO DELETE (Mobile) - Versión mejorada ===========
   
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.touches[0].clientX;
@@ -74,20 +74,25 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
   };
   
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!e.touches[0]) return;
+    
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
     const diffX = touchStartX.current - currentX;
     const diffY = Math.abs(touchStartY.current - currentY);
     
     // Si el movimiento es más horizontal que vertical, es un swipe
-    if (Math.abs(diffX) > diffY && Math.abs(diffX) > 10) {
+    if (Math.abs(diffX) > diffY && Math.abs(diffX) > 5) {
       setIsSwiping(true);
-      // Prevenir scroll vertical cuando estamos haciendo swipe horizontal
-      e.preventDefault();
       
-      // Solo permitir swipe a la izquierda
+      // Prevenir scroll SOLO cuando estamos haciendo swipe horizontal
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      
+      // Solo permitir swipe a la izquierda (diffX positivo)
       if (diffX > 0) {
-        setSwipeOffset(Math.min(diffX, 100));
+        setSwipeOffset(Math.min(diffX, 120)); // Aumenté el límite para mejor UX
       } else {
         setSwipeOffset(0);
       }
@@ -95,9 +100,12 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
   };
   
   const handleTouchEnd = () => {
-    // Si el swipe fue mayor a 60px, eliminar
-    if (swipeOffset > 60) {
-      handleRemove();
+    // Si el swipe fue mayor a 50px, eliminar
+    if (swipeOffset > 50) {
+      // Pequeño delay para que el usuario vea la animación
+      setTimeout(() => {
+        handleRemove();
+      }, 100);
     } else {
       // Volver a la posición original con animación
       setSwipeOffset(0);
@@ -154,23 +162,29 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     <div
       ref={cardRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ touchAction: 'pan-y pinch-zoom' }}
+      style={{ 
+        touchAction: 'pan-y pinch-zoom',
+        userSelect: 'none',
+        WebkitUserSelect: 'none'
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Background de eliminación (swipe) */}
+      {/* Background de eliminación (swipe) - Más visible */}
       {swipeOffset > 0 && (
         <div
-          className="absolute inset-0 bg-gradient-to-l from-red-500 to-red-600 flex items-center justify-end px-6 text-white font-bold rounded-xl z-0"
+          className="absolute inset-0 bg-gradient-to-l from-red-600 via-red-500 to-red-600 flex items-center justify-end px-4 text-white font-bold rounded-xl z-0 shadow-inner"
           style={{ 
-            opacity: Math.min(swipeOffset / 80, 1),
+            opacity: Math.min(swipeOffset / 60, 1),
             pointerEvents: 'none'
           }}
         >
-          <span className="flex items-center gap-2 text-lg">
-            <span className="text-2xl">🗑️</span>
-            <span className="hidden sm:inline">Eliminar</span>
+          <span className="flex items-center gap-2 animate-pulse">
+            <span className="text-3xl drop-shadow-lg">🗑️</span>
+            <span className="text-base font-extrabold tracking-wide drop-shadow-md">
+              {swipeOffset > 50 ? '¡Suelta!' : 'Desliza'}
+            </span>
           </span>
         </div>
       )}
