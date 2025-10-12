@@ -55,7 +55,7 @@ const FILTER_CHIPS: FilterChip[] = [
 const FavoritesPage: FC = () => {
   // Hook para navegación (reservado para futuras mejoras: scroll con hash)
   // const navigate = useNavigate();
-  const { list, remove, togglePin, exportToJSON, importFromJSON } = useFavorites();
+  const { list, togglePin, exportToJSON, importFromJSON } = useFavorites();
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   const [showStats, setShowStats] = useState(false);
   
@@ -190,34 +190,34 @@ const FavoritesPage: FC = () => {
   // =========== RENDER PRINCIPAL ===========
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 py-8 px-4 md:py-12 md:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-2 flex items-center gap-3">
+        <header className="mb-8 md:mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-10">
+            <div className="md:flex-1 md:text-center">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-purple-900 dark:text-white mb-2 md:mb-4 flex items-center gap-3 md:justify-center">
                 <span>⭐</span>
                 Mis Favoritos
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 md:text-lg">
                 {stats.total} {stats.total === 1 ? 'elemento guardado' : 'elementos guardados'}
                 {stats.pinned > 0 && ` • ${stats.pinned} anclado${stats.pinned > 1 ? 's' : ''}`}
               </p>
             </div>
             
             {/* Acciones */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 md:absolute md:top-0 md:right-0">
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium md:px-6 md:py-3"
               >
                 📊 Stats
               </button>
               
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium md:px-6 md:py-3"
                 title="Exportar favoritos"
               >
                 💾
@@ -225,7 +225,7 @@ const FavoritesPage: FC = () => {
               
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-white/50 dark:bg-purple-800/30 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-white/70 dark:hover:bg-purple-700/40 transition-colors text-sm font-medium md:px-6 md:py-3"
                 title="Importar favoritos"
               >
                 📥
@@ -355,13 +355,13 @@ const FavoritesPage: FC = () => {
           </div>
 
           {/* Versión desktop (≥ 640px): Chips horizontales */}
-          <div className="hidden sm:flex flex-wrap gap-2">
+          <div className="hidden sm:flex flex-wrap gap-2 md:gap-3 md:justify-center md:px-8">
             {FILTER_CHIPS.map((chip) => (
               <button
                 key={chip.id}
                 onClick={() => setSelectedFilter(chip.id)}
                 className={`
-                  px-4 py-2 rounded-full text-sm font-medium transition-all
+                  px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium transition-all
                   ${selectedFilter === chip.id
                     ? 'bg-purple-600 text-white shadow-lg scale-105'
                     : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700'
@@ -382,7 +382,6 @@ const FavoritesPage: FC = () => {
               <FavoriteCard
                 key={item.id}
                 item={item}
-                onRemove={() => remove(item.id)}
                 onTogglePin={() => togglePin(item.id)}
               />
             ))}

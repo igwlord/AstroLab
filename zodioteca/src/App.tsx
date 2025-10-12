@@ -14,6 +14,7 @@ const FloatingMiniPlayer = lazy(() => import('./components/FloatingMiniPlayer'))
 
 // Lazy loading para páginas - reduce bundle inicial ~40-50%
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
@@ -55,6 +56,13 @@ function AppRoutes() {
         <Route path="/login" element={
           <PublicRoute>
             <LoginPage />
+          </PublicRoute>
+        } />
+
+        {/* Reset Password */}
+        <Route path="/reset-password" element={
+          <PublicRoute>
+            <ResetPasswordPage />
           </PublicRoute>
         } />
 
