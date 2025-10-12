@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MOON_SIGNS } from '../types/moonSign';
 import type { MoonSign } from '../types/moonSign';
 import MoonSignModal from './MoonSignModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const MoonSignsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedMoonSign, setSelectedMoonSign] = useState<MoonSign | null>(null);
   const [filter, setFilter] = useState<'all' | 'fuego' | 'tierra' | 'aire' | 'agua'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const moonSign = MOON_SIGNS.find(m => m.sign.toLowerCase() === state.autoOpen!.toLowerCase());
+      if (moonSign) {
+        setSelectedMoonSign(moonSign);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="moon-${state.autoOpen}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const filteredMoonSigns = filter === 'all' 
     ? MOON_SIGNS 
@@ -85,18 +106,40 @@ const MoonSignsGrid: React.FC = () => {
       {/* Grid de Lunas */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         {filteredMoonSigns.map((moonSign) => (
-          <button
+          <div
             key={moonSign.sign}
-            data-id={moonSign.sign.toLowerCase()}
-            onClick={() => setSelectedMoonSign(moonSign)}
-            className={`bg-gradient-to-br ${getElementColor(moonSign.element)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            className="relative group"
           >
-            <span className="text-4xl sm:text-5xl md:text-6xl">🌙</span>
-            <div className="text-center">
-              <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">Luna en {moonSign.sign}</h3>
-              <p className="text-[10px] sm:text-xs md:text-sm opacity-90">{moonSign.element}</p>
+            {/* Botón de Favorito */}
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20 opacity-80 hover:opacity-100 transition-opacity">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-moon-sign',
+                  scope: 'global',
+                  title: `Luna en ${moonSign.sign}`,
+                  icon: '🌙',
+                  route: `/glossary?categoria=moon-signs#moon-${moonSign.sign.toLowerCase()}`,
+                  targetId: moonSign.sign.toLowerCase(),
+                  tags: [moonSign.element, moonSign.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
             </div>
-          </button>
+            
+            <button
+              data-id={moonSign.sign.toLowerCase()}
+              onClick={() => setSelectedMoonSign(moonSign)}
+              className={`w-full h-full bg-gradient-to-br ${getElementColor(moonSign.element)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            >
+              <span className="text-4xl sm:text-5xl md:text-6xl">🌙</span>
+              <div className="text-center">
+                <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">Luna en {moonSign.sign}</h3>
+                <p className="text-[10px] sm:text-xs md:text-sm opacity-90">{moonSign.element}</p>
+              </div>
+            </button>
+          </div>
         ))}
       </div>
 

@@ -1,6 +1,29 @@
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 export default function AdvancedDimensionsGrid() {
+  const location = useLocation();
+
+  // Auto-scroll + destello si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      setTimeout(() => {
+        const element = document.querySelector(`[data-id="${state.autoOpen}"]`) as HTMLElement;
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Efecto destello
+          element.classList.add('animate-pulse-highlight');
+          setTimeout(() => {
+            element.classList.remove('animate-pulse-highlight');
+          }, 2000);
+        }
+        window.history.replaceState({}, document.title);
+      }, 300);
+    }
+  }, [location.state]);
   
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
@@ -25,6 +48,22 @@ export default function AdvancedDimensionsGrid() {
               bg-gradient-to-br ${dimension.gradient} text-white
               shadow-lg border-2 ${dimension.border}`}
           >
+            <div className="absolute top-2 right-2 z-20">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-dimension',
+                  scope: 'global',
+                  title: dimension.name,
+                  icon: dimension.icon,
+                  route: `/glossary?categoria=advanced#dimension-${dimension.id}`,
+                  targetId: dimension.id,
+                  tags: [dimension.frequency],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             {/* Patrón de fondo */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0" style={{

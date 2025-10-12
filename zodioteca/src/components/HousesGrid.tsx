@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { HOUSES } from '../types/house';
 import type { House } from '../types/house';
 import HouseModal from './HouseModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const HousesGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'angular' | 'succedent' | 'cadent'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const house = HOUSES.find(h => h.id.toString() === state.autoOpen!.toString());
+      if (house) {
+        setSelectedHouse(house);
+        setIsModalOpen(true);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="house-${state.autoOpen}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const handleHouseClick = (house: House) => {
     setSelectedHouse(house);
@@ -100,38 +122,60 @@ const HousesGrid: React.FC = () => {
       {/* Grid de casas */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {filteredHouses.map((house) => (
-          <button
+          <div
             key={house.id}
-            data-id={house.number.toString()}
-            onClick={() => handleHouseClick(house)}
-            className={`
-              group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
-              bg-gradient-to-br ${getCategoryColor(house.category)}
-              text-white shadow-lg hover:shadow-2xl
-              transform hover:scale-105 transition-all duration-300
-              cursor-pointer
-            `}
+            className="relative group"
           >
-            {/* Patrón de fondo animado */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
-                backgroundSize: '15px 15px'
-              }}></div>
+            {/* Botón de Favorito - Sistema v2 */}
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20 opacity-80 hover:opacity-100 transition-opacity">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-house',
+                  scope: 'global',
+                  title: `Casa ${house.number}: ${house.title}`,
+                  icon: house.number.toString(),
+                  route: `/glossary?categoria=houses#house-${house.id}`,
+                  targetId: house.id,
+                  tags: ['Casas', house.category, house.name],
+                  pinned: false,
+                }}
+                size="sm"
+                variant="amber"
+              />
             </div>
+            
+            <button
+              data-id={house.number.toString()}
+              onClick={() => handleHouseClick(house)}
+              className={`
+                w-full h-full relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
+                bg-gradient-to-br ${getCategoryColor(house.category)}
+                text-white shadow-lg hover:shadow-2xl
+                transform hover:scale-105 transition-all duration-300
+                cursor-pointer
+              `}
+            >
+              {/* Patrón de fondo animado */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
+                  backgroundSize: '15px 15px'
+                }}></div>
+              </div>
 
-            {/* Contenido */}
-            <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
-              <div className="text-4xl sm:text-5xl md:text-6xl font-bold group-hover:scale-110 transition-transform duration-300">
-                {house.number}
+              {/* Contenido */}
+              <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
+                <div className="text-4xl sm:text-5xl md:text-6xl font-bold group-hover:scale-110 transition-transform duration-300">
+                  {house.number}
+                </div>
+                <div className="text-[10px] sm:text-xs font-bold text-center">{house.name}</div>
+                <div className="text-[10px] sm:text-xs text-center opacity-90 line-clamp-2 hidden sm:block">{house.title}</div>
+                <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
+                  <span className="hidden sm:inline">{getCategoryIcon(house.category)} </span>{house.category === 'angular' ? 'Ang' : house.category === 'succedent' ? 'Suc' : 'Cad'}
+                </div>
               </div>
-              <div className="text-[10px] sm:text-xs font-bold text-center">{house.name}</div>
-              <div className="text-[10px] sm:text-xs text-center opacity-90 line-clamp-2 hidden sm:block">{house.title}</div>
-              <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
-                <span className="hidden sm:inline">{getCategoryIcon(house.category)} </span>{house.category === 'angular' ? 'Ang' : house.category === 'succedent' ? 'Suc' : 'Cad'}
-              </div>
-            </div>
-          </button>
+            </button>
+          </div>
         ))}
       </div>
 

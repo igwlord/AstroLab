@@ -1,15 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ChartShapeGlossaryEntry } from '../data/chartShapesGlossary';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 interface ChartShapeGlossaryCardProps {
   shape: ChartShapeGlossaryEntry;
+  autoExpand?: boolean;
 }
 
-const ChartShapeGlossaryCard: React.FC<ChartShapeGlossaryCardProps> = ({ shape }) => {
+const ChartShapeGlossaryCard: React.FC<ChartShapeGlossaryCardProps> = ({ shape, autoExpand = false }) => {
   const [expanded, setExpanded] = useState(false);
 
+  // Auto-expandir si viene desde favoritos
+  useEffect(() => {
+    if (autoExpand) {
+      setExpanded(true);
+    }
+  }, [autoExpand]);
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-purple-200 dark:border-purple-700">
+    <div 
+      data-shape-id={shape.id}
+      className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-purple-200 dark:border-purple-700"
+    >
+      <div className="absolute top-2 right-2 z-20">
+        <FavoriteToggleButton
+          item={{
+            type: 'chart-shape',
+            scope: 'global',
+            title: shape.name,
+            icon: shape.emoji,
+            route: `/glossary?categoria=chart-shapes#shape-${shape.id}`,
+            targetId: shape.id,
+            tags: shape.keywords,
+            pinned: false
+          }}
+          size="sm"
+          variant="amber"
+        />
+      </div>
       {/* Header con emoji y nombre */}
       <div 
         className="p-6 cursor-pointer select-none"

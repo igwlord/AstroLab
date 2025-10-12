@@ -1,11 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ZODIAC_SIGNS } from '../types/zodiacSign';
 import type { ZodiacSign } from '../types/zodiacSign';
 import ZodiacModal from './ZodiacModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const ZodiacSignsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedSign, setSelectedSign] = useState<ZodiacSign | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      // Buscar el signo por targetId (formato: "aries", "taurus", etc.)
+      const sign = ZODIAC_SIGNS.find(s => s.id.toLowerCase() === state.autoOpen!.toLowerCase());
+      if (sign) {
+        setSelectedSign(sign);
+        setIsModalOpen(true);
+        
+        // Limpiar el state para evitar re-abrir
+        window.history.replaceState({}, document.title);
+        
+        // Scroll al elemento
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${state.autoOpen}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const handleSignClick = (sign: ZodiacSign) => {
     setSelectedSign(sign);
@@ -53,38 +80,60 @@ const ZodiacSignsGrid: React.FC = () => {
       {/* Grid de signos */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {ZODIAC_SIGNS.map((sign) => (
-          <button
+          <div
             key={sign.id}
-            data-id={sign.id}
-            onClick={() => handleSignClick(sign)}
-            className={`
-              group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
-              bg-gradient-to-br ${getElementColor(sign.element)}
-              text-white shadow-lg hover:shadow-2xl
-              transform hover:scale-105 transition-all duration-300
-              cursor-pointer
-            `}
+            className="relative group"
           >
-            {/* Patrón de fondo animado */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
-                backgroundSize: '15px 15px'
-              }}></div>
+            {/* Botón de Favorito - Sistema v2 */}
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20 opacity-80 hover:opacity-100 transition-opacity">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-sign',
+                  scope: 'global',
+                  title: sign.name,
+                  icon: sign.symbol,
+                  route: `/glossary?categoria=signs#sign-${sign.id}`,
+                  targetId: sign.id,
+                  tags: ['Signos', sign.element, sign.modality],
+                  pinned: false,
+                }}
+                size="sm"
+                variant="amber"
+              />
             </div>
+            
+            <button
+              data-id={sign.id}
+              onClick={() => handleSignClick(sign)}
+              className={`
+                w-full h-full relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
+                bg-gradient-to-br ${getElementColor(sign.element)}
+                text-white shadow-lg hover:shadow-2xl
+                transform hover:scale-105 transition-all duration-300
+                cursor-pointer
+              `}
+            >
+              {/* Patrón de fondo animado */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
+                  backgroundSize: '15px 15px'
+                }}></div>
+              </div>
 
-            {/* Contenido */}
-            <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
-              <div className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
-                {sign.symbol}
+              {/* Contenido */}
+              <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
+                <div className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
+                  {sign.symbol}
+                </div>
+                <div className="text-xs sm:text-sm font-bold">{sign.name}</div>
+                <div className="text-[10px] sm:text-xs opacity-90 hidden sm:block">{sign.dateRange.split('–')[0].trim()}</div>
+                <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
+                  {getElementIcon(sign.element)} <span className="hidden sm:inline">{sign.element}</span>
+                </div>
               </div>
-              <div className="text-xs sm:text-sm font-bold">{sign.name}</div>
-              <div className="text-[10px] sm:text-xs opacity-90 hidden sm:block">{sign.dateRange.split('–')[0].trim()}</div>
-              <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
-                {getElementIcon(sign.element)} <span className="hidden sm:inline">{sign.element}</span>
-              </div>
-            </div>
-          </button>
+            </button>
+          </div>
         ))}
       </div>
 

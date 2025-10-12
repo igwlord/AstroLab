@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ASTEROIDS } from '../types/asteroid';
 import type { Asteroid } from '../types/asteroid';
 import AsteroidModal from './AsteroidModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const AsteroidsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedAsteroid, setSelectedAsteroid] = useState<Asteroid | null>(null);
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const asteroid = ASTEROIDS.find(a => a.name.toLowerCase().replace(/\s+/g, '-') === state.autoOpen!.toLowerCase());
+      if (asteroid) {
+        setSelectedAsteroid(asteroid);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${asteroid.name.toLowerCase()}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const getAsteroidGradient = (name: string) => {
     const gradients: { [key: string]: string } = {
@@ -41,8 +62,24 @@ const AsteroidsGrid: React.FC = () => {
             key={asteroid.name}
             data-id={asteroid.name.toLowerCase()}
             onClick={() => setSelectedAsteroid(asteroid)}
-            className={`bg-gradient-to-br ${getAsteroidGradient(asteroid.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            className={`relative bg-gradient-to-br ${getAsteroidGradient(asteroid.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >
+            <div className="absolute top-1 right-1 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-asteroid',
+                  scope: 'global',
+                  title: asteroid.name,
+                  icon: asteroid.symbol,
+                  route: `/glossary?categoria=asteroids#asteroid-${asteroid.name.toLowerCase().replace(/\s+/g, '-')}`,
+                  targetId: asteroid.name.toLowerCase().replace(/\s+/g, '-'),
+                  tags: [asteroid.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             <span className="text-4xl sm:text-5xl md:text-6xl">{asteroid.symbol}</span>
             <div className="text-center">
               <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">{asteroid.name}</h3>

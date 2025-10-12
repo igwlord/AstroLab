@@ -1,9 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { COORDINATE_SYSTEMS, COORDINATE_SYSTEMS_INTRO, SYSTEMS_COMPARISON } from '../types/coordinateSystem';
 import StandardModal from './StandardModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const CoordinateSystemsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedSystem, setSelectedSystem] = useState<typeof COORDINATE_SYSTEMS[0] | null>(null);
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const system = COORDINATE_SYSTEMS.find(s => s.id === state.autoOpen);
+      if (system) {
+        setSelectedSystem(system);
+        window.history.replaceState({}, document.title);
+        // Scroll + destello
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="system-${state.autoOpen}"]`) as HTMLElement;
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Efecto destello
+            element.classList.add('animate-pulse-highlight');
+            setTimeout(() => {
+              element.classList.remove('animate-pulse-highlight');
+            }, 2000);
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   return (
     <div className="space-y-6">
@@ -24,13 +51,29 @@ const CoordinateSystemsGrid: React.FC = () => {
             key={system.id}
             onClick={() => setSelectedSystem(system)}
             className={`
-              bg-gradient-to-br ${system.gradient}
+              relative bg-gradient-to-br ${system.gradient}
               rounded-xl p-6 shadow-lg hover:shadow-2xl 
               border-2 border-white/20
               hover:scale-105 transition-all duration-300
-              cursor-pointer relative overflow-hidden
+              cursor-pointer overflow-hidden
             `}
           >
+            <div className="absolute top-2 right-2 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'coordinate-system',
+                  scope: 'global',
+                  title: system.name,
+                  icon: system.symbol,
+                  route: `/glossary?categoria=coordinate-systems#system-${system.id}`,
+                  targetId: system.id,
+                  tags: [system.base],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             {/* Efecto de brillo */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
             

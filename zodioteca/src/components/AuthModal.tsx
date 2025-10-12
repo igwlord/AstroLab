@@ -73,7 +73,9 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         if (signInError) {
           setError(signInError);
         } else {
-          onClose(); // Cerrar modal si todo salió bien
+          console.log('✅ Login exitoso para:', email);
+          onClose(); // Cerrar modal
+          navigate('/dashboard'); // Redirigir al dashboard
         }
       }
     } catch {

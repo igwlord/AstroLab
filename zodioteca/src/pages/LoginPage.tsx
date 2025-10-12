@@ -1,28 +1,34 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StarryBackground from '../components/StarryBackground';
-import CosmicLoader from '../components/CosmicLoader';
+import AuthModal from '../components/AuthModal';
+import { useAuth } from '../context/useAuth';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { loginAnonymous } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const handleEnterLab = () => {
-    setIsLoading(true);
+  const handleGuestMode = async () => {
+    // Modo de prueba - acceso directo sin login
+    await loginAnonymous();
+    navigate('/dashboard');
   };
 
-  const handleLoadingComplete = () => {
-    navigate('/dashboard');
+  const handleLoginMode = () => {
+    // Mostrar modal de autenticación Supabase
+    setShowAuthModal(true);
   };
 
   return (
     <>
-      {/* Cosmic Loader */}
-      {isLoading && <CosmicLoader onComplete={handleLoadingComplete} />}
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} />
+      )}
 
-      {/* Login Page - Solo visible cuando NO está cargando */}
-      {!isLoading && (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8">
+      {/* Login Page */}
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8">
         {/* Fondo de estrellas reutilizable */}
         <StarryBackground />
 
@@ -47,10 +53,11 @@ const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          {/* CTA Button */}
-          <div className="pt-4 sm:pt-6">
+          {/* CTA Buttons */}
+          <div className="pt-4 sm:pt-6 space-y-4">
+            {/* Botón 1: Modo de prueba (invitado) */}
             <button
-              onClick={handleEnterLab}
+              onClick={handleGuestMode}
               className="group relative w-full max-w-sm mx-auto bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 text-purple-950 font-bold text-base sm:text-lg md:text-xl py-4 sm:py-5 md:py-6 px-6 sm:px-8 rounded-2xl shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-amber-400/50 overflow-hidden"
             >
               <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
@@ -62,11 +69,33 @@ const LoginPage: React.FC = () => {
               {/* Efecto de brillo animado */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </button>
+            
+            <p className="text-xs sm:text-sm text-purple-200/60 text-center font-light italic px-4">
+              (modo de prueba)
+            </p>
+
+            {/* Botón 2: Login con Supabase */}
+            <button
+              onClick={handleLoginMode}
+              className="group relative w-full max-w-sm mx-auto bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-2xl shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-purple-400/50 overflow-hidden"
+            >
+              <span className="relative z-10 flex flex-col items-center gap-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-lg sm:text-xl">☁️</span>
+                  <span className="tracking-wide">Login al Laboratorio</span>
+                </span>
+                <span className="text-xs sm:text-sm font-normal opacity-90">
+                  (tus datos en una nube astrológica)
+                </span>
+              </span>
+              
+              {/* Efecto de brillo animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            </button>
           </div>
         </div>
       </div>
       </div>
-      )}
     </>
   );
 };

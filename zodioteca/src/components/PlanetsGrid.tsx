@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { PLANETS } from '../types/planet';
 import type { Planet } from '../types/planet';
 import PlanetModal from './PlanetModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const PlanetsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'personal' | 'social' | 'transpersonal'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const planet = PLANETS.find(p => p.id.toLowerCase() === state.autoOpen!.toLowerCase());
+      if (planet) {
+        setSelectedPlanet(planet);
+        setIsModalOpen(true);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${state.autoOpen}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const handlePlanetClick = (planet: Planet) => {
     setSelectedPlanet(planet);
@@ -100,37 +122,59 @@ const PlanetsGrid: React.FC = () => {
       {/* Grid de planetas */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
         {filteredPlanets.map((planet) => (
-          <button
+          <div
             key={planet.id}
-            data-id={planet.name.toLowerCase()}
-            onClick={() => handlePlanetClick(planet)}
-            className={`
-              group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
-              bg-gradient-to-br ${getCategoryColor(planet.category)}
-              text-white shadow-lg hover:shadow-2xl
-              transform hover:scale-105 transition-all duration-300
-              cursor-pointer
-            `}
+            className="relative group"
           >
-            {/* Patrón de fondo animado */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
-                backgroundSize: '15px 15px'
-              }}></div>
+            {/* Botón de Favorito - Sistema v2 */}
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20 opacity-80 hover:opacity-100 transition-opacity">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-planet',
+                  scope: 'global',
+                  title: planet.name,
+                  icon: planet.symbol,
+                  route: `/glossary?categoria=planets#planet-${planet.id}`,
+                  targetId: planet.id,
+                  tags: ['Planetas', planet.category, planet.rhythm],
+                  pinned: false,
+                }}
+                size="sm"
+                variant="amber"
+              />
             </div>
+            
+            <button
+              data-id={planet.name.toLowerCase()}
+              onClick={() => handlePlanetClick(planet)}
+              className={`
+                w-full h-full relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6
+                bg-gradient-to-br ${getCategoryColor(planet.category)}
+                text-white shadow-lg hover:shadow-2xl
+                transform hover:scale-105 transition-all duration-300
+                cursor-pointer
+              `}
+            >
+              {/* Patrón de fondo animado */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
+                  backgroundSize: '15px 15px'
+                }}></div>
+              </div>
 
-            {/* Contenido */}
-            <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
-              <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light group-hover:scale-110 transition-transform duration-300">
-                {planet.symbol}
+              {/* Contenido */}
+              <div className="relative z-10 flex flex-col items-center space-y-1 sm:space-y-1.5 md:space-y-2">
+                <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light group-hover:scale-110 transition-transform duration-300">
+                  {planet.symbol}
+                </div>
+                <div className="text-xs sm:text-sm font-bold">{planet.name}</div>
+                <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
+                  <span className="hidden sm:inline">{getCategoryIcon(planet.category)} </span>{planet.rhythm}
+                </div>
               </div>
-              <div className="text-xs sm:text-sm font-bold">{planet.name}</div>
-              <div className="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
-                <span className="hidden sm:inline">{getCategoryIcon(planet.category)} </span>{planet.rhythm}
-              </div>
-            </div>
-          </button>
+            </button>
+          </div>
         ))}
       </div>
 

@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { RELATIONAL_TECHNIQUES } from '../types/relational';
 import type { RelationalTechnique } from '../types/relational';
 import RelationalModal from './RelationalModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const RelationalGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedTechnique, setSelectedTechnique] = useState<RelationalTechnique | null>(null);
   const [filter, setFilter] = useState<'all' | 'main' | 'additional'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const technique = RELATIONAL_TECHNIQUES.find(t => t.name.toLowerCase().replace(/\s+/g, '-') === state.autoOpen!.toLowerCase());
+      if (technique) {
+        setSelectedTechnique(technique);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${technique.name.toLowerCase()}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const filteredTechniques = RELATIONAL_TECHNIQUES.filter(tech => 
     filter === 'all' || tech.category === filter
@@ -90,8 +111,24 @@ const RelationalGrid: React.FC = () => {
             key={technique.name}
             data-id={technique.name.toLowerCase()}
             onClick={() => setSelectedTechnique(technique)}
-            className={`bg-gradient-to-br ${getTechniqueGradient(technique.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-left`}
+            className={`relative bg-gradient-to-br ${getTechniqueGradient(technique.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-left`}
           >
+            <div className="absolute top-1 right-1 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-relational',
+                  scope: 'global',
+                  title: technique.name,
+                  icon: technique.symbol,
+                  route: `/glossary?categoria=relational#technique-${technique.name.toLowerCase().replace(/\s+/g, '-')}`,
+                  targetId: technique.name.toLowerCase().replace(/\s+/g, '-'),
+                  tags: [technique.category],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             <span className="text-4xl sm:text-5xl md:text-6xl">{technique.symbol}</span>
             <div className="text-center w-full">
               <h3 className="font-bold text-sm sm:text-base md:text-lg leading-tight">{technique.name}</h3>

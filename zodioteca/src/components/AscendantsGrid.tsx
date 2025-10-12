@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ASCENDANTS } from '../types/ascendant';
 import type { Ascendant } from '../types/ascendant';
 import AscendantModal from './AscendantModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const AscendantsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedAscendant, setSelectedAscendant] = useState<Ascendant | null>(null);
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const ascendant = ASCENDANTS.find(a => a.sign.toLowerCase() === state.autoOpen!.toLowerCase());
+      if (ascendant) {
+        setSelectedAscendant(ascendant);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="asc-${state.autoOpen}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const getSignColor = (sign: string) => {
     const colors: { [key: string]: string } = {
@@ -41,18 +62,40 @@ const AscendantsGrid: React.FC = () => {
       {/* Grid de Ascendentes */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         {ASCENDANTS.map((ascendant) => (
-          <button
+          <div
             key={ascendant.sign}
-            data-id={ascendant.sign.toLowerCase()}
-            onClick={() => setSelectedAscendant(ascendant)}
-            className={`bg-gradient-to-br ${getSignColor(ascendant.sign)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            className="relative group"
           >
-            <span className="text-4xl sm:text-5xl md:text-6xl">{ascendant.symbol}</span>
-            <div className="text-center">
-              <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">ASC en {ascendant.sign}</h3>
-              <p className="text-xs sm:text-sm opacity-90 mt-0.5 sm:mt-1">🌅</p>
+            {/* Botón de Favorito */}
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20 opacity-80 hover:opacity-100 transition-opacity">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-ascendant',
+                  scope: 'global',
+                  title: `ASC en ${ascendant.sign}`,
+                  icon: ascendant.symbol,
+                  route: `/glossary?categoria=ascendants#asc-${ascendant.sign.toLowerCase()}`,
+                  targetId: ascendant.sign.toLowerCase(),
+                  tags: [ascendant.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
             </div>
-          </button>
+            
+            <button
+              data-id={ascendant.sign.toLowerCase()}
+              onClick={() => setSelectedAscendant(ascendant)}
+              className={`w-full h-full bg-gradient-to-br ${getSignColor(ascendant.sign)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            >
+              <span className="text-4xl sm:text-5xl md:text-6xl">{ascendant.symbol}</span>
+              <div className="text-center">
+                <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg">ASC en {ascendant.sign}</h3>
+                <p className="text-xs sm:text-sm opacity-90 mt-0.5 sm:mt-1">🌅</p>
+              </div>
+            </button>
+          </div>
         ))}
       </div>
 

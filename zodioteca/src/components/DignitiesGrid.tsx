@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DIGNITIES } from '../types/dignity';
 import type { Dignity } from '../types/dignity';
 import DignityModal from './DignityModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const DignitiesGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedDignity, setSelectedDignity] = useState<Dignity | null>(null);
   const [filter, setFilter] = useState<'all' | 'essential' | 'accidental'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const dignity = DIGNITIES.find(d => d.name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '') === state.autoOpen!.toLowerCase());
+      if (dignity) {
+        setSelectedDignity(dignity);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${dignity.name.toLowerCase()}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const filteredDignities = DIGNITIES.filter(dig => 
     filter === 'all' || dig.category === filter
@@ -91,10 +112,26 @@ const DignitiesGrid: React.FC = () => {
             key={dignity.name}
             data-id={dignity.name.toLowerCase()}
             onClick={() => setSelectedDignity(dignity)}
-            className={`bg-gradient-to-br ${getDignityGradient(dignity.name)} ${
+            className={`relative bg-gradient-to-br ${getDignityGradient(dignity.name)} ${
               dignity.name === 'Exaltación' ? 'text-gray-800' : 'text-white'
             } p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >
+            <div className="absolute top-1 right-1 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'dignity',
+                  scope: 'global',
+                  title: dignity.name,
+                  icon: dignity.symbol,
+                  route: `/glossary?categoria=dignities#dignity-${dignity.name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}`,
+                  targetId: dignity.name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
+                  tags: [dignity.category, dignity.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             <span className="text-4xl sm:text-5xl md:text-6xl">{dignity.symbol}</span>
             <div className="text-center">
               <h3 className="font-bold text-xs sm:text-sm leading-tight">{dignity.name}</h3>

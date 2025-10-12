@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ZodiacFrequency } from '../types/zodiacFrequency';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 interface FrequencyInfoPanelProps {
   frequency: ZodiacFrequency;
@@ -15,6 +16,24 @@ const FrequencyInfoPanel: React.FC<FrequencyInfoPanelProps> = ({ frequency }) =>
           background: `linear-gradient(135deg, ${frequency.color.hex}dd, ${frequency.color.hex}88)`,
         }}
       >
+        {/* Botón de Favorito - Posición absoluta en esquina superior derecha */}
+        <div className="absolute top-3 right-3 z-20">
+          <FavoriteToggleButton
+            item={{
+              type: 'frequency-exercise',
+              scope: 'global',
+              title: `${frequency.name} - ${frequency.exercise.title}`,
+              icon: frequency.symbol,
+              route: `/frequencies?sign=${frequency.id}`,
+              targetId: frequency.id,
+              tags: ['Frecuencias', frequency.element, `${frequency.frequency}Hz`],
+              pinned: false,
+            }}
+            size="sm"
+            variant="amber"
+          />
+        </div>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-4xl sm:text-5xl drop-shadow-lg">{frequency.symbol}</span>

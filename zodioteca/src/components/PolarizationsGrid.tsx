@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { POLARIZATIONS, INTEGRATION_EXERCISE } from '../types/polarization';
 import type { Polarization } from '../types/polarization';
 import PolarizationModal from './PolarizationModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 const PolarizationsGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedPolarization, setSelectedPolarization] = useState<Polarization | null>(null);
   const [filter, setFilter] = useState<'all' | 'type' | 'example'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const polarization = POLARIZATIONS.find(p => p.name.toLowerCase().replace(/\s+/g, '-') === state.autoOpen!.toLowerCase());
+      if (polarization) {
+        setSelectedPolarization(polarization);
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${polarization.name.toLowerCase()}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const filteredPolarizations = POLARIZATIONS.filter(pol => 
     filter === 'all' || pol.category === filter
@@ -91,8 +112,24 @@ const PolarizationsGrid: React.FC = () => {
             key={polarization.name}
             data-id={polarization.name.toLowerCase()}
             onClick={() => setSelectedPolarization(polarization)}
-            className={`bg-gradient-to-br ${getPolarizationGradient(polarization.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-left`}
+            className={`relative bg-gradient-to-br ${getPolarizationGradient(polarization.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-left`}
           >
+            <div className="absolute top-1 right-1 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-polarization',
+                  scope: 'global',
+                  title: polarization.name,
+                  icon: polarization.symbol,
+                  route: `/glossary?categoria=polarizations#polarization-${polarization.name.toLowerCase().replace(/\s+/g, '-')}`,
+                  targetId: polarization.name.toLowerCase().replace(/\s+/g, '-'),
+                  tags: [polarization.category, polarization.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             <span className="text-4xl sm:text-5xl md:text-6xl">{polarization.symbol}</span>
             <div className="text-center w-full">
               <h3 className="font-bold text-xs sm:text-sm leading-tight">{polarization.name}</h3>

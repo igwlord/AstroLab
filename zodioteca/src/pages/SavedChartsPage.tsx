@@ -243,7 +243,7 @@ const SavedChartsPage: FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Botón Supabase Auth */}
+            {/* Botón Supabase Auth + Sync */}
             {isAuthenticated ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="text-right hidden sm:block">
@@ -256,6 +256,24 @@ const SavedChartsPage: FC = () => {
                   aria-label="Cerrar Sesión"
                 >
                   <Cloud className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                </button>
+                {/* Botón de sincronizar (pequeño) */}
+                <button
+                  onClick={handleSyncAll}
+                  disabled={syncing || loading}
+                  className="relative p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors disabled:opacity-50 group"
+                  aria-label="Sincronizar todas las cartas"
+                  title="Sincronizar todas las cartas con la nube"
+                >
+                  {syncing ? (
+                    <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-green-600 dark:text-green-400" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                  )}
+                  {/* Tooltip */}
+                  <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    Sincronizar todas
+                  </span>
                 </button>
               </div>
             ) : (
@@ -302,26 +320,14 @@ const SavedChartsPage: FC = () => {
 
         {/* Stats */}
         {isAuthenticated && (
-          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+          <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-100 dark:border-purple-700">
               <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.total}</div>
               <div className="text-xs sm:text-sm text-purple-600 dark:text-purple-400">Total</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300">{stats.local}</div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Solo local</div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-400">{stats.drive}</div>
-              <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400">Solo Drive</div>
-            </div>
             <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-green-200 dark:border-green-700">
               <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-700 dark:text-green-400">{stats.synced}</div>
               <div className="text-xs sm:text-sm text-green-600 dark:text-green-400">Sincronizados</div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-orange-200 dark:border-orange-700 col-span-2 sm:col-span-1">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-700 dark:text-orange-400">{stats.conflicts}</div>
-              <div className="text-xs sm:text-sm text-orange-600 dark:text-orange-400">Conflictos</div>
             </div>
           </div>
         )}
@@ -359,19 +365,6 @@ const SavedChartsPage: FC = () => {
                 Sincronizar seleccionadas
               </button>
             )}
-
-            <button
-              onClick={handleSyncAll}
-              disabled={syncing || loading}
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-            >
-              {syncing ? (
-                <Loader className="w-5 h-5 animate-spin" />
-              ) : (
-                <RefreshCw className="w-5 h-5" />
-              )}
-              Sincronizar todas
-            </button>
           </div>
         </div>
       )}

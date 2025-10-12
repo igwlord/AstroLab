@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { HOUSE_SYSTEMS_GLOSSARY } from '../types/houseSystem';
 import type { HouseSystemGlossary } from '../types/houseSystem';
 import LoadingSpinner from './LoadingSpinner';
+import FavoriteToggleButton from './FavoriteToggleButton';
 
 // ⚡ FASE 3: Lazy load HouseSystemModal (16.96 KB)
 const HouseSystemModal = lazy(() => import('./HouseSystemModal'));
@@ -15,7 +16,7 @@ const HouseSystemsGrid: React.FC = () => {
   const [selectedEra, setSelectedEra] = useState<'all' | 'antiguo' | 'medieval' | 'renacentista' | 'moderno'>('all');
   const [highlightedSystem, setHighlightedSystem] = useState<string | null>(null);
 
-  // Auto-abrir modal si viene con parámetro 'sistema' en la URL
+  // Auto-abrir modal si viene con parámetro 'sistema' en la URL o desde favoritos
   useEffect(() => {
     const sistemaParam = searchParams.get('sistema');
     if (sistemaParam && HOUSE_SYSTEMS_GLOSSARY[sistemaParam as keyof typeof HOUSE_SYSTEMS_GLOSSARY]) {
@@ -223,6 +224,22 @@ const HouseSystemsGrid: React.FC = () => {
                 ${highlightedSystem === system.id ? 'ring-4 ring-yellow-400 animate-pulse' : ''}
               `}
             >
+              <div className="absolute top-2 right-2 z-10">
+                <FavoriteToggleButton
+                  item={{
+                    type: 'house-system',
+                    scope: 'global',
+                    title: system.name,
+                    icon: getTypeIcon(system.type),
+                    route: `/glossary?categoria=house-systems&sistema=${system.id}`,
+                    targetId: system.id,
+                    tags: [system.type, system.era],
+                    pinned: false
+                  }}
+                  size="sm"
+                  variant="amber"
+                />
+              </div>
               {/* Patrón de fondo animado */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
                 <div className="absolute inset-0" style={{

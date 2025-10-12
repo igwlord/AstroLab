@@ -1,11 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CELESTIAL_BODIES } from '../types/celestialBody';
 import type { CelestialBody } from '../types/celestialBody';
 import CelestialBodyModal from './CelestialBodyModal';
+import FavoriteToggleButton from './FavoriteToggleButton';
+
+// Helper para normalizar strings (quitar acentos, espacios, etc)
+const normalizeId = (str: string): string => {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quita acentos
+    .replace(/\s+/g, '-');
+};
 
 const CelestialBodiesGrid: React.FC = () => {
+  const location = useLocation();
   const [selectedBody, setSelectedBody] = useState<CelestialBody | null>(null);
   const [filter, setFilter] = useState<'all' | 'shadow' | 'healer' | 'centaur' | 'transneptunian' | 'comet'>('all');
+  
+  // Auto-abrir modal si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      const normalizedAutoOpen = decodeURIComponent(state.autoOpen).toLowerCase();
+      const body = CELESTIAL_BODIES.find(b => normalizeId(b.name) === normalizedAutoOpen);
+      if (body) {
+        setSelectedBody(body);
+        window.history.replaceState({}, document.title);
+        // Scroll + destello
+        setTimeout(() => {
+          const element = document.querySelector(`[data-id="${normalizeId(body.name)}"]`) as HTMLElement;
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Efecto destello
+            element.classList.add('animate-pulse-highlight');
+            setTimeout(() => {
+              element.classList.remove('animate-pulse-highlight');
+            }, 2000);
+          }
+        }, 300);
+      }
+    }
+  }, [location.state]);
 
   const filteredBodies = filter === 'all' 
     ? CELESTIAL_BODIES 
@@ -112,10 +149,26 @@ const CelestialBodiesGrid: React.FC = () => {
         {filteredBodies.map((body) => (
           <button
             key={body.name}
-            data-id={body.name.toLowerCase()}
+            data-id={normalizeId(body.name)}
             onClick={() => setSelectedBody(body)}
-            className={`bg-gradient-to-br ${getCategoryGradient(body.category)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
+            className={`relative bg-gradient-to-br ${getCategoryGradient(body.category)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3`}
           >
+            <div className="absolute top-1 right-1 z-10">
+              <FavoriteToggleButton
+                item={{
+                  type: 'glossary-celestial-body',
+                  scope: 'global',
+                  title: body.name,
+                  icon: body.symbol,
+                  route: `/glossary?categoria=celestial-bodies#body-${normalizeId(body.name)}`,
+                  targetId: normalizeId(body.name),
+                  tags: [body.category, body.chakra],
+                  pinned: false
+                }}
+                size="sm"
+                variant="amber"
+              />
+            </div>
             <span className="text-4xl sm:text-5xl md:text-6xl">{body.symbol}</span>
             <div className="text-center">
               <h3 className="font-bold text-xs sm:text-sm">{body.name}</h3>

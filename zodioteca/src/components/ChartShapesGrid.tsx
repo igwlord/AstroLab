@@ -1,8 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import CHART_SHAPES_GLOSSARY from '../data/chartShapesGlossary';
 import ChartShapeGlossaryCard from './ChartShapeGlossaryCard';
 
 const ChartShapesGrid: React.FC = () => {
+  const location = useLocation();
+  const [autoExpandId, setAutoExpandId] = useState<string | null>(null);
+
+  // Auto-scroll + expand + destello si viene desde favoritos
+  useEffect(() => {
+    const state = location.state as { autoOpen?: string; fromFavorites?: boolean } | null;
+    if (state?.autoOpen && state?.fromFavorites) {
+      setAutoExpandId(state.autoOpen);
+      setTimeout(() => {
+        const element = document.querySelector(`[data-shape-id="${state.autoOpen}"]`) as HTMLElement;
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Efecto destello
+          element.classList.add('animate-pulse-highlight');
+          setTimeout(() => {
+            element.classList.remove('animate-pulse-highlight');
+          }, 2000);
+        }
+        window.history.replaceState({}, document.title);
+      }, 300);
+    }
+  }, [location.state]);
+
   return (
     <div className="space-y-4">
       {/* Header con descripción */}
@@ -23,7 +47,11 @@ const ChartShapesGrid: React.FC = () => {
       {/* Grid de formas */}
       <div className="space-y-4">
         {CHART_SHAPES_GLOSSARY.map(shape => (
-          <ChartShapeGlossaryCard key={shape.id} shape={shape} />
+          <ChartShapeGlossaryCard 
+            key={shape.id} 
+            shape={shape} 
+            autoExpand={autoExpandId === shape.id}
+          />
         ))}
       </div>
 

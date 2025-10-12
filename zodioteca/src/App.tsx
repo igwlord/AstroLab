@@ -20,6 +20,7 @@ const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // ============================================
@@ -109,6 +110,15 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Favoritos */}
+      <Route path="/favorites" element={
+        <ProtectedRoute>
+          <Layout>
+            <FavoritesPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      
       {/* Configuración */}
       <Route path="/settings" element={
         <ProtectedRoute>
@@ -118,10 +128,8 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Ruta raíz - redirige al login */}
-      <Route path="/" element={
-        <Navigate to="/login" replace />
-      } />
+      {/* Ruta raíz - redirige a login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       
       {/* 404 */}
       <Route path="*" element={

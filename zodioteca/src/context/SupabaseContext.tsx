@@ -8,6 +8,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabaseService';
+import { favoritesService } from '../services/favoritesService';
+import { useFavorites } from '../store/useFavorites';
 import { logger } from '../utils/logger';
 
 // ============================================
@@ -116,6 +118,47 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       setUser(loggedUser);
       setSession(newSession);
       logger.log('✅ Sesión iniciada:', email);
+      
+      // 🔄 Sincronizar favoritos en background (no bloquear el login)
+      setTimeout(async () => {
+        try {
+          logger.log('🔄 Iniciando sync de favoritos...');
+          // Nota: Acceder al store en un timeout evita problemas de hooks
+          const favoritesRecord = useFavorites.getState().items;
+          const favoritesArray = Object.values(favoritesRecord);
+          
+          const result = await favoritesService.syncOnLogin(favoritesArray);
+          
+          if (result.success) {
+            logger.log('✅ Favoritos sincronizados:', result);
+            
+            // Actualizar el store con los favoritos combinados (local + cloud)
+            if (result.merged && result.merged.length > 0) {
+              // Convertir array a objeto con IDs como keys
+              const mergedItems = Object.fromEntries(
+                result.merged.map(fav => [fav.id, fav])
+              );
+              
+              // Actualizar el store Zustand directamente
+              useFavorites.setState({
+                items: mergedItems,
+                order: result.merged.map(f => f.id)
+              });
+              
+              logger.log(`📥 Store actualizado: ${result.merged.length} favoritos cargados`);
+              
+              if (result.added > 0 || result.updated > 0) {
+                logger.log(`📊 Cambios: ${result.added} nuevos, ${result.updated} actualizados`);
+              }
+            }
+          } else {
+            logger.warn('⚠️ No se pudo sincronizar favoritos:', result.error);
+          }
+        } catch (syncError) {
+          logger.error('❌ Error en sync de favoritos:', syncError);
+          // No fallar el login si falla el sync
+        }
+      }, 1000);
       
       return { error: null };
     } catch (error) {
