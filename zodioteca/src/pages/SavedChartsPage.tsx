@@ -20,7 +20,6 @@ import {
 import {
   Cloud,
   CloudOff,
-  RefreshCw,
   Trash2,
   Upload,
   CheckCircle,
@@ -32,7 +31,7 @@ import {
 
 const SavedChartsPage: FC = () => {
   const { t } = useI18n();
-  const { user, isAuthenticated, isLoading: isConnecting, signOut, showAuthModal, setShowAuthModal } = useSupabase();
+  const { user, isAuthenticated, showAuthModal, setShowAuthModal } = useSupabase();
   const userEmail = user?.email || null;
   
   const [charts, setCharts] = useState<ChartWithStatus[]>([]);
@@ -72,31 +71,9 @@ const SavedChartsPage: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  // Sincronizar todas
-  const handleSyncAll = async () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-
-    setSyncing(true);
-    try {
-      const localCharts = getLocalCharts();
-      const { data: serverCharts, error } = await supabase.syncCharts(localCharts);
-      
-      if (error) {
-        alert('Error al sincronizar: ' + error);
-      } else {
-        setCharts((serverCharts || []).map(c => ({ ...c, syncStatus: 'synced' as SyncStatus })));
-        alert('✅ Sincronización completa');
-      }
-    } catch (error) {
-      logger.error('Error syncing:', error);
-      alert('Error al sincronizar cartas');
-    } finally {
-      setSyncing(false);
-    }
-  };
+  // Sincronizar todas - MOVIDO A SETTINGSPAGE
+  // La sincronización ahora se maneja desde la página de configuración
+  // Este código se mantiene comentado por si se necesita en el futuro
 
   // Sincronizar seleccionadas
   const handleSyncSelected = async () => {
@@ -243,52 +220,18 @@ const SavedChartsPage: FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Botón Supabase Auth + Sync */}
-            {isAuthenticated ? (
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="text-right hidden sm:block">
-                  <div className="text-xs sm:text-sm font-medium text-purple-900 dark:text-purple-100">{userEmail}</div>
-                  <div className="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400">Conectado</div>
+            {/* Estado de conexión (solo indicador) */}
+            {isAuthenticated && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                <Cloud className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <div className="hidden sm:block">
+                  <div className="text-xs font-medium text-green-700 dark:text-green-300">{userEmail}</div>
+                  <div className="text-[10px] text-green-600 dark:text-green-400">Sincronizado</div>
                 </div>
-                <button
-                  onClick={signOut}
-                  className="p-1.5 sm:p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  aria-label="Cerrar Sesión"
-                >
-                  <Cloud className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
-                </button>
-                {/* Botón de sincronizar (pequeño) */}
-                <button
-                  onClick={handleSyncAll}
-                  disabled={syncing || loading}
-                  className="relative p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors disabled:opacity-50 group"
-                  aria-label="Sincronizar todas las cartas"
-                  title="Sincronizar todas las cartas con la nube"
-                >
-                  {syncing ? (
-                    <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-green-600 dark:text-green-400" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
-                  )}
-                  {/* Tooltip */}
-                  <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    Sincronizar todas
-                  </span>
-                </button>
+                <div className="sm:hidden text-xs font-medium text-green-700 dark:text-green-300">
+                  Conectado
+                </div>
               </div>
-            ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                disabled={isConnecting}
-                className="flex items-center gap-1.5 sm:gap-2 bg-blue-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-xs sm:text-sm"
-              >
-                {isConnecting ? (
-                  <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                ) : (
-                  <Cloud className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-                <span className="hidden sm:inline">Iniciar</span> Sesión
-              </button>
             )}
 
             {/* Botón Exportar */}

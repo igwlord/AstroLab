@@ -2,36 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/useTheme';
 import { useAuth } from '../context/useAuth';
+import { useSupabase } from '../context/SupabaseContext';
 import ThemeToggle from '../components/ThemeToggle';
+import { LogOut, Cloud, RefreshCw, Loader } from 'lucide-react';
 
 const SettingsPage: React.FC = () => {
   const { isDark } = useThemeStore();
-  const { user, logout, syncSettings } = useAuth();
+  const { user: guestUser, logout: guestLogout, syncSettings } = useAuth();
+  const { user: supabaseUser, isAuthenticated, signOut, setShowAuthModal } = useSupabase();
   const navigate = useNavigate();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
 
+  // Determinar qué usuario está activo (prioridad a Supabase)
+  const activeUser = supabaseUser || guestUser;
+  const userEmail = supabaseUser?.email || guestUser?.email;
+  const isGuest = !supabaseUser && guestUser?.isAnonymous;
+
   // Sincronizar settings cuando cambien
   useEffect(() => {
     const syncTheme = async () => {
-      if (user && !user.isAnonymous) {
+      if (activeUser && !isGuest) {
         await syncSettings({ theme: isDark ? 'dark' : 'light' });
       }
     };
     syncTheme();
-  }, [isDark, user, syncSettings]);
+  }, [isDark, activeUser, isGuest, syncSettings]);
 
   const handleLogout = async () => {
     const confirmed = window.confirm('¿Estás seguro de que quieres cerrar sesión?');
     if (confirmed) {
-      await logout();
-      navigate('/login');
+      if (supabaseUser) {
+        await signOut();
+      } else {
+        await guestLogout();
+      }
+      navigate('/');
     }
   };
 
   const handleManualSync = async () => {
-    if (!user || user.isAnonymous) {
-      setSyncMessage('Inicia sesión con Google para sincronizar');
+    if (!activeUser || isGuest) {
+      setSyncMessage('Inicia sesión con tu cuenta para sincronizar');
       return;
     }
     
@@ -86,81 +98,97 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Cuenta y Sesión */}
-          {user && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-              <h2 className="text-xl font-semibold text-purple-900 dark:text-purple-100 mb-4">
-                👤 Cuenta
+          {activeUser ? (
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 shadow-lg border border-purple-100 dark:border-purple-700">
+              <h2 className="text-lg sm:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-2xl">👤</span>
+                Cuenta y Sesión
               </h2>
               
-              <div className="space-y-4">
-                {/* Info del usuario */}
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-700">
-                  <div className="flex items-center gap-4">
-                    <div className="text-4xl">
-                      {user.avatar || '🌟'}
+              {/* Card compacto con email y botones */}
+              <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                <div className="flex items-center justify-between gap-3">
+                  {/* Email y estado */}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="text-2xl sm:text-3xl flex-shrink-0">
+                      {supabaseUser ? '🔐' : '🌟'}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-purple-900 dark:text-purple-100">
-                        {user.name}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-purple-900 dark:text-purple-100 text-sm sm:text-base truncate">
+                        {supabaseUser ? userEmail : (guestUser?.name || 'Invitado')}
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-300">
-                        {user.email || 'Modo anónimo'}
-                      </p>
-                      <div className="mt-2 flex items-center gap-2">
-                        {user.isAnonymous ? (
-                          <span className="text-xs px-2 py-1 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full">
-                            📱 Datos solo en este dispositivo
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {isGuest ? (
+                          <span className="text-[10px] sm:text-xs px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full flex items-center gap-1">
+                            <span>📱</span>
+                            <span>Local</span>
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-full">
-                            ☁️ Sincronizado con la nube
+                          <span className="text-[10px] sm:text-xs px-2 py-0.5 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-full flex items-center gap-1">
+                            <Cloud className="w-3 h-3" />
+                            <span>Sincronizado</span>
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Sincronización manual */}
-                {user && !user.isAnonymous && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium text-blue-900 dark:text-blue-100">
-                          Sincronización automática
-                        </p>
-                        <p className="text-sm text-blue-600 dark:text-blue-300">
-                          Tus configuraciones se guardan automáticamente
-                        </p>
-                      </div>
+                  {/* Botones de acción */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Botón sincronizar - solo para usuarios autenticados */}
+                    {!isGuest && supabaseUser && (
                       <button
                         onClick={handleManualSync}
                         disabled={isSyncing}
-                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                        className="p-2 sm:p-2.5 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg transition-all disabled:opacity-50 group relative"
+                        title="Sincronizar ahora"
                       >
-                        {isSyncing ? '⏳ Sincronizando...' : '🔄 Sincronizar ahora'}
+                        {isSyncing ? (
+                          <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-180 transition-transform duration-500" />
+                        )}
                       </button>
-                    </div>
-                    {syncMessage && (
-                      <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                        {syncMessage}
-                      </div>
                     )}
+                    
+                    {/* Botón logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="p-2 sm:p-2.5 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg transition-all group"
+                      title="Cerrar sesión"
+                    >
+                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mensaje de sincronización */}
+                {syncMessage && (
+                  <div className="mt-2 pt-2 border-t border-purple-200 dark:border-purple-700">
+                    <p className="text-xs sm:text-sm text-center font-medium text-blue-700 dark:text-blue-300">
+                      {syncMessage}
+                    </p>
                   </div>
                 )}
-
-                {/* Botón de cerrar sesión */}
-                <div className="pt-3 sm:pt-4 border-t border-purple-200 dark:border-purple-700">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors shadow-lg text-sm sm:text-base"
-                  >
-                    <span>🚪</span>
-                    <span>Cerrar Sesión</span>
-                  </button>
-                  <p className="text-[10px] sm:text-xs text-center text-purple-600 dark:text-purple-400 mt-1.5 sm:mt-2">Sesión finalizada</p>
-                </div>
               </div>
+            </div>
+          ) : (
+            /* Si no hay usuario activo, mostrar botón de login */
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+              <h2 className="text-lg sm:text-xl font-semibold text-purple-900 dark:text-purple-100 mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-2xl">🔒</span>
+                Inicia Sesión
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+                Conecta tu cuenta para sincronizar tus datos en la nube y acceder desde cualquier dispositivo.
+              </p>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg text-sm sm:text-base"
+              >
+                <Cloud className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Conectar Cuenta</span>
+              </button>
             </div>
           )}
 

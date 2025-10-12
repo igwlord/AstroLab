@@ -17,6 +17,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
+const ExercisePlanPage = lazy(() => import('./pages/ExercisePlanPage'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
@@ -82,6 +83,14 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Ejercicios Holísticos */}
+      <Route path="/ejercicios/:chartId?" element={
+        <ProtectedRoute>
+          <Layout>
+            <ExercisePlanPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
 
       {/* Glosario */}
       <Route path="/glossary" element={
