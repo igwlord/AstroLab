@@ -13,6 +13,7 @@ import { useExercisesOnboarding } from '../hooks/useExercisesOnboarding';
 import PhaseSection from '../components/PhaseSection';
 import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
+import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
 
 export default function ExercisePlanPage() {
   const location = useLocation();
@@ -102,16 +103,7 @@ export default function ExercisePlanPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-900">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-600"></div>
-          <p className="mt-4 text-purple-700 dark:text-purple-300 animate-pulse text-lg font-medium">
-            Analizando tu carta natal y generando plan personalizado...
-          </p>
-        </div>
-      </div>
-    );
+    return <ExercisePlanSkeleton />;
   }
 
   if (error) {
@@ -149,12 +141,23 @@ export default function ExercisePlanPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-4 md:mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 mb-2 md:mb-4 flex items-center gap-2 text-sm md:text-base"
-          >
-            ← Volver
-          </button>
+          <div className="flex justify-between items-start mb-2 md:mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-2 text-sm md:text-base"
+            >
+              ← Volver
+            </button>
+            
+            <button
+              onClick={handleLoadChart}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
+              title="Cambiar carta natal"
+            >
+              <span>🔄</span>
+              <span className="hidden sm:inline">Cambiar Carta</span>
+            </button>
+          </div>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-1 md:mb-2">
             Tu Plan de Ejercicios Holístico
