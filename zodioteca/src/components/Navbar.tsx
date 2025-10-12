@@ -33,43 +33,43 @@ const Navbar: React.FC = () => {
           {/* Logo Mejorado - Clickeable para abrir biografía */}
           <button
             onClick={() => setIsBiographyOpen(true)}
-            className="flex items-center space-x-2 sm:space-x-3 group transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400/50 rounded-lg p-1 sm:p-2"
+            className="flex items-center space-x-1.5 sm:space-x-2 group transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400/50 rounded-lg p-1"
             title="Conoce más sobre Astro Lab"
           >
             <div className="relative">
-              <span className="text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] group-hover:drop-shadow-[0_0_20px_rgba(251,191,36,1)] group-hover:animate-glow-pulse transition-all duration-300">
+              <span className="text-xl sm:text-2xl md:text-2xl drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] group-hover:drop-shadow-[0_0_20px_rgba(251,191,36,1)] group-hover:animate-glow-pulse transition-all duration-300">
                 🌙
               </span>
-              <span className="absolute -top-1 -right-1 text-xs sm:text-sm animate-pulse group-hover:animate-spin-slow transition-all duration-300">✨</span>
+              <span className="absolute -top-1 -right-1 text-[10px] sm:text-xs animate-pulse group-hover:animate-spin-slow transition-all duration-300">✨</span>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] group-hover:drop-shadow-[0_4px_8px_rgba(251,191,36,0.5)] transition-all duration-300">
+              <h1 className="text-base sm:text-lg md:text-lg lg:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] group-hover:drop-shadow-[0_4px_8px_rgba(251,191,36,0.5)] transition-all duration-300">
                 ASTROLAB
               </h1>
-              <span className="text-[8px] sm:text-[9px] md:text-[10px] text-purple-300/80 dark:text-purple-400/60 tracking-[0.2em] font-semibold -mt-1 group-hover:text-amber-300/90 transition-colors duration-300">
+              <span className="text-[7px] sm:text-[8px] md:text-[8px] text-purple-300/80 dark:text-purple-400/60 tracking-[0.15em] font-semibold -mt-0.5 group-hover:text-amber-300/90 transition-colors duration-300">
                 LABORATORIO ASTROLÓGICO
               </span>
             </div>
           </button>
 
           {/* Desktop Navigation - Diseño Mejorado */}
-          <div className="hidden md:flex items-center space-x-0.5 lg:space-x-1 bg-purple-950/40 dark:bg-gray-950/40 backdrop-blur-sm rounded-full px-1.5 lg:px-2 py-1.5 shadow-inner border border-purple-400/20">
+          <div className="hidden md:flex items-center space-x-0.5 bg-purple-950/40 dark:bg-gray-950/40 backdrop-blur-sm rounded-full px-1 py-1 shadow-inner border border-purple-400/20">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group relative flex items-center space-x-1.5 px-2 lg:px-3 py-1.5 lg:py-2 rounded-full transition-all duration-300 ${
+                className={`group relative flex items-center space-x-1 px-1.5 lg:px-2 py-1.5 rounded-full transition-all duration-300 ${
                   isActiveRoute(item.path)
                     ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-purple-950 shadow-lg shadow-amber-500/50 scale-105'
                     : 'text-purple-100 hover:bg-purple-800/50 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30'
                 }`}
               >
-                <span className={`text-base lg:text-lg transition-transform duration-300 ${
+                <span className={`text-sm lg:text-base transition-transform duration-300 ${
                   isActiveRoute(item.path) ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'group-hover:scale-110'
                 }`}>
                   {item.icon}
                 </span>
-                <span className={`text-[11px] lg:text-xs font-semibold tracking-tight ${
+                <span className={`text-[10px] lg:text-[11px] font-semibold tracking-tighter ${
                   isActiveRoute(item.path) ? 'drop-shadow-sm' : ''
                 }`}>
                   {item.label}
