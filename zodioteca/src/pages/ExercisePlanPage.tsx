@@ -1,13 +1,18 @@
 /**
  * PÁGINA DE PLAN DE EJERCICIOS HOLÍSTICOS
  * Recibe chart desde URL params o state, genera plan personalizado
+ * 
+ * Versión 2.0 - Con Onboarding y Estado Vacío Mejorado
  */
 
 import { useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useChartsStore, type NatalChart } from '../store/useCharts';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
+import { useExercisesOnboarding } from '../hooks/useExercisesOnboarding';
 import PhaseSection from '../components/PhaseSection';
+import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
+import EmptyExercisesState from '../components/EmptyExercisesState';
 
 export default function ExercisePlanPage() {
   const location = useLocation();
@@ -15,6 +20,13 @@ export default function ExercisePlanPage() {
   const navigate = useNavigate();
   
   const { currentChart, charts } = useChartsStore();
+  
+  // Onboarding
+  const {
+    shouldShowWelcome,
+    isLoading: onboardingLoading,
+    markAsSeen,
+  } = useExercisesOnboarding();
   
   // Usar store en lugar de estado local
   const {
@@ -64,6 +76,31 @@ export default function ExercisePlanPage() {
     uncompleteExercise(exerciseId);
   };
 
+  const handleLoadChart = () => {
+    navigate('/natal-chart');
+  };
+
+  const handleCloseWelcome = (dontShowAgain: boolean) => {
+    markAsSeen(dontShowAgain);
+  };
+
+  // Mostrar modal de bienvenida si es primera visita
+  if (!onboardingLoading && shouldShowWelcome && !loading && !plan) {
+    return (
+      <>
+        <WelcomeExercisesModal
+          isOpen={shouldShowWelcome}
+          onClose={handleCloseWelcome}
+          onLoadChart={handleLoadChart}
+        />
+        {/* Fondo mientras se muestra el modal */}
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900">
+          <EmptyExercisesState onLoadChart={handleLoadChart} />
+        </div>
+      </>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-900">
@@ -98,8 +135,13 @@ export default function ExercisePlanPage() {
     );
   }
 
+  // Si no hay plan, mostrar estado vacío
   if (!plan) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900">
+        <EmptyExercisesState onLoadChart={handleLoadChart} />
+      </div>
+    );
   }
 
   return (
