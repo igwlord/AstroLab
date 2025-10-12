@@ -33,10 +33,10 @@ export type AnalysisRule = {
 const RULE_EMOTIONAL_STRESS_MOON: AnalysisRule = {
   id: 'emotional-stress-moon',
   name: 'Estrés Emocional (Luna)',
-  condition: (chart, analysis) => {
+  condition: (_chart, analysis) => {
     return analysis.moon ? analysis.moon.stressScore >= 3 : false;
   },
-  evaluate: (chart, analysis) => {
+  evaluate: (_chart, analysis) => {
     if (!analysis.moon) return null;
 
     const indicators: string[] = [];
@@ -72,10 +72,10 @@ const RULE_EMOTIONAL_STRESS_MOON: AnalysisRule = {
 const RULE_COMMUNICATION_MERCURY: AnalysisRule = {
   id: 'communication-mercury-retro',
   name: 'Comunicación (Mercurio)',
-  condition: (chart, analysis) => {
+  condition: (_chart, analysis) => {
     return analysis.mercury?.retrograde === true && analysis.mutableCount >= 3;
   },
-  evaluate: (chart, analysis) => {
+  evaluate: (_chart, analysis) => {
     if (!analysis.mercury) return null;
 
     const indicators: string[] = ['Mercurio retrógrado'];
@@ -105,11 +105,11 @@ const RULE_COMMUNICATION_MERCURY: AnalysisRule = {
 const RULE_GROUNDING_MUTABLE: AnalysisRule = {
   id: 'grounding-mutable-stellium',
   name: 'Grounding (Energía Dispersa)',
-  condition: (chart, analysis) => {
+  condition: (_chart, analysis) => {
     return analysis.mutableCount >= 4 || 
            (analysis.stelliumHouses.length > 0 && analysis.mutableCount >= 3);
   },
-  evaluate: (chart, analysis) => {
+  evaluate: (_chart, analysis) => {
     const indicators: string[] = [];
     
     if (analysis.mutableCount >= 4) {
@@ -143,19 +143,19 @@ const RULE_PHYSICAL_MARS_TENSION: AnalysisRule = {
   id: 'physical-mars-tension',
   name: 'Liberación Física (Marte)',
   condition: (chart, analysis) => {
-    const marsAspects = chart.aspects.filter(a => 
+    const marsAspects = chart.aspects?.filter(a => 
       (a.a === 'Mars' || a.b === 'Mars') &&
       ['square', 'opposition'].includes(a.type) &&
       a.orb <= 3
-    );
+    ) || [];
     return marsAspects.length >= 1 || analysis.tensionsCount >= 3;
   },
   evaluate: (chart, analysis) => {
-    const marsAspects = chart.aspects.filter(a => 
+    const marsAspects = chart.aspects?.filter(a => 
       (a.a === 'Mars' || a.b === 'Mars') &&
       ['square', 'opposition'].includes(a.type) &&
       a.orb <= 3
-    );
+    ) || [];
 
     const indicators: string[] = [];
     if (marsAspects.length > 0) {
@@ -190,18 +190,18 @@ const RULE_PHYSICAL_MARS_TENSION: AnalysisRule = {
 const RULE_SATURN_STRUCTURE: AnalysisRule = {
   id: 'saturn-structure',
   name: 'Estructura (Saturno)',
-  condition: (chart, analysis) => {
-    const saturn = chart.planets.find(p => p.name === 'Saturn');
+  condition: (chart) => {
+    const saturn = chart.planets?.find(p => p.name === 'Saturn');
     if (!saturn) return false;
 
     // Saturno en casa angular (1, 4, 7, 10) o con muchos aspectos
     const isAngular = [1, 4, 7, 10].includes(saturn.house);
-    const saturnAspects = chart.aspects.filter(a => a.a === 'Saturn' || a.b === 'Saturn');
+    const saturnAspects = chart.aspects?.filter(a => a.a === 'Saturn' || a.b === 'Saturn') || [];
     
     return isAngular || saturnAspects.length >= 3;
   },
-  evaluate: (chart, analysis) => {
-    const saturn = chart.planets.find(p => p.name === 'Saturn');
+  evaluate: (chart) => {
+    const saturn = chart.planets?.find(p => p.name === 'Saturn');
     if (!saturn) return null;
 
     const indicators: string[] = [];
@@ -209,7 +209,7 @@ const RULE_SATURN_STRUCTURE: AnalysisRule = {
       indicators.push(`Saturno en casa angular (${saturn.house})`);
     }
     
-    const saturnAspects = chart.aspects.filter(a => a.a === 'Saturn' || a.b === 'Saturn');
+    const saturnAspects = chart.aspects?.filter(a => a.a === 'Saturn' || a.b === 'Saturn') || [];
     if (saturnAspects.length >= 3) {
       indicators.push(`${saturnAspects.length} aspectos de Saturno`);
     }
@@ -237,10 +237,10 @@ const RULE_SATURN_STRUCTURE: AnalysisRule = {
 const RULE_WEAK_DIGNITIES: AnalysisRule = {
   id: 'weak-dignities',
   name: 'Compensación de Dignidades Débiles',
-  condition: (chart, analysis) => {
+  condition: (_chart, analysis) => {
     return analysis.weakDignities.length >= 2;
   },
-  evaluate: (chart, analysis) => {
+  evaluate: (_chart, analysis) => {
     const indicators = analysis.weakDignities.map(d => 
       `${d.planet} en ${d.dignity.type} (${d.sign})`
     );
@@ -268,10 +268,10 @@ const RULE_WEAK_DIGNITIES: AnalysisRule = {
 const RULE_HARMONIES_AVAILABLE: AnalysisRule = {
   id: 'harmonies-available',
   name: 'Potenciar Recursos Armónicos',
-  condition: (chart, analysis) => {
+  condition: (_chart, analysis) => {
     return analysis.harmoniesCount >= 3 && analysis.tensionsCount <= 2;
   },
-  evaluate: (chart, analysis) => {
+  evaluate: (_chart, analysis) => {
     return {
       ruleId: 'harmonies-available',
       priorityArea: 'Expansión',

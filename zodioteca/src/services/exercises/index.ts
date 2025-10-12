@@ -6,15 +6,15 @@
 // Normalización y validación
 export { normalizeChart, isPlanetNormalized, isSignNormalized } from './planetNormalizer';
 export { validateChart, sanitizeChart, validateAndNormalize } from './chartValidator';
-export type { ValidationResult, ChartWarning, ChartError } from './chartValidator';
+export type { ValidationResult } from './chartValidator';
 
 // Dignidades
 export { getPlanetDignity, adjustSeverityByDignity, getWeakDignities } from './dignities';
-export type { Dignity, DignityType } from './dignities';
+export type { DignityInfo, DignityType } from './dignities';
 
 // Análisis de carta
 export { analyzeChart } from './chartAnalyzer';
-export type { ChartAnalysis, MoonAnalysis, MercuryAnalysis } from './chartAnalyzer';
+export type { ChartAnalysis } from './chartAnalyzer';
 
 // Motor de reglas
 export { evaluateRules, RULES_V2 } from './rulesEngine';

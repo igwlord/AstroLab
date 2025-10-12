@@ -9,7 +9,7 @@ import { LogOut, Cloud, RefreshCw, Loader } from 'lucide-react';
 const SettingsPage: React.FC = () => {
   const { isDark } = useThemeStore();
   const { user: guestUser, logout: guestLogout, syncSettings } = useAuth();
-  const { user: supabaseUser, isAuthenticated, signOut, setShowAuthModal } = useSupabase();
+  const { user: supabaseUser, signOut, setShowAuthModal } = useSupabase();
   const navigate = useNavigate();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');

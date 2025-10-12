@@ -184,7 +184,7 @@ function selectExercises(
   if (selected.length < 18) {
     const topArea = priorities[0]?.priorityArea || 'Emocional';
     const fillers = getExercisesByCategoryAndLevel(topArea, 'easy')
-      .filter(e => !usedIds.has(e.id))
+      .filter((e: ExerciseTemplate) => !usedIds.has(e.id))
       .slice(0, 18 - selected.length);
 
     selected.push(...fillers);

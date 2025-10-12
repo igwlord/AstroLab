@@ -98,7 +98,7 @@ const SIGN_TO_MODALITY: Record<string, string> = {
  * Considera aspectos, casa y dignidad
  */
 function analyzeMoonStress(chart: NatalChart): number {
-  const moon = chart.planets.find(p => p.name === 'Moon');
+  const moon = chart.planets?.find(p => p.name === 'Moon');
   if (!moon) return 0;
 
   let stress = 0;
@@ -107,7 +107,7 @@ function analyzeMoonStress(chart: NatalChart): number {
   if ([4, 8, 12].includes(moon.house)) stress += 1;
 
   // Analizar aspectos
-  const moonAspects = chart.aspects.filter(a => a.a === 'Moon' || a.b === 'Moon');
+  const moonAspects = chart.aspects?.filter(a => a.a === 'Moon' || a.b === 'Moon') || [];
   
   moonAspects.forEach(aspect => {
     const otherPlanet = aspect.a === 'Moon' ? aspect.b : aspect.a;
@@ -147,7 +147,7 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   let fixedCount = 0;
 
   // Analizar planetas
-  for (const p of chart.planets) {
+  for (const p of chart.planets || []) {
     const element = SIGN_TO_ELEMENT[p.sign] || 'air';
     const modality = SIGN_TO_MODALITY[p.sign] || 'mutable';
 
@@ -169,7 +169,7 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   let tensionsCount = 0;
   let harmoniesCount = 0;
 
-  for (const a of chart.aspects) {
+  for (const a of chart.aspects || []) {
     if (['square', 'opposition'].includes(a.type) && a.orb <= 3) {
       tensionsCount++;
     }
@@ -179,26 +179,26 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   }
 
   // Analizar Luna
-  const moon = chart.planets.find(p => p.name === 'Moon');
+  const moon = chart.planets?.find(p => p.name === 'Moon');
   const moonAnalysis = moon ? {
     house: moon.house,
     sign: moon.sign,
     dignity: getPlanetDignity('Moon', moon.sign),
-    hardAspects: chart.aspects.filter(a => 
+    hardAspects: chart.aspects?.filter(a => 
       (a.a === 'Moon' || a.b === 'Moon') && 
       ['square', 'opposition'].includes(a.type) && 
       a.orb <= 3
-    ).length,
-    softAspects: chart.aspects.filter(a => 
+    ).length || 0,
+    softAspects: chart.aspects?.filter(a => 
       (a.a === 'Moon' || a.b === 'Moon') && 
       ['trine', 'sextile'].includes(a.type) && 
       a.orb <= 4
-    ).length,
+    ).length || 0,
     stressScore: analyzeMoonStress(chart)
   } : undefined;
 
   // Analizar Mercurio
-  const mercury = chart.planets.find(p => p.name === 'Mercury');
+  const mercury = chart.planets?.find(p => p.name === 'Mercury');
   const mercuryAnalysis = mercury ? {
     house: mercury.house,
     sign: mercury.sign,
@@ -207,8 +207,8 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   } : undefined;
 
   // Dignidades débiles y fuertes
-  const weakDignities = getWeakDignities(chart.planets);
-  const strongDignities = getStrongDignities(chart.planets);
+  const weakDignities = getWeakDignities(chart.planets || []);
+  const strongDignities = getStrongDignities(chart.planets || []);
 
   // Notas de análisis
   const notes: string[] = [];

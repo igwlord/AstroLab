@@ -12,6 +12,9 @@ export interface ValidationResult {
   warnings: string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UnknownChart = Record<string, any>;
+
 const VALID_PLANETS = [
   'Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 
   'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron'
@@ -29,7 +32,7 @@ const VALID_ASPECTS = [
 /**
  * Valida una carta natal completa
  */
-export function validateChart(chart: any): ValidationResult {
+export function validateChart(chart: UnknownChart): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -51,7 +54,8 @@ export function validateChart(chart: any): ValidationResult {
     errors.push('Chart must have at least 1 planet');
   } else {
     // Validar cada planeta
-    chart.planets.forEach((p: any, index: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    chart.planets.forEach((p: Record<string, any>, index: number) => {
       if (!p.name) {
         errors.push(`Planet ${index} missing "name" field`);
       } else if (!VALID_PLANETS.includes(p.name)) {
@@ -82,7 +86,8 @@ export function validateChart(chart: any): ValidationResult {
   if (!Array.isArray(chart.aspects)) {
     errors.push('Chart must have an "aspects" array (can be empty)');
   } else {
-    chart.aspects.forEach((a: any, index: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    chart.aspects.forEach((a: Record<string, any>, index: number) => {
       // Soportar ambas estructuras: {a, b} o {planet1, planet2}
       const hasOldFormat = a.a && a.b;
       const hasNewFormat = a.planet1 && a.planet2;
@@ -108,14 +113,17 @@ export function validateChart(chart: any): ValidationResult {
   // 4. Validaciones de integridad
   if (chart.planets && Array.isArray(chart.planets)) {
     // Verificar que hay planetas básicos
-    const hasSun = chart.planets.some((p: any) => p.name === 'Sun');
-    const hasMoon = chart.planets.some((p: any) => p.name === 'Moon');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hasSun = chart.planets.some((p: Record<string, any>) => p.name === 'Sun');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hasMoon = chart.planets.some((p: Record<string, any>) => p.name === 'Moon');
     
     if (!hasSun) warnings.push('Chart missing Sun - analysis may be incomplete');
     if (!hasMoon) warnings.push('Chart missing Moon - emotional analysis may be limited');
 
     // Verificar duplicados
-    const planetNames = chart.planets.map((p: any) => p.name);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const planetNames = chart.planets.map((p: Record<string, any>) => p.name);
     const duplicates = planetNames.filter((name: string, index: number) => 
       planetNames.indexOf(name) !== index
     );
@@ -149,13 +157,15 @@ export function sanitizeChart(chart: NatalChart): NatalChart {
       : [],
     aspects: chart.aspects
       ? chart.aspects
-          .filter((a: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((a: Record<string, any>) => {
             // Soportar ambos formatos: {a, b} o {planet1, planet2}
             const hasOldFormat = a.a && a.b;
             const hasNewFormat = a.planet1 && a.planet2;
             return (hasOldFormat || hasNewFormat) && a.type;
           })
-          .map((a: any) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((a: Record<string, any>) => ({
             // Normalizar a formato {a, b} si viene como {planet1, planet2}
             a: a.a || a.planet1,
             b: a.b || a.planet2,
@@ -170,7 +180,8 @@ export function sanitizeChart(chart: NatalChart): NatalChart {
 /**
  * Valida y normaliza una carta (proceso completo)
  */
-export function validateAndNormalize(chart: any): {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function validateAndNormalize(chart: Record<string, any>): {
   chart: NatalChart | null;
   validation: ValidationResult;
 } {

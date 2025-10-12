@@ -15,7 +15,12 @@ export interface DignityInfo {
 /**
  * Tabla de dignidades esenciales
  */
-export const DIGNITIES = {
+export const DIGNITIES: {
+  domicile: Record<string, string[]>;
+  exaltation: Record<string, string[]>;
+  fall: Record<string, string[]>;
+  detriment: Record<string, string[]>;
+} = {
   domicile: {
     'Sun': ['Leo'],
     'Moon': ['Cancer'],
@@ -64,14 +69,14 @@ export const DIGNITIES = {
     'Neptune': ['Virgo'], // o Gemini según tradición
     'Pluto': ['Taurus'] // o Cancer según tradición
   }
-} as const;
+};
 
 /**
  * Obtiene la dignidad de un planeta en un signo específico
  */
 export function getPlanetDignity(planet: string, sign: string): DignityInfo {
   // Verificar domicilio (+2)
-  if (DIGNITIES.domicile[planet as keyof typeof DIGNITIES.domicile]?.includes(sign)) {
+  if (DIGNITIES.domicile[planet]?.includes(sign)) {
     return {
       type: 'domicile',
       strength: 2,
@@ -80,7 +85,7 @@ export function getPlanetDignity(planet: string, sign: string): DignityInfo {
   }
 
   // Verificar exaltación (+1)
-  if (DIGNITIES.exaltation[planet as keyof typeof DIGNITIES.exaltation]?.includes(sign)) {
+  if (DIGNITIES.exaltation[planet]?.includes(sign)) {
     return {
       type: 'exaltation',
       strength: 1,
@@ -89,7 +94,7 @@ export function getPlanetDignity(planet: string, sign: string): DignityInfo {
   }
 
   // Verificar caída (-1)
-  if (DIGNITIES.fall[planet as keyof typeof DIGNITIES.fall]?.includes(sign)) {
+  if (DIGNITIES.fall[planet]?.includes(sign)) {
     return {
       type: 'fall',
       strength: -1,
@@ -98,7 +103,7 @@ export function getPlanetDignity(planet: string, sign: string): DignityInfo {
   }
 
   // Verificar exilio/detrimento (-2)
-  if (DIGNITIES.detriment[planet as keyof typeof DIGNITIES.detriment]?.includes(sign)) {
+  if (DIGNITIES.detriment[planet]?.includes(sign)) {
     return {
       type: 'detriment',
       strength: -2,
