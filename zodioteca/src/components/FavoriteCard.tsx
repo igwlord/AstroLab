@@ -13,7 +13,7 @@
  * - 🚫 Sin modal propio, sin preview complejo
  */
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FavoriteItem } from '../types/favorites';
@@ -27,9 +27,6 @@ import { useFavorites } from '../store/useFavorites';
 interface FavoriteCardProps {
   /** Item del favorito */
   item: FavoriteItem;
-  
-  /** Callback al eliminar (opcional, usa store por defecto) */
-  onRemove?: () => void;
   
   /** Callback al abrir (opcional, para compatibilidad) */
   onOpen?: () => void;
@@ -50,68 +47,15 @@ interface FavoriteCardProps {
 
 const FavoriteCard: FC<FavoriteCardProps> = ({
   item,
-  onRemove,
   onOpen,
   onTogglePin,
   compact = false,
   className = '',
 }) => {
   const navigate = useNavigate();
-  const { remove, togglePin, touch } = useFavorites();
+  const { togglePin, touch } = useFavorites();
   
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
-  // =========== SWIPE TO DELETE (Mobile) - Versión mejorada ===========
-  
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    setIsSwiping(false);
-  };
-  
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!e.touches[0]) return;
-    
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-    const diffX = touchStartX.current - currentX;
-    const diffY = Math.abs(touchStartY.current - currentY);
-    
-    // Si el movimiento es más horizontal que vertical, es un swipe
-    if (Math.abs(diffX) > diffY && Math.abs(diffX) > 5) {
-      setIsSwiping(true);
-      
-      // Prevenir scroll SOLO cuando estamos haciendo swipe horizontal
-      if (e.cancelable) {
-        e.preventDefault();
-      }
-      
-      // Solo permitir swipe a la izquierda (diffX positivo)
-      if (diffX > 0) {
-        setSwipeOffset(Math.min(diffX, 120)); // Aumenté el límite para mejor UX
-      } else {
-        setSwipeOffset(0);
-      }
-    }
-  };
-  
-  const handleTouchEnd = () => {
-    // Si el swipe fue mayor a 50px, eliminar
-    if (swipeOffset > 50) {
-      // Pequeño delay para que el usuario vea la animación
-      setTimeout(() => {
-        handleRemove();
-      }, 100);
-    } else {
-      // Volver a la posición original con animación
-      setSwipeOffset(0);
-    }
-    setIsSwiping(false);
-  };
   
   // =========== ACCIONES ===========
   
@@ -134,14 +78,6 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     });
   };
   
-  const handleRemove = () => {
-    if (onRemove) {
-      onRemove();
-    } else {
-      remove(item.id);
-    }
-  };
-  
   const handleTogglePin = (e: React.MouseEvent) => {
     e.stopPropagation(); // No navegar al hacer click en pin
     
@@ -162,43 +98,10 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     <div
       ref={cardRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ 
-        touchAction: 'pan-y pinch-zoom',
-        userSelect: 'none',
-        WebkitUserSelect: 'none'
-      }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {/* Background de eliminación (swipe) - Más visible */}
-      {swipeOffset > 0 && (
-        <div
-          className="absolute inset-0 bg-gradient-to-l from-red-600 via-red-500 to-red-600 flex items-center justify-end px-4 text-white font-bold rounded-xl z-0 shadow-inner"
-          style={{ 
-            opacity: Math.min(swipeOffset / 60, 1),
-            pointerEvents: 'none'
-          }}
-        >
-          <span className="flex items-center gap-2 animate-pulse">
-            <span className="text-3xl drop-shadow-lg">🗑️</span>
-            <span className="text-base font-extrabold tracking-wide drop-shadow-md">
-              {swipeOffset > 50 ? '¡Suelta!' : 'Desliza'}
-            </span>
-          </span>
-        </div>
-      )}
-      
       {/* Card principal */}
       <div
-        onClick={(e) => {
-          // Solo navegar si no estamos haciendo swipe
-          if (isSwiping || swipeOffset > 10) {
-            e.preventDefault();
-            return;
-          }
-          handleClick();
-        }}
+        onClick={handleClick}
         className={`
           relative z-10
           ${compact ? 'p-3' : 'p-4'}
@@ -210,17 +113,11 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
           transition-all duration-300 ease-out
           hover:border-purple-400 dark:hover:border-purple-500
           hover:shadow-lg hover:shadow-purple-200/50 dark:hover:shadow-purple-900/30
-          ${swipeOffset === 0 ? 'hover:scale-[1.02] hover:-translate-y-0.5' : ''}
+          hover:scale-[1.02] hover:-translate-y-0.5
           active:scale-[0.98]
           active:translate-y-0
           group
         `}
-        style={{
-          transform: swipeOffset > 0 
-            ? `translateX(-${swipeOffset}px)` 
-            : undefined,
-          transition: isSwiping ? 'none' : 'transform 0.3s ease-out',
-        }}
         role="link"
         tabIndex={0}
         aria-label={`Ir a ${item.title}`}
@@ -276,6 +173,7 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
           
           {/* Badges y acciones */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            
             {/* Badge de anclado */}
             {item.pinned && (
               <button
