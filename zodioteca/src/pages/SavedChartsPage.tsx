@@ -107,9 +107,22 @@ const SavedChartsPage: FC = () => {
   // Eliminar carta
   const handleDelete = async (chartId: string) => {
     if (!confirm('¿Eliminar esta carta? Esta acción no se puede deshacer.')) return;
-    
-    deleteChartLocal(chartId);
-    await loadCharts();
+
+    try {
+      // Si está autenticado, eliminar también de Supabase
+      if (isAuthenticated) {
+        await supabase.deleteChart(chartId);
+      }
+
+      // Eliminar de localStorage (siempre)
+      deleteChartLocal(chartId);
+
+      // Recargar cartas
+      await loadCharts();
+    } catch (error) {
+      logger.error('Error eliminando carta:', error);
+      alert('Error al eliminar la carta. Inténtalo de nuevo.');
+    }
   };
 
   // Toggle selección
