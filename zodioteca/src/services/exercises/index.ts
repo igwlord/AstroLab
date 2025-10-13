@@ -33,7 +33,7 @@ export type { ScoredPriority } from './scoring';
 export { detectConflicts, resolveConflicts, hasBlockingConflicts } from './conflictDetector';
 export type { ExerciseConflict, ExerciseMetadata, ConflictType } from './conflictDetector';
 
-// Base de datos de ejercicios
+// Base de datos de ejercicios (v3.0 - con tipos mejorados)
 export {
   EXERCISE_DATABASE,
   getExercisesByIds,
@@ -41,7 +41,27 @@ export {
   getRandomExercises,
   searchExercises
 } from './exerciseDatabase';
-export type { ExerciseTemplate } from './exerciseDatabase';
+export type { 
+  ExerciseTemplate, 
+  TherapeuticTags, 
+  TherapeuticModality,
+  AstroTags,
+  EssentialOil,
+  SafetyInfo
+} from './exerciseDatabase';
+
+// Sistema de recomendación (v3.0 - NUEVO)
+export {
+  recommendExercisesForChart,
+  filterByMedicalSafety,
+  generateMicroRoutine,
+  formatRecommendationForUser
+} from './exerciseRecommender';
+export type {
+  ChartDominance,
+  ClientContext,
+  ExerciseRecommendation
+} from './exerciseRecommender';
 
 // Generador de planes
 export { generateExercisePlan } from './planGenerator';

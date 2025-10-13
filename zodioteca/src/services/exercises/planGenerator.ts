@@ -11,7 +11,8 @@ import { analyzeChart, type ChartAnalysis } from './chartAnalyzer';
 import { evaluateRules } from './rulesEngine';
 import { scorePriorities, filterLowConfidence, summarizeTopPriorities, type ScoredPriority } from './scoring';
 import { detectConflicts, resolveConflicts, hasBlockingConflicts } from './conflictDetector';
-import { getExercisesByIds, getExercisesByCategoryAndLevel, type ExerciseTemplate } from './exerciseDatabase';
+import { getExercisesByIds, EXERCISE_DATABASE, type ExerciseTemplate } from './exerciseDatabase';
+import { logger } from '../../utils/logger';
 
 export interface ExercisePlan {
   id: string;
@@ -44,6 +45,20 @@ export interface ExercisePhase {
   exercises: ExerciseTemplate[];
   dailyRoutine: string;
   instructions: string;
+  
+  // Nuevos campos v3.0: Geometría Sagrada y Chakras
+  sacredGeometry: {
+    name: string;
+    symbolism: string;
+    color: string;
+    visualizationGuide: string;
+  };
+  chakras: {
+    primary: string;
+    secondary?: string;
+    focus: string;
+    affirmation: string;
+  };
 }
 
 /**
@@ -57,10 +72,10 @@ export async function generateExercisePlan(
     excludeExerciseIds?: string[];
   }
 ): Promise<ExercisePlan> {
-  console.log('🚀 INICIANDO GENERACIÓN DE PLAN (v2.0)');
+  logger.log('🚀 INICIANDO GENERACIÓN DE PLAN (v2.0)');
 
   // FASE 1: NORMALIZACIÓN Y VALIDACIÓN
-  console.log('📋 Fase 1: Validación de carta...');
+  logger.log('📋 Fase 1: Validación de carta...');
   const normalized = normalizeChart(chart);
   const validationResult = validateAndNormalize(normalized);
   
@@ -74,52 +89,52 @@ export async function generateExercisePlan(
   }
 
   if (validationResult.validation.warnings && validationResult.validation.warnings.length > 0) {
-    console.warn('⚠️  Advertencias de validación:', validationResult.validation.warnings);
+    logger.warn('⚠️  Advertencias de validación:', validationResult.validation.warnings);
   }
 
   // FASE 2: ANÁLISIS DE CARTA
-  console.log('🔍 Fase 2: Análisis de carta...');
+  logger.log('🔍 Fase 2: Análisis de carta...');
   const analysis = analyzeChart(validationResult.chart);
-  console.log(`   - Luna estrés: ${analysis.moon?.stressScore || 0}/10`);
-  console.log(`   - Tensiones: ${analysis.tensionsCount}, Armonías: ${analysis.harmoniesCount}`);
-  console.log(`   - Dignidades débiles: ${analysis.weakDignities.length}`);
+  logger.log(`   - Luna estrés: ${analysis.moon?.stressScore || 0}/10`);
+  logger.log(`   - Tensiones: ${analysis.tensionsCount}, Armonías: ${analysis.harmoniesCount}`);
+  logger.log(`   - Dignidades débiles: ${analysis.weakDignities.length}`);
 
   // FASE 3: EVALUACIÓN DE REGLAS
-  console.log('⚙️  Fase 3: Evaluando reglas...');
+  logger.log('⚙️  Fase 3: Evaluando reglas...');
   const ruleOutputs = evaluateRules(validationResult.chart, analysis);
-  console.log(`   - Reglas activadas: ${ruleOutputs.length}`);
+  logger.log(`   - Reglas activadas: ${ruleOutputs.length}`);
 
   // FASE 4: SCORING Y PRIORIZACIÓN
-  console.log('📊 Fase 4: Scoring y priorización...');
+  logger.log('📊 Fase 4: Scoring y priorización...');
   const allPriorities = scorePriorities(ruleOutputs, analysis);
   const priorities = filterLowConfidence(allPriorities);
   const { areas, summary } = summarizeTopPriorities(priorities);
   
-  console.log(`   - Prioridades finales: ${priorities.length}`);
-  console.log(`   - Top áreas: ${areas.join(', ')}`);
-  console.log('   - Top 3:\n' + summary);
+  logger.log(`   - Prioridades finales: ${priorities.length}`);
+  logger.log(`   - Top áreas: ${areas.join(', ')}`);
+  logger.log('   - Top 3:\n' + summary);
 
   // FASE 5: SELECCIÓN DE EJERCICIOS
-  console.log('🎯 Fase 5: Seleccionando ejercicios...');
+  logger.log('🎯 Fase 5: Seleccionando ejercicios...');
   const selectedExercises = selectExercises(priorities, options?.excludeExerciseIds);
-  console.log(`   - Ejercicios candidatos: ${selectedExercises.length}`);
+  logger.log(`   - Ejercicios candidatos: ${selectedExercises.length}`);
 
   // FASE 6: DETECCIÓN Y RESOLUCIÓN DE CONFLICTOS
-  console.log('⚔️  Fase 6: Detectando conflictos...');
+  logger.log('⚔️  Fase 6: Detectando conflictos...');
   const conflicts = detectConflicts(selectedExercises);
-  console.log(`   - Conflictos detectados: ${conflicts.length}`);
+  logger.log(`   - Conflictos detectados: ${conflicts.length}`);
 
   if (hasBlockingConflicts(conflicts)) {
-    console.warn('🛑 Conflictos bloqueantes detectados — resolviendo...');
+    logger.warn('🛑 Conflictos bloqueantes detectados — resolviendo...');
   }
 
   const { kept, removed } = resolveConflicts(selectedExercises, conflicts);
   const finalExercises = selectedExercises.filter(e => kept.includes(e.id));
-  console.log(`   - Ejercicios finales: ${finalExercises.length} (removidos: ${removed.length})`);
+  logger.log(`   - Ejercicios finales: ${finalExercises.length} (removidos: ${removed.length})`);
 
   // FASE 7: DISTRIBUCIÓN EN FASES (3 fases de 7 días)
-  console.log('📅 Fase 7: Distribuyendo en fases...');
-  const phases = distributeIntoPhases(finalExercises, priorities);
+  logger.log('📅 Fase 7: Distribuyendo en fases...');
+  const phases = distributeIntoPhases(finalExercises, priorities, analysis);
 
   // FASE 8: ENSAMBLAR PLAN
   const plan: ExercisePlan = {
@@ -142,15 +157,16 @@ export async function generateExercisePlan(
     )
   };
 
-  console.log('✅ PLAN GENERADO CON ÉXITO');
-  console.log(`   - Total: ${plan.totalExercises} ejercicios`);
-  console.log(`   - Tiempo diario estimado: ${plan.estimatedDailyMinutes} min`);
+  logger.log('✅ PLAN GENERADO CON ÉXITO');
+  logger.log(`   - Total: ${plan.totalExercises} ejercicios`);
+  logger.log(`   - Tiempo diario estimado: ${plan.estimatedDailyMinutes} min`);
   
   return plan;
 }
 
 /**
  * Selecciona ejercicios basándose en las prioridades scoredadas
+ * GARANTIZA 6 ejercicios únicos con progresión de dificultad
  */
 function selectExercises(
   priorities: ScoredPriority[],
@@ -159,10 +175,12 @@ function selectExercises(
   const selected: ExerciseTemplate[] = [];
   const usedIds = new Set<string>(excludeIds || []);
 
-  // Iterar por prioridades (ya están ordenadas por score)
+  logger.log('   🔍 Iniciando selección de 6 ejercicios...');
+
+  // PASO 1: Recolectar ejercicios de prioridades
   for (const priority of priorities) {
-    // Extraer ejercicios sugeridos
     const exerciseIds = priority.suggestions;
+    logger.log(`   📌 Prioridad "${priority.priorityArea}": ${exerciseIds.length} sugerencias`);
 
     for (const exId of exerciseIds) {
       if (usedIds.has(exId)) continue;
@@ -171,71 +189,366 @@ function selectExercises(
       if (exercise) {
         selected.push(exercise);
         usedIds.add(exId);
+        logger.log(`      ✓ Agregado: ${exercise.title} (intensidad: ${exercise.intensity})`);
       }
 
-      // Límite: no más de 18 ejercicios (6 por fase)
-      if (selected.length >= 18) break;
+      // Solo necesitamos 6 ejercicios
+      if (selected.length >= 6) break;
     }
 
-    if (selected.length >= 18) break;
+    if (selected.length >= 6) break;
   }
 
-  // Si no alcanzamos 18, rellenar con ejercicios de mantenimiento
-  if (selected.length < 18) {
-    const topArea = priorities[0]?.priorityArea || 'Emocional';
-    const fillers = getExercisesByCategoryAndLevel(topArea, 'easy')
-      .filter((e: ExerciseTemplate) => !usedIds.has(e.id))
-      .slice(0, 18 - selected.length);
+  logger.log(`   📊 Ejercicios de prioridades: ${selected.length}`);
 
-    selected.push(...fillers);
+  // PASO 2: Si no llegamos a 6, usar fallback balanceado
+  if (selected.length < 6) {
+    logger.log('   ⚠️ Insuficientes ejercicios, activando fallback...');
+    
+    // Categorías esenciales balanceadas
+    const essentialCategories = ['Respiración', 'Emocional', 'Físico', 'Estructura', 'Mental', 'Creatividad'];
+    
+    for (const category of essentialCategories) {
+      if (selected.length >= 6) break;
+      
+      const categoryExercises = EXERCISE_DATABASE
+        .filter(e => e.category === category && !usedIds.has(e.id))
+        .sort((a, b) => (a.intensity || 1) - (b.intensity || 1)); // Ordenar por dificultad
+
+      if (categoryExercises.length > 0) {
+        const ex = categoryExercises[0];
+        selected.push(ex);
+        usedIds.add(ex.id);
+        logger.log(`      ✓ Fallback: ${ex.title} (${category})`);
+      }
+    }
   }
 
-  return selected;
+  // PASO 3: Si aún faltan, rellenar con ejercicios seguros
+  if (selected.length < 6) {
+    logger.log('   🆘 Completando con ejercicios de bajo riesgo...');
+    
+    const generalFillers = EXERCISE_DATABASE
+      .filter(e => 
+        !usedIds.has(e.id) && 
+        e.intensity && e.intensity <= 2 &&
+        (!e.safetyInfo || e.safetyInfo.riskLevel !== 'high')
+      )
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 6 - selected.length);
+
+    selected.push(...generalFillers);
+  }
+
+  // PASO 4: Ordenar por intensidad para progresión natural (fácil → difícil)
+  const sortedByIntensity = selected
+    .slice(0, 6)
+    .sort((a, b) => (a.intensity || 1) - (b.intensity || 1));
+
+  logger.log(`   ✅ Total seleccionado: ${sortedByIntensity.length} ejercicios`);
+  sortedByIntensity.forEach((ex, i) => {
+    logger.log(`      ${i + 1}. ${ex.title} (intensidad: ${ex.intensity}, categoría: ${ex.category})`);
+  });
+
+  return sortedByIntensity;
 }
 
 /**
- * Distribuye ejercicios en 3 fases de 7 días
- * Fase 1: nivel fácil, Fase 2: nivel medio, Fase 3: nivel variado
+ * MAPA DE GEOMETRÍAS SAGRADAS POR SIGNO ZODIACAL
+ * Basado en vibración arquetípica, elementos y frecuencias energéticas
+ */
+const ZODIAC_GEOMETRIES: Record<string, {
+  name: string;
+  symbolism: string;
+  color: string;
+  visualizationGuide: string;
+  element: 'fire' | 'earth' | 'air' | 'water';
+}> = {
+  'Aries': {
+    name: 'Tetraedro',
+    symbolism: 'Fuego primordial, impulso creativo, voluntad pura',
+    color: '#FF0000',
+    visualizationGuide: 'Visualiza un tetraedro rojo brillante girando sobre tu plexo solar para activar la confianza y la decisión.',
+    element: 'fire'
+  },
+  'Taurus': {
+    name: 'Cubo',
+    symbolism: 'Estabilidad, materia, arraigo. Equilibrio de los 4 elementos en el plano físico',
+    color: '#228B22',
+    visualizationGuide: 'Medita sobre un cubo verde esmeralda para conectar con la abundancia, la seguridad y la fuerza interior.',
+    element: 'earth'
+  },
+  'Gemini': {
+    name: 'Octaedro',
+    symbolism: 'Equilibrio entre polaridades, intercambio, diálogo entre mente y espíritu',
+    color: '#C0C0C0',
+    visualizationGuide: 'Visualiza un octaedro plateado girando entre tus pulmones para equilibrar pensamiento y emoción.',
+    element: 'air'
+  },
+  'Cancer': {
+    name: 'Esfera',
+    symbolism: 'Totalidad, matriz, útero cósmico. Amor maternal universal',
+    color: '#87CEEB',
+    visualizationGuide: 'Imagina una esfera acuosa envolviendo tu corazón para sanar memorias emocionales.',
+    element: 'water'
+  },
+  'Leo': {
+    name: 'Sol Dodecaédrico',
+    symbolism: 'Conexión con lo divino interior, autoexpresión, el alma que brilla',
+    color: '#FFD700',
+    visualizationGuide: 'Medita visualizando un dodecaedro dorado irradiando luz desde el plexo solar.',
+    element: 'fire'
+  },
+  'Virgo': {
+    name: 'Merkaba',
+    symbolism: 'Vehículo de luz, purificación, equilibrio cuerpo-espíritu',
+    color: '#8B7355',
+    visualizationGuide: 'Activa la Merkaba con respiraciones conscientes para limpiar y armonizar los cuerpos sutiles.',
+    element: 'earth'
+  },
+  'Libra': {
+    name: 'Flor de la Vida',
+    symbolism: 'Armonía universal, patrones de creación, belleza y proporción',
+    color: '#FF69B4',
+    visualizationGuide: 'Medita sobre su geometría rosada para armonizar vínculos y restaurar el equilibrio interno.',
+    element: 'air'
+  },
+  'Scorpio': {
+    name: 'Icosaedro',
+    symbolism: 'Agua en movimiento, transformación, capacidad de mutar y renacer',
+    color: '#8B008B',
+    visualizationGuide: 'Visualiza un icosaedro violeta flotando sobre el abdomen bajo para transmutar emociones densas.',
+    element: 'water'
+  },
+  'Sagittarius': {
+    name: 'Espiral Dorada',
+    symbolism: 'Expansión infinita del conocimiento, conexión con la verdad universal',
+    color: '#DAA520',
+    visualizationGuide: 'Visualiza una espiral dorada que nace en tu corazón y se expande hacia el universo.',
+    element: 'fire'
+  },
+  'Capricorn': {
+    name: 'Cuboctaedro',
+    symbolism: 'Maestría material, estructura que sostiene la evolución',
+    color: '#696969',
+    visualizationGuide: 'Medita con un cuboctaedro gris plomo para consolidar proyectos y materializar metas.',
+    element: 'earth'
+  },
+  'Aquarius': {
+    name: 'Estrella Icosaédrica',
+    symbolism: 'Mente superior, conciencia colectiva, redes energéticas',
+    color: '#00BFFF',
+    visualizationGuide: 'Visualízala azul eléctrica activando tu campo mental y conexión con la conciencia grupal.',
+    element: 'air'
+  },
+  'Pisces': {
+    name: 'Vesica Piscis',
+    symbolism: 'Portal entre mundos, útero de la creación, unión espíritu-materia',
+    color: '#9370DB',
+    visualizationGuide: 'Medita en su forma como un portal de luz blanca que une el alma con lo divino.',
+    element: 'water'
+  }
+};
+
+/**
+ * Geometrías alternativas por área de trabajo (para Fase 2 - Profundización)
+ */
+const PRIORITY_GEOMETRIES: Record<string, { name: string; symbolism: string; color: string; visualizationGuide: string; element: string }> = {
+  'Emocional': ZODIAC_GEOMETRIES['Cancer'],       // Esfera - contención emocional
+  'Estructura': ZODIAC_GEOMETRIES['Capricorn'],   // Cuboctaedro - maestría
+  'Físico': ZODIAC_GEOMETRIES['Taurus'],          // Cubo - arraigo
+  'Mental': ZODIAC_GEOMETRIES['Gemini'],          // Octaedro - equilibrio mental
+  'Comunicación': ZODIAC_GEOMETRIES['Gemini'],    // Octaedro - intercambio
+  'Autoestima': ZODIAC_GEOMETRIES['Leo'],         // Sol Dodecaédrico - brillo interior
+  'Relaciones': ZODIAC_GEOMETRIES['Libra'],       // Flor de la Vida - armonía
+  'Transformación': ZODIAC_GEOMETRIES['Scorpio'], // Icosaedro - metamorfosis
+  'Propósito': ZODIAC_GEOMETRIES['Sagittarius'],  // Espiral Dorada - expansión
+  'Espiritualidad': ZODIAC_GEOMETRIES['Pisces']   // Vesica Piscis - portal
+};
+
+/**
+ * Calcula el signo zodiacal dominante en la carta natal
+ * Usa el elemento dominante de la carta para determinar el signo representativo
+ */
+function calculateDominantZodiacSign(analysis: ChartAnalysis): string {
+  // Determinar elemento dominante
+  let dominantElement = 'air';
+  let maxElementCount = 0;
+
+  Object.entries(analysis.dominances.elements).forEach(([element, count]) => {
+    if (count > maxElementCount) {
+      maxElementCount = count;
+      dominantElement = element;
+    }
+  });
+
+  // Seleccionar signo basado en características de la carta
+  let selectedSign: string;
+
+  // Luna estresada → Signo cardinal del elemento (iniciar acción)
+  if (analysis.moon && analysis.moon.stressScore >= 6) {
+    if (dominantElement === 'fire') selectedSign = 'Aries';
+    else if (dominantElement === 'earth') selectedSign = 'Capricorn';
+    else if (dominantElement === 'air') selectedSign = 'Libra';
+    else selectedSign = 'Cancer';
+  }
+  // Muchas dignidades débiles → Signo mutable (adaptación)
+  else if (analysis.weakDignities.length >= 3) {
+    if (dominantElement === 'fire') selectedSign = 'Sagittarius';
+    else if (dominantElement === 'earth') selectedSign = 'Virgo';
+    else if (dominantElement === 'air') selectedSign = 'Gemini';
+    else selectedSign = 'Pisces';
+  }
+  // Default → Signo fijo (estabilidad)
+  else {
+    if (dominantElement === 'fire') selectedSign = 'Leo';
+    else if (dominantElement === 'earth') selectedSign = 'Taurus';
+    else if (dominantElement === 'air') selectedSign = 'Aquarius';
+    else selectedSign = 'Scorpio';
+  }
+
+  logger.log(`   🔮 Signo dominante: ${selectedSign} (elemento: ${dominantElement}, dignidades débiles: ${analysis.weakDignities.length}, luna stress: ${analysis.moon?.stressScore || 0})`);
+  return selectedSign;
+}
+
+/**
+ * Calcula geometría sagrada y chakras para cada fase basándose en la carta natal
+ */
+function calculateSacredGeometryAndChakras(
+  phaseNumber: number,
+  analysis: ChartAnalysis,
+  priorities: ScoredPriority[]
+): {
+  sacredGeometry: { name: string; symbolism: string; color: string; visualizationGuide: string };
+  chakras: { primary: string; secondary?: string; focus: string; affirmation: string };
+} {
+  
+  // Calcular signo dominante
+  const dominantSign = calculateDominantZodiacSign(analysis);
+  const signGeometry = ZODIAC_GEOMETRIES[dominantSign] || ZODIAC_GEOMETRIES['Aries'];
+
+  const topPriority = priorities[0]?.priorityArea || 'Emocional';
+
+  // LÓGICA DE SELECCIÓN SEGÚN FASE
+  let selectedGeometry;
+  let selectedChakra;
+  let secondaryChakra;
+  let focus;
+  let affirmation;
+
+  if (phaseNumber === 1) {
+    // FASE 1: Adaptación → Geometría del SIGNO DOMINANTE + Chakras de base
+    selectedGeometry = signGeometry;
+    selectedChakra = 'Root';
+    secondaryChakra = 'Sacral';
+    focus = 'Enraizamiento y adaptación usando la energía arquetípica de tu carta';
+    affirmation = `Anclo la energía de ${dominantSign} en mi cuerpo. Me adapto con confianza y fluidez.`;
+    
+  } else if (phaseNumber === 2) {
+    // FASE 2: Profundización → Geometría según PRIORIDAD + Chakras emocionales
+    selectedGeometry = PRIORITY_GEOMETRIES[topPriority] || signGeometry;
+    
+    // Chakras según necesidad emocional
+    if (analysis.moon && analysis.moon.stressScore >= 6) {
+      selectedChakra = 'Sacral';
+      secondaryChakra = 'Heart';
+      focus = 'Procesamiento emocional profundo y sanación lunar';
+      affirmation = 'Honro la sabiduría de mis emociones. Me permito sentir y sanar.';
+    } else {
+      selectedChakra = 'Heart';
+      secondaryChakra = topPriority === 'Comunicación' ? 'Throat' : 'Solar Plexus';
+      focus = `Trabajo profundo en ${topPriority} con compasión y fuerza interior`;
+      affirmation = `Mi ${topPriority.toLowerCase()} florece con cada práctica. Soy capaz y merecedor/a.`;
+    }
+    
+  } else {
+    // FASE 3: Integración → FLOR DE LA VIDA (patrón maestro) + Chakras superiores
+    selectedGeometry = ZODIAC_GEOMETRIES['Libra']; // Flor de la Vida - armonía universal
+    selectedChakra = 'Crown';
+    secondaryChakra = 'Third Eye';
+    focus = 'Integración total de aprendizajes y expansión de conciencia';
+    affirmation = 'Integro todo lo vivido. Soy parte del patrón perfecto del universo.';
+  }
+
+  logger.log(`   🔮 Fase ${phaseNumber}: ${selectedGeometry.name} (${dominantSign}) + Chakra ${selectedChakra}`);
+
+  return {
+    sacredGeometry: selectedGeometry,
+    chakras: {
+      primary: selectedChakra,
+      secondary: secondaryChakra,
+      focus,
+      affirmation
+    }
+  };
+}
+
+/**
+ * Distribuye 6 ejercicios en 3 fases de 7 días (2 ejercicios por fase)
+ * Los ejercicios ya vienen ordenados por intensidad (fácil → difícil)
+ * NO SE REPITEN ejercicios entre fases
+ * Incluye geometría sagrada y chakras calculados según la carta
  */
 function distributeIntoPhases(
   exercises: ExerciseTemplate[],
-  priorities: ScoredPriority[]
+  priorities: ScoredPriority[],
+  analysis: ChartAnalysis
 ): [ExercisePhase, ExercisePhase, ExercisePhase] {
-  // Ordenar ejercicios por intensidad
-  const sorted = [...exercises].sort((a, b) => (a.intensity || 1) - (b.intensity || 1));
+  logger.log(`   - Distribuyendo ${exercises.length} ejercicios en 3 fases (2 por fase)...`);
+  logger.log(`   🔮 Calculando geometrías sagradas y chakras según carta...`);
 
-  // Dividir en 3 grupos
-  const third = Math.ceil(sorted.length / 3);
-  const easy = sorted.slice(0, third);
-  const medium = sorted.slice(third, third * 2);
-  const varied = sorted.slice(third * 2);
+  // Los ejercicios ya vienen ordenados por intensidad de menor a mayor
+  // Fase 1: ejercicios 1-2 (más fáciles)
+  // Fase 2: ejercicios 3-4 (medios)
+  // Fase 3: ejercicios 5-6 (más desafiantes)
+  
+  const phase1Exercises = exercises.slice(0, 2);
+  const phase2Exercises = exercises.slice(2, 4);
+  const phase3Exercises = exercises.slice(4, 6);
+
+  const topPriority = priorities[0]?.priorityArea || 'equilibrio';
+
+  // Calcular geometrías y chakras para cada fase
+  const phase1GeometryChakras = calculateSacredGeometryAndChakras(1, analysis, priorities);
+  const phase2GeometryChakras = calculateSacredGeometryAndChakras(2, analysis, priorities);
+  const phase3GeometryChakras = calculateSacredGeometryAndChakras(3, analysis, priorities);
 
   const phase1: ExercisePhase = {
     phaseNumber: 1,
     days: 7,
     level: 'easy',
-    exercises: easy,
-    dailyRoutine: generateDailyRoutine(easy),
-    instructions: `Semana de adaptación: ejercicios suaves para familiarizarte con las prácticas. Enfócate en ${priorities[0]?.priorityArea || 'equilibrio'}.`
+    exercises: phase1Exercises,
+    dailyRoutine: generateDailyRoutine(phase1Exercises),
+    instructions: `📅 Días 1-7: Adaptación suave. Realiza estos 2 ejercicios diariamente para familiarizarte con las prácticas. Enfócate en ${topPriority}.`,
+    sacredGeometry: phase1GeometryChakras.sacredGeometry,
+    chakras: phase1GeometryChakras.chakras
   };
 
   const phase2: ExercisePhase = {
     phaseNumber: 2,
     days: 7,
     level: 'medium',
-    exercises: medium,
-    dailyRoutine: generateDailyRoutine(medium),
-    instructions: `Semana de profundización: aumentamos intensidad. Continúa trabajando en ${priorities[0]?.priorityArea || 'equilibrio'}.`
+    exercises: phase2Exercises,
+    dailyRoutine: generateDailyRoutine(phase2Exercises),
+    instructions: `📅 Días 8-14: Profundización. Estos 2 ejercicios tienen mayor intensidad. Continúa trabajando en ${topPriority} con más compromiso.`,
+    sacredGeometry: phase2GeometryChakras.sacredGeometry,
+    chakras: phase2GeometryChakras.chakras
   };
 
   const phase3: ExercisePhase = {
     phaseNumber: 3,
     days: 7,
     level: 'varied',
-    exercises: varied,
-    dailyRoutine: generateDailyRoutine(varied),
-    instructions: `Semana de integración: ejercicios variados para consolidar hábitos. Explora todas las áreas trabajadas.`
+    exercises: phase3Exercises,
+    dailyRoutine: generateDailyRoutine(phase3Exercises),
+    instructions: `📅 Días 15-21: Integración y consolidación. Completa el ciclo con estos 2 ejercicios desafiantes que integran todo lo aprendido.`,
+    sacredGeometry: phase3GeometryChakras.sacredGeometry,
+    chakras: phase3GeometryChakras.chakras
   };
+
+  logger.log(`   ✓ Fase 1 (fácil): ${phase1Exercises.map(e => e.title).join(', ')}`);
+  logger.log(`   ✓ Fase 2 (medio): ${phase2Exercises.map(e => e.title).join(', ')}`);
+  logger.log(`   ✓ Fase 3 (variado): ${phase3Exercises.map(e => e.title).join(', ')}`);
 
   return [phase1, phase2, phase3];
 }

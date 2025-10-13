@@ -14,6 +14,7 @@ import PhaseSection from '../components/PhaseSection';
 import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
 import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
+import { logger } from '../utils/logger';
 
 export default function ExercisePlanPage() {
   const location = useLocation();
@@ -56,11 +57,11 @@ export default function ExercisePlanPage() {
       }
 
       if (!chart) {
-        console.error('No se encontró la carta natal');
+        logger.error('No se encontró la carta natal');
         return;
       }
 
-      console.log('🎯 Generando plan para:', chart.name || chart.id);
+      logger.log('🎯 Generando plan para:', chart.name || chart.id);
 
       // 2. Generar plan usando el store
       await generatePlan(chart);

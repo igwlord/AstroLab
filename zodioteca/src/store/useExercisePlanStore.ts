@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { NatalChart } from './useCharts';
 import { generateExercisePlan, type ExercisePlan } from '../services/exercises';
+import { logger } from '../utils/logger';
 
 interface ExercisePlanState {
   // Estado
@@ -52,7 +53,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
         set({ isGenerating: true, error: null });
         
         try {
-          console.log('🎯 Generando plan de ejercicios para:', chart.name || chart.id);
+          logger.log('🎯 Generando plan de ejercicios para:', chart.name || chart.id);
           
           const plan = await generateExercisePlan(chart, {
             userId: undefined, // TODO: integrar con auth
@@ -67,10 +68,10 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
             error: null
           });
 
-          console.log('✅ Plan generado exitosamente:', plan.id);
+          logger.log('✅ Plan generado exitosamente:', plan.id);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-          console.error('❌ Error generando plan:', errorMessage);
+          logger.error('❌ Error generando plan:', errorMessage);
           
           set({
             error: errorMessage,
@@ -117,7 +118,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
           totalExercisesCompleted: get().totalExercisesCompleted + 1
         });
 
-        console.log(`✅ Ejercicio completado: ${exerciseId} (Racha: ${newStreak} días)`);
+        logger.log(`✅ Ejercicio completado: ${exerciseId} (Racha: ${newStreak} días)`);
       },
 
       // Desmarcar ejercicio completado
@@ -131,7 +132,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
           totalExercisesCompleted: Math.max(0, get().totalExercisesCompleted - 1)
         });
 
-        console.log(`↩️  Ejercicio desmarcado: ${exerciseId}`);
+        logger.log(`↩️  Ejercicio desmarcado: ${exerciseId}`);
       },
 
       // Limpiar plan actual
@@ -150,7 +151,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
           dailyStreak: 0,
           lastCompletedDate: null
         });
-        console.log('🔄 Progreso reseteado');
+        logger.log('🔄 Progreso reseteado');
       },
 
       // Obtener progreso global

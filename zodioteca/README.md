@@ -1,11 +1,43 @@
-# React + TypeScript + Vite
+# 🌟 AstroLab - Plataforma Integral de Astrología
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Versión:** 2.0.0  
+**Stack:** React 18 + TypeScript + Vite + Tailwind CSS  
+**Deployment:** Netlify  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📖 Descripción
+
+AstroLab es una aplicación web moderna de astrología que ofrece análisis profundos de cartas natales, ejercicios holísticos personalizados, gestión de favoritos y contenido educativo sobre astrología.
+
+### ✨ Características Principales
+
+- 🎯 **Carta Natal Completa**: Cálculo preciso con Swiss Ephemeris
+  - Planetas, casas, aspectos y puntos especiales
+  - Múltiples sistemas de casas (Placidus, Koch, Equal, etc.)
+  - Dignidades esenciales y accidentales
+  - Formas de carta (Bundle, Bucket, Locomotive, etc.)
+  
+- 🧘 **Plan de Ejercicios Personalizado**: Sistema inteligente de 21 días
+  - Generación basada en análisis astrológico profundo
+  - 3 fases progresivas (fácil → medio → variado)
+  - Tracking de progreso y rachas diarias
+  - Onboarding para nuevos usuarios
+  
+- ⭐ **Sistema de Favoritos**: Guarda y organiza contenido
+  - Filtros por categoría (signos, planetas, aspectos, etc.)
+  - Export/Import en JSON
+  - Navegación directa al contenido original
+  
+- 🎨 **Glosario Interactivo**: Más de 200 entradas
+  - Signos zodiacales con descripciones detalladas
+  - Casas astrológicas y su significado
+  - Planetas y cuerpos celestes
+  - Aspectos y configuraciones
+  
+- 🌓 **Modo Oscuro**: Tema adaptable con persistencia
+- 📱 **PWA**: Instalable y funciona offline
+- 🌐 **i18n Ready**: Infraestructura para múltiples idiomas
 
 ## React Compiler
 
