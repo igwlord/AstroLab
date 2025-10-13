@@ -13,6 +13,7 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [weather, setWeather] = useState<DailyWeather | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fadeIn, setFadeIn] = useState(true);
 
   useEffect(() => {
     const updateSize = () => {
@@ -117,8 +118,14 @@ const Dashboard: React.FC = () => {
     loadAstrologicalData();
   }, []);
 
+  // Fade in del dashboard
+  useEffect(() => {
+    const timer = setTimeout(() => setFadeIn(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
+    <div className={`min-h-[calc(100vh-64px)] flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 transition-opacity duration-700 ${fadeIn ? 'opacity-0' : 'opacity-100'}`}>
       <div className="max-w-5xl w-full space-y-4 sm:space-y-6">
         <AstrologicalWeatherCard />
         <div className="relative bg-gradient-to-br from-gray-900/80 via-purple-950/80 to-gray-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-purple-400/40 overflow-hidden">

@@ -1,34 +1,104 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import StarryBackground from '../components/StarryBackground';
 import AuthModal from '../components/AuthModal';
+import EphemerisLoadingScreen from '../components/EphemerisLoadingScreen';
 import { useAuth } from '../context/useAuth';
+import { useAuthFlow } from '../hooks/useAuthFlow';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { loginAnonymous } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const authFlow = useAuthFlow();
 
+  // OPCIÓN 1: Acceder al Laboratorio (sin credenciales)
   const handleGuestMode = async () => {
-    // Modo de prueba - acceso directo sin login
-    await loginAnonymous();
-    navigate('/dashboard');
+    try {
+      authFlow.startAuth('guest');
+      toast.loading('Iniciando modo invitado...', { id: 'guest-auth' });
+      
+      await loginAnonymous();
+      
+      toast.success('¡Bienvenido al Laboratorio! 🎉', { id: 'guest-auth' });
+      authFlow.authSuccess('Acceso concedido', '/dashboard');
+      
+      // Pequeño delay para que el usuario vea el toast de éxito
+      setTimeout(() => {
+        authFlow.startLoading('/dashboard');
+      }, 800);
+    } catch (error) {
+      toast.error('Error al iniciar sesión como invitado', { id: 'guest-auth' });
+      authFlow.error('Error de autenticación');
+      console.error('Error en guest mode:', error);
+    }
   };
 
+  // OPCIÓN 2: Login al Laboratorio (con credenciales Supabase)
   const handleLoginMode = () => {
-    // Mostrar modal de autenticación Supabase
     setShowAuthModal(true);
   };
 
+  const handleLoginSuccess = (destination: string) => {
+    authFlow.authSuccess('Login exitoso', destination);
+    
+    // Cerrar el modal primero
+    setShowAuthModal(false);
+    
+    // Esperar a que el modal termine su animación de cierre (400ms)
+    setTimeout(() => {
+      authFlow.startLoading(destination);
+    }, 400);
+  };
+
+  // Mostrar pantalla de carga
+  if (authFlow.isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <EphemerisLoadingScreen
+          onComplete={() => {
+            const destination = authFlow.state.phase === 'loading' 
+              ? authFlow.state.destination 
+              : '/dashboard';
+            authFlow.completeLoading(destination);
+            
+            // Pequeño delay antes de navegar para el fade out
+            setTimeout(() => {
+              navigate(destination);
+            }, 100);
+          }}
+          durationMs={5000}
+        />
+      </motion.div>
+    );
+  }
+
   return (
     <>
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <AuthModal onClose={() => setShowAuthModal(false)} />
-      )}
+      {/* Auth Modal con AnimatePresence para transiciones suaves */}
+      <AnimatePresence mode="wait">
+        {showAuthModal && (
+          <AuthModal 
+            onClose={() => setShowAuthModal(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Login Page */}
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8">
+      {/* Login Page con animación de entrada */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8"
+      >
         {/* Fondo de estrellas reutilizable */}
         <StarryBackground />
 
@@ -95,7 +165,7 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-      </div>
+      </motion.div>
     </>
   );
 };

@@ -1,18 +1,21 @@
 /**
  * Modal de autenticación con Supabase
  * Login y Registro en un solo componente
+ * Ahora con Framer Motion para animaciones fluidas
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { useSupabase } from '../context/SupabaseContext';
-import EphemerisLoadingScreen from './EphemerisLoadingScreen';
 
 interface AuthModalProps {
   onClose: () => void;
+  onLoginSuccess?: (destination: string) => void;
 }
 
-export default function AuthModal({ onClose }: AuthModalProps) {
+export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
   const navigate = useNavigate();
   const { signIn, signUp, resetPassword } = useSupabase();
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
@@ -20,15 +23,11 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const [loadingDestination, setLoadingDestination] = useState<string>('/dashboard');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setLoading(true);
 
     try {
@@ -37,56 +36,75 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         const { error: resetError } = await resetPassword(email);
         if (resetError) {
           setError(resetError);
+          toast.error(resetError);
         } else {
-          setSuccess('📧 Email de recuperación enviado. Revisa tu bandeja de entrada.');
+          toast.success('📧 Email de recuperación enviado. Revisa tu bandeja de entrada.', {
+            duration: 4000
+          });
           setEmail('');
           // Volver a login después de 3 segundos
           setTimeout(() => {
             setMode('signin');
-            setSuccess('');
           }, 3000);
         }
       } else if (mode === 'signup') {
         // Validar contraseñas
         if (password !== confirmPassword) {
-          setError('Las contraseñas no coinciden');
+          const errorMsg = 'Las contraseñas no coinciden';
+          setError(errorMsg);
+          toast.error(errorMsg);
           setLoading(false);
           return;
         }
 
         if (password.length < 6) {
-          setError('La contraseña debe tener al menos 6 caracteres');
+          const errorMsg = 'La contraseña debe tener al menos 6 caracteres';
+          setError(errorMsg);
+          toast.error(errorMsg);
           setLoading(false);
           return;
         }
-
-        // Debug: Verificar qué email se está enviando
-        console.log('🔍 Registrando con email:', email);
         
         const { error: signUpError } = await signUp(email, password);
         if (signUpError) {
           setError(signUpError);
+          toast.error(signUpError);
         } else {
-          console.log('✅ Registro exitoso para:', email);
-          onClose(); // Cerrar modal
-          // Mostrar pantalla de carga antes de ir a welcome
-          setLoadingDestination('/welcome');
-          setShowLoadingScreen(true);
+          toast.success('¡Cuenta creada! Bienvenido al Laboratorio 🎉');
+          setLoading(false);
+          // Esperar 400ms antes de cerrar para que se vea el toast
+          setTimeout(() => {
+            if (onLoginSuccess) {
+              onLoginSuccess('/welcome');
+            } else {
+              navigate('/welcome');
+            }
+          }, 400);
+          return; // No ejecutar finally
         }
       } else {
         const { error: signInError } = await signIn(email, password);
         if (signInError) {
           setError(signInError);
+          toast.error(signInError);
         } else {
-          console.log('✅ Login exitoso para:', email);
-          onClose(); // Cerrar modal
-          // Mostrar pantalla de carga antes de navegar
-          setLoadingDestination('/dashboard');
-          setShowLoadingScreen(true);
+          toast.success('¡Login exitoso! Accediendo al laboratorio... 🚀');
+          setLoading(false);
+          // Esperar 400ms antes de cerrar para que se vea el toast
+          setTimeout(() => {
+            if (onLoginSuccess) {
+              onLoginSuccess('/dashboard');
+            } else {
+              navigate('/dashboard');
+            }
+          }, 400);
+          return; // No ejecutar finally
         }
       }
     } catch {
-      setError('Error inesperado. Intenta de nuevo.');
+      const errorMsg = 'Error inesperado. Intenta de nuevo.';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -95,23 +113,25 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin');
     setError('');
-    setSuccess('');
     setPassword('');
     setConfirmPassword('');
   };
 
-  // Mostrar pantalla de carga después de login/registro exitoso
-  if (showLoadingScreen) {
-    return (
-      <EphemerisLoadingScreen
-        onComplete={() => navigate(loadingDestination)}
-      />
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl bg-gradient-to-br from-purple-900/90 to-blue-900/90 p-8 shadow-2xl">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative w-full max-w-md rounded-2xl bg-gradient-to-br from-purple-900/90 to-blue-900/90 p-8 shadow-2xl"
+      >
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -200,18 +220,15 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             </div>
           )}
 
-          {/* Success */}
-          {success && (
-            <div className="rounded-lg bg-green-500/20 border border-green-500/50 px-4 py-3 text-sm text-green-200">
-              {success}
-            </div>
-          )}
-
           {/* Error */}
           {error && (
-            <div className="rounded-lg bg-red-500/20 border border-red-500/50 px-4 py-3 text-sm text-red-200">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg bg-red-500/20 border border-red-500/50 px-4 py-3 text-sm text-red-200"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           {/* Botón submit */}
@@ -235,7 +252,6 @@ export default function AuthModal({ onClose }: AuthModalProps) {
               onClick={() => {
                 setMode('reset');
                 setError('');
-                setSuccess('');
               }}
               className="block w-full text-sm text-white/60 transition-colors hover:text-white"
             >
@@ -278,7 +294,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             ☁️ Tus cartas se sincronizarán automáticamente en todos tus dispositivos
           </p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

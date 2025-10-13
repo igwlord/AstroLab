@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ServiceWorkerUpdatePrompt } from './utils/sw-update-prompt';
+import { ToastProvider } from './components/ToastProvider';
 
 // ⚡ FASE 3: Lazy load componentes pesados adicionales
 const FloatingMiniPlayer = lazy(() => import('./components/FloatingMiniPlayer'));
@@ -172,17 +173,19 @@ function App() {
         <SupabaseProvider>
           <AuthProvider>
             <AudioPlayerProvider>
-              <Router>
-                <ErrorBoundary>
-                  {/* Notificación de actualización de Service Worker */}
-                  <ServiceWorkerUpdatePrompt />
-                  <AppRoutes />
-                  {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
-                  <Suspense fallback={null}>
-                    <FloatingMiniPlayer isMobile={false} />
-                  </Suspense>
-                </ErrorBoundary>
-              </Router>
+              <ToastProvider>
+                <Router>
+                  <ErrorBoundary>
+                    {/* Notificación de actualización de Service Worker */}
+                    <ServiceWorkerUpdatePrompt />
+                    <AppRoutes />
+                    {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
+                    <Suspense fallback={null}>
+                      <FloatingMiniPlayer isMobile={false} />
+                    </Suspense>
+                  </ErrorBoundary>
+                </Router>
+              </ToastProvider>
             </AudioPlayerProvider>
           </AuthProvider>
         </SupabaseProvider>
