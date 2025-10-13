@@ -31,8 +31,8 @@ interface FavoriteCardProps {
   /** Callback al abrir (opcional, para compatibilidad) */
   onOpen?: () => void;
   
-  /** Callback al anclar/desanclar (opcional, usa store por defecto) */
-  onTogglePin?: () => void;
+  /** Callback al eliminar */
+  onDelete?: (id: string) => void;
   
   /** Modo compacto (para dashboard/widgets) */
   compact?: boolean;
@@ -48,12 +48,12 @@ interface FavoriteCardProps {
 const FavoriteCard: FC<FavoriteCardProps> = ({
   item,
   onOpen,
-  onTogglePin,
+  onDelete,
   compact = false,
   className = '',
 }) => {
   const navigate = useNavigate();
-  const { togglePin, touch } = useFavorites();
+  const { touch } = useFavorites();
   
   const cardRef = useRef<HTMLDivElement>(null);
   
@@ -78,13 +78,10 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
     });
   };
   
-  const handleTogglePin = (e: React.MouseEvent) => {
-    e.stopPropagation(); // No navegar al hacer click en pin
-    
-    if (onTogglePin) {
-      onTogglePin();
-    } else {
-      togglePin(item.id);
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // No navegar al hacer click en delete
+    if (onDelete) {
+      onDelete(item.id);
     }
   };
   
@@ -174,38 +171,22 @@ const FavoriteCard: FC<FavoriteCardProps> = ({
           {/* Badges y acciones */}
           <div className="flex items-center gap-2 flex-shrink-0">
             
-            {/* Badge de anclado */}
-            {item.pinned && (
+            {/* Botón de eliminar */}
+            {onDelete && (
               <button
-                onClick={handleTogglePin}
+                onClick={handleDelete}
                 className={`
                   ${compact ? 'text-base' : 'text-lg'}
-                  transition-transform duration-200
-                  hover:scale-125
-                  active:scale-95
-                `}
-                aria-label="Desanclar favorito"
-                title="Desanclar"
-              >
-                📌
-              </button>
-            )}
-            
-            {/* Botón de pin (solo visible al hover si no está pinned) */}
-            {!item.pinned && !compact && (
-              <button
-                onClick={handleTogglePin}
-                className="
-                  text-lg
-                  opacity-0 group-hover:opacity-100
+                  text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300
                   transition-all duration-200
                   hover:scale-125
                   active:scale-95
-                "
-                aria-label="Anclar favorito"
-                title="Anclar"
+                  opacity-0 group-hover:opacity-100
+                `}
+                aria-label="Eliminar favorito"
+                title="Eliminar"
               >
-                📌
+                🗑️
               </button>
             )}
             

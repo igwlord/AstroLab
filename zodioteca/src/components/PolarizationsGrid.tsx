@@ -114,7 +114,7 @@ const PolarizationsGrid: React.FC = () => {
             onClick={() => setSelectedPolarization(polarization)}
             className={`relative bg-gradient-to-br ${getPolarizationGradient(polarization.name)} text-white p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-left`}
           >
-            <div className="absolute top-1 right-1 z-10">
+            <div className="absolute top-1 right-1 z-30">
               <FavoriteToggleButton
                 item={{
                   type: 'glossary-polarization',

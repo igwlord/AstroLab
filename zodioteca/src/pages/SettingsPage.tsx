@@ -5,6 +5,7 @@ import { useAuth } from '../context/useAuth';
 import { useSupabase } from '../context/SupabaseContext';
 import ThemeToggle from '../components/ThemeToggle';
 import { LogOut, Cloud, RefreshCw, Loader } from 'lucide-react';
+import { useAstrologicalToast } from '../utils/astrologicalToast';
 
 const SettingsPage: React.FC = () => {
   const { isDark } = useThemeStore();
@@ -13,6 +14,7 @@ const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const toast = useAstrologicalToast();
 
   // Determinar qué usuario está activo (prioridad a Supabase)
   const activeUser = supabaseUser || guestUser;
@@ -43,7 +45,7 @@ const SettingsPage: React.FC = () => {
 
   const handleManualSync = async () => {
     if (!activeUser || isGuest) {
-      setSyncMessage('Inicia sesión con tu cuenta para sincronizar');
+      toast.warning('Inicia sesión con tu cuenta para sincronizar');
       return;
     }
     
@@ -52,10 +54,10 @@ const SettingsPage: React.FC = () => {
     
     try {
       await syncSettings({ theme: isDark ? 'dark' : 'light' });
-      setSyncMessage('✅ Configuración sincronizada correctamente');
+      toast.success('✅ Configuración sincronizada correctamente');
       setTimeout(() => setSyncMessage(''), 3000);
     } catch {
-      setSyncMessage('❌ Error al sincronizar');
+      toast.error('❌ Error al sincronizar');
     } finally {
       setIsSyncing(false);
     }

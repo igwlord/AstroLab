@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import AstrologicalWeatherCard from '../components/AstrologicalWeatherCard';
 import DailyChartWheel from '../components/DailyChartWheel';
 import WeatherDetailsModal from '../components/WeatherDetailsModal';
+import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
 import { logger } from '../utils/logger';
 import type { PlanetData } from '../components/DailyChartWheel';
 import { Info } from 'lucide-react';
+import { PLANET_COLORS } from '../constants/designTokens';
 
 const Dashboard: React.FC = () => {
   const [chartSize, setChartSize] = useState(500);
@@ -47,16 +49,16 @@ const Dashboard: React.FC = () => {
         
         // Colores tradicionales astrológicos
         const planetColors: Record<string, string> = {
-          sun: '#FFD700',      // Sol: dorado
-          moon: '#E8E8E8',     // Luna: plateado
-          mercury: '#F4E04D',  // Mercurio: amarillo limón
-          venus: '#FF69B4',    // Venus: rosa
-          mars: '#FF4444',     // Marte: rojo brillante
-          jupiter: '#4A90E2',  // Júpiter: azul cielo
-          saturn: '#8B7355',   // Saturno: marrón/ocre
-          uranus: '#40E0D0',   // Urano: turquesa
-          neptune: '#9370DB',  // Neptuno: azul violeta
-          pluto: '#8B0000'     // Plutón: carmesí oscuro
+          sun: PLANET_COLORS.sun.primary,      // Sol: dorado
+          moon: PLANET_COLORS.moon.primary,     // Luna: plateado
+          mercury: PLANET_COLORS.mercury.primary,  // Mercurio: amarillo limón
+          venus: PLANET_COLORS.venus.primary,    // Venus: rosa
+          mars: PLANET_COLORS.mars.primary,     // Marte: rojo brillante
+          jupiter: PLANET_COLORS.jupiter.primary,  // Júpiter: azul cielo
+          saturn: PLANET_COLORS.saturn.primary,   // Saturno: marrón/ocre
+          uranus: PLANET_COLORS.uranus.primary,   // Urano: turquesa
+          neptune: PLANET_COLORS.neptune.primary,  // Neptuno: azul violeta
+          pluto: PLANET_COLORS.pluto.primary     // Plutón: carmesí oscuro
         };
 
         const planetSymbols: Record<string, string> = {
@@ -107,8 +109,8 @@ const Dashboard: React.FC = () => {
         logger.error('Error cargando clima astrológico:', error);
         // Si falla, usar datos de ejemplo
         setPlanets([
-          { name: 'Sol', symbol: '☉', degree: 194, sign: 'Libra', color: '#FFD700' },
-          { name: 'Luna', symbol: '☽', degree: 14, sign: 'Aries', color: '#E8E8E8' },
+          { name: 'Sol', symbol: '☉', degree: 194, sign: 'Libra', color: PLANET_COLORS.sun.primary },
+          { name: 'Luna', symbol: '☽', degree: 14, sign: 'Aries', color: PLANET_COLORS.moon.primary },
         ]);
       } finally {
         setIsLoading(false);
@@ -127,60 +129,60 @@ const Dashboard: React.FC = () => {
   return (
     <div className={`min-h-[calc(100vh-64px)] flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 transition-opacity duration-700 ${fadeIn ? 'opacity-0' : 'opacity-100'}`}>
       <div className="max-w-5xl w-full space-y-4 sm:space-y-6">
-        <AstrologicalWeatherCard />
-        <div className="relative bg-gradient-to-br from-gray-900/80 via-purple-950/80 to-gray-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-purple-400/40 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-          <h3 className="relative text-lg sm:text-xl md:text-2xl font-bold text-center mb-4 sm:mb-5 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 animate-pulse px-2" style={{ animationDuration: `3s` }}>
-            ✨ Carta del Cielo de Hoy ✨
-          </h3>
-          <div className="relative flex justify-center items-center">
-            {isLoading ? (
-              <div className="flex items-center justify-center" style={{ height: chartSize }}>
-                <div className="text-yellow-300 animate-pulse">Cargando cielo actual...</div>
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            <AstrologicalWeatherCard />
+            <div className="relative bg-gradient-to-br from-gray-900/80 via-purple-950/80 to-gray-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-purple-400/40 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+              <h3 className="relative text-lg sm:text-xl md:text-2xl font-bold text-center mb-4 sm:mb-5 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 animate-pulse px-2" style={{ animationDuration: `3s` }}>
+                ✨ Carta del Cielo de Hoy ✨
+              </h3>
+              <div className="relative flex justify-center items-center">
+                <DailyChartWheel
+                  size={chartSize}
+                  planets={planets}
+                />
               </div>
-            ) : (
-              <DailyChartWheel 
-                size={chartSize}
-                planets={planets}
-              />
-            )}
-          </div>
 
-          {/* Botón para abrir modal de detalles - Con efectos llamativos */}
-          {weather && (
-            <div className="relative mt-8 flex justify-center">
-              {/* Efecto de resplandor animado */}
-              <div className="absolute inset-0 flex justify-center items-center">
-                <div className="w-64 h-12 bg-purple-500/30 rounded-full blur-xl animate-pulse"></div>
-              </div>
-              
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="relative group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 rounded-2xl text-base sm:text-lg font-bold text-white transition-all duration-500 shadow-2xl shadow-purple-500/50 hover:shadow-purple-400/70 hover:scale-110 active:scale-95 border-2 border-purple-400/50 hover:border-purple-300 animate-pulse"
-                style={{ animationDuration: '2s' }}
-              >
-                {/* Brillo interior animado */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500 animate-shimmer"></div>
-                
-                <Info className="w-6 h-6 drop-shadow-lg group-hover:rotate-12 transition-transform duration-300" />
-                <span className="drop-shadow-lg tracking-wide">Ver Detalles del Cielo</span>
-                
-                {/* Iconos de estrellas decorativas */}
-                <span className="text-yellow-300 animate-pulse group-hover:scale-125 transition-transform">✨</span>
-              </button>
+              {/* Botón para abrir modal de detalles - Con efectos llamativos */}
+              {weather && (
+                <div className="relative mt-8 flex justify-center">
+                  {/* Efecto de resplandor animado */}
+                  <div className="absolute inset-0 flex justify-center items-center">
+                    <div className="w-64 h-12 bg-purple-500/30 rounded-full blur-xl animate-pulse"></div>
+                  </div>
+
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="relative group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 rounded-2xl text-base sm:text-lg font-bold text-white transition-all duration-500 shadow-2xl shadow-purple-500/50 hover:shadow-purple-400/70 hover:scale-110 active:scale-95 border-2 border-purple-400/50 hover:border-purple-300 animate-pulse"
+                    style={{ animationDuration: '2s' }}
+                  >
+                    {/* Brillo interior animado */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500 animate-shimmer"></div>
+
+                    <Info className="w-6 h-6 drop-shadow-lg group-hover:rotate-12 transition-transform duration-300" />
+                    <span className="drop-shadow-lg tracking-wide">Ver Detalles del Cielo</span>
+
+                    {/* Iconos de estrellas decorativas */}
+                    <span className="text-yellow-300 animate-pulse group-hover:scale-125 transition-transform">✨</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </>
+        )}
 
-      {/* Modal de Detalles */}
-      {weather && (
-        <WeatherDetailsModal 
-          weather={weather}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+        {/* Modal de Detalles */}
+        {weather && (
+          <WeatherDetailsModal
+            weather={weather}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
+      </div>
     </div>
   );
 };

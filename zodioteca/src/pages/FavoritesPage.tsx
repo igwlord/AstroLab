@@ -6,7 +6,7 @@
  * Características:
  * - 📊 Grid responsive (1-2-3-4 columnas)
  * - 🔍 Filtros por chips (tipo)
- * - � Navegación directa a contenido original
+ * - ➡️ Navegación directa a contenido original
  * - 📱 Optimizado mobile
  * - 📈 Estadísticas de uso (calculadas localmente)
  * - 💾 Export/Import JSON
@@ -55,9 +55,10 @@ const FILTER_CHIPS: FilterChip[] = [
 const FavoritesPage: FC = () => {
   // Hook para navegación (reservado para futuras mejoras: scroll con hash)
   // const navigate = useNavigate();
-  const { list, togglePin, exportToJSON, importFromJSON } = useFavorites();
+  const { list, remove, exportToJSON, importFromJSON } = useFavorites();
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   const [showStats, setShowStats] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // =========== FILTRADO ===========
   
@@ -66,7 +67,7 @@ const FavoritesPage: FC = () => {
       return list();
     }
     return list({ type: selectedFilter as FavoriteType });
-  }, [selectedFilter, list]);
+  }, [selectedFilter, list, refreshTrigger]);
   
   // =========== ESTADÍSTICAS CALCULADAS ===========
   
@@ -75,7 +76,6 @@ const FavoritesPage: FC = () => {
     const allItems = list();
     return {
       total: allItems.length,
-      pinned: allItems.filter(item => item.pinned).length,
       byScope: {
         global: allItems.filter(item => item.scope === 'global').length,
         chart: allItems.filter(item => item.scope === 'chart').length,
@@ -88,6 +88,14 @@ const FavoritesPage: FC = () => {
   }, [list]);
   
   // =========== ACCIONES ===========
+  
+  const handleDeleteFavorite = (id: string) => {
+    if (confirm('¿Eliminar este favorito?')) {
+      remove(id);
+      // Forzar re-render actualizando el trigger
+      setRefreshTrigger(prev => prev + 1);
+    }
+  };
   
   const handleExport = useCallback(() => {
     const json = exportToJSON();
@@ -193,7 +201,7 @@ const FavoritesPage: FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 py-8 px-4 md:py-12 md:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-8 md:mb-12">
+        <header className="mb-8 md:mb-12 bg-white/30 dark:bg-purple-900/10 backdrop-blur-sm rounded-2xl p-6 border border-purple-200/50 dark:border-purple-700/50">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-10">
             <div className="md:flex-1 md:text-center">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-purple-900 dark:text-white mb-2 md:mb-4 flex items-center gap-3 md:justify-center">
@@ -202,7 +210,6 @@ const FavoritesPage: FC = () => {
               </h1>
               <p className="text-gray-600 dark:text-gray-400 md:text-lg">
                 {stats.total} {stats.total === 1 ? 'elemento guardado' : 'elementos guardados'}
-                {stats.pinned > 0 && ` • ${stats.pinned} anclado${stats.pinned > 1 ? 's' : ''}`}
               </p>
             </div>
             
@@ -237,14 +244,10 @@ const FavoritesPage: FC = () => {
           {showStats && (
             <div className="bg-white/50 dark:bg-purple-900/20 backdrop-blur-sm p-6 rounded-xl border border-purple-200 dark:border-purple-700 mb-6 animate-fadeIn">
               <h3 className="text-lg font-bold text-purple-900 dark:text-white mb-4">📊 Estadísticas de Uso</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.total}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.pinned}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Anclados</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -263,7 +266,7 @@ const FavoritesPage: FC = () => {
               {/* Tipos por categoría */}
               {Object.keys(stats.byType).length > 0 && (
                 <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
-                  <h4 className="text-sm font-semibold text-purple-900 dark:text-white mb-2">� Por Tipo</h4>
+                  <h4 className="text-sm font-semibold text-purple-900 dark:text-white mb-2">📊 Por Tipo</h4>
                   <div className="space-y-1">
                     {Object.entries(stats.byType).slice(0, 5).map(([type, count]) => (
                       <div key={type} className="text-sm text-gray-600 dark:text-gray-400 flex justify-between">
@@ -354,22 +357,50 @@ const FavoritesPage: FC = () => {
             )}
           </div>
 
-          {/* Versión desktop (≥ 640px): Chips horizontales */}
-          <div className="hidden sm:flex flex-wrap gap-2 md:gap-3 md:justify-center md:px-8">
+          {/* Versión desktop (≥ 640px): Chips compactos */}
+          <div className="hidden sm:flex flex-wrap gap-2 md:gap-3 md:justify-center md:px-8 mb-4">
             {FILTER_CHIPS.map((chip) => (
               <button
                 key={chip.id}
                 onClick={() => setSelectedFilter(chip.id)}
                 className={`
-                  px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium transition-all
+                  group relative overflow-hidden
+                  px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ease-out
+                  transform hover:scale-105 active:scale-95
                   ${selectedFilter === chip.id
-                    ? 'bg-purple-600 text-white shadow-lg scale-105'
-                    : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700'
+                    ? `
+                      bg-gradient-to-r from-purple-600 to-violet-600
+                      text-white
+                      shadow-lg shadow-purple-500/30
+                      ring-2 ring-purple-300/20
+                      scale-105
+                    `
+                    : `
+                      bg-white/60 dark:bg-gray-800/60
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-purple-100/80 dark:hover:bg-purple-900/40
+                      hover:shadow-md hover:shadow-purple-200/30 dark:hover:shadow-purple-900/20
+                      border border-purple-200/50 dark:border-purple-700/50
+                      hover:border-purple-300/70 dark:hover:border-purple-600/70
+                      backdrop-blur-sm
+                    `
                   }
                 `}
               >
-                <span className="mr-2">{chip.icon}</span>
-                {chip.label}
+                <div className="relative z-10 flex items-center gap-2">
+                  <span className={`
+                    text-base md:text-lg transition-transform duration-200
+                    ${selectedFilter === chip.id
+                      ? 'animate-pulse'
+                      : 'group-hover:scale-110'
+                    }
+                  `}>
+                    {chip.icon}
+                  </span>
+                  <span className="transition-all duration-200">
+                    {chip.label}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -382,7 +413,7 @@ const FavoritesPage: FC = () => {
               <FavoriteCard
                 key={item.id}
                 item={item}
-                onTogglePin={() => togglePin(item.id)}
+                onDelete={handleDeleteFavorite}
               />
             ))}
           </div>

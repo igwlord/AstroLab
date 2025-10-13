@@ -39,7 +39,6 @@ import { useSupabase } from '../context/SupabaseContext';
 import { supabase } from '../services/supabaseService';
 
 // ⚡ Lazy imports para reducir bundle inicial (401 KB + 200 KB = 601 KB ahorrados)
-// Solo se cargan cuando el usuario hace click en "Descargar PDF"
 import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 
 // Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
@@ -57,7 +56,6 @@ export default function NatalChartPage() {
   const [aspectsLevel, setAspectsLevel] = useState<'basic' | 'standard' | 'complete'>('standard');
   const houseSystem = useSettingsStore(state => state.astro.houseSystem);
   const [showForm, setShowForm] = useState(true);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'chart' | 'aspects' | 'shape' | 'positions' | 'dominances' | 'polarizations'>('chart');
@@ -425,90 +423,6 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!chartRef.current || !result) return;
-
-    setIsGeneratingPDF(true);
-
-    try {
-      // 0. Lazy load jsPDF y html2canvas solo cuando se necesitan
-      logger.debug('⏳ Cargando librerías de PDF...');
-      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-        import('jspdf'),
-        import('html2canvas')
-      ]);
-      logger.debug('✅ Librerías de PDF cargadas');
-
-      // 1. Expandir todos los acordeones automáticamente
-      const accordionButtons = chartRef.current.querySelectorAll('button[class*="w-full flex items-center justify-between"]');
-      const closedAccordions: HTMLElement[] = [];
-      
-      accordionButtons.forEach((button) => {
-        const svg = button.querySelector('svg');
-        // Si el SVG NO tiene rotate-180, significa que está cerrado
-        if (svg && !svg.classList.contains('rotate-180')) {
-          closedAccordions.push(button as HTMLElement);
-          (button as HTMLElement).click(); // Abrir acordeón
-        }
-      });
-
-      // 2. Esperar a que se rendericen todos los acordeones
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 3. Capturar el elemento HTML como imagen
-      const canvas = await html2canvas(chartRef.current, {
-        scale: 2, // Mayor calidad
-        useCORS: true,
-        backgroundColor: '#f9fafb',
-        logging: false,
-        windowWidth: chartRef.current.scrollWidth,
-        windowHeight: chartRef.current.scrollHeight,
-      });
-
-      // 4. Crear PDF en orientación vertical (portrait)
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // Ancho A4 en mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Si la imagen es muy alta, dividirla en páginas
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // Agregar primera página
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= 297; // Altura A4 en mm
-
-      // Agregar páginas adicionales si es necesario
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
-      }
-
-      // 5. Cerrar los acordeones que estaban cerrados antes
-      await new Promise(resolve => setTimeout(resolve, 100));
-      closedAccordions.forEach(button => {
-        button.click(); // Volver a cerrar
-      });
-
-      // 6. Generar nombre del archivo
-      const date = new Date(result.date);
-      const personNameForFile = personName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-      const fileName = `Carta_Natal_${personNameForFile}_${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}.pdf`;
-
-      // 7. Descargar
-      pdf.save(fileName);
-      
-      logger.log('✅ PDF generado con éxito:', fileName);
-    } catch (error) {
-      logger.error('❌ Error generando PDF:', error);
-      alert('Error al generar el PDF. Por favor intenta de nuevo.');
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
-
   return (
     <div className="py-2 sm:py-4 md:py-8 print:py-0">
       {showForm ? (
@@ -519,18 +433,6 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
         </Suspense>
       ) : result && (
         <div ref={chartRef} className="print-content max-w-6xl mx-auto px-2 sm:px-3 md:px-6 space-y-2 sm:space-y-3 md:space-y-6 print:px-2 print:space-y-4">
-          {/* Banner de generación de PDF */}
-          {isGeneratingPDF && (
-            <div className="print:hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
-              <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3">
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="font-bold">📄 Generando PDF completo...</span>
-              </div>
-            </div>
-          )}
           
           {/* Header Expandido - Estilo Astro-Seek */}
           <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
@@ -607,29 +509,6 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
               </div>
               <div className="print:hidden flex flex-col gap-2 shrink-0">
                 <div className="flex gap-1.5 sm:gap-2 justify-end">
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={isGeneratingPDF}
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 bg-green-600 text-white rounded-md sm:rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base"
-                  title="Descargar PDF"
-                >
-                  {isGeneratingPDF ? (
-                    <>
-                      <svg className="animate-spin h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span className="hidden md:inline">Generando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span className="hidden md:inline">PDF</span>
-                    </>
-                  )}
-                </button>
                 <button
                   onClick={() => {
                     if (result) {
@@ -1092,7 +971,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           {/* ORDEN: 1.Casas → 2.Planetas → 3.Aspectos → 4.Nodos → 5.Puntos Sensibles → 6.Asteroides → 7.Partes Árabes → 8.Síntesis */}
 
           {/* 🏠 1. CASAS (incluye ASC/MC) */}
-          {/* TODO: Mover sección de Casas aquí */}
+          {/* TODO: Mover sección de Casas (línea ~2257) aquí para seguir el orden correcto */}
 
           {/* 🪐 2. PLANETAS */}
           <AccordionSection title="Planetas" icon="🪐" count={result.planets.length} data-chart-section="Planetas">
