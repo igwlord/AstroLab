@@ -1,7 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../i18n';
-import ThemeToggle from './ThemeToggle';
 import BiographyModal from './BiographyModal';
 
 // ⚡ FASE 3: Lazy load FloatingMiniPlayer (16.94 KB)
@@ -14,13 +13,12 @@ const Navbar: React.FC = () => {
   const [isBiographyOpen, setIsBiographyOpen] = useState(false);
 
   const navItems = [
-    { path: '/dashboard', label: t('navigation.dashboard'), icon: '🏠' },
     { path: '/natal-chart', label: t('navigation.natalChart'), icon: '🎯' },
-    { path: '/ejercicios', label: 'Ejercicios', icon: '🏋️' },
-    { path: '/glossary', label: t('navigation.glossary'), icon: '📚' },
-    { path: '/frequencies', label: t('navigation.frequencies'), icon: '🎵' },
-    { path: '/favorites', label: 'Favoritos', icon: '⭐' },
     { path: '/saved-charts', label: t('navigation.savedCharts'), icon: '💾' },
+    { path: '/favorites', label: 'Favoritos', icon: '⭐' },
+    { path: '/ejercicios', label: 'Ejercicios', icon: '📝' },
+    { path: '/frequencies', label: t('navigation.frequencies'), icon: '🎵' },
+    { path: '/glossary', label: t('navigation.glossary'), icon: '📚' },
     { path: '/settings', label: t('navigation.settings'), icon: '⚙️' },
   ];
 
@@ -28,8 +26,8 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="bg-gradient-to-r from-purple-900/95 via-violet-900/95 to-purple-900/95 dark:from-gray-900/95 dark:via-purple-950/95 dark:to-gray-900/95 backdrop-blur-md shadow-2xl border-b-2 border-purple-500/30 dark:border-purple-400/20 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
+      <div className="max-w-7xl mx-auto pl-1 pr-2 sm:pl-2 sm:pr-3 md:pl-3 md:pr-4 lg:pl-4 lg:pr-6">
+        <div className="flex justify-between items-center h-16 sm:h-18 md:h-20 xl:h-24 2xl:h-28">
           {/* Logo Mejorado - Clickeable para abrir biografía */}
           <button
             onClick={() => setIsBiographyOpen(true)}
@@ -58,18 +56,18 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group relative flex items-center space-x-1 px-1.5 lg:px-2 py-1.5 rounded-full transition-all duration-300 ${
+                className={`group relative flex items-center space-x-1 px-2 lg:px-3 xl:px-4 py-2 xl:py-2.5 2xl:py-3 rounded-full transition-all duration-300 ${
                   isActiveRoute(item.path)
                     ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-purple-950 shadow-lg shadow-amber-500/50 scale-105'
                     : 'text-purple-100 hover:bg-purple-800/50 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30'
                 }`}
               >
-                <span className={`text-sm lg:text-base transition-transform duration-300 ${
+                <span className={`text-base lg:text-lg xl:text-xl 2xl:text-2xl transition-transform duration-300 ${
                   isActiveRoute(item.path) ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'group-hover:scale-110'
                 }`}>
                   {item.icon}
                 </span>
-                <span className={`text-[10px] lg:text-[11px] font-semibold tracking-tighter ${
+                <span className={`text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold tracking-tighter ${
                   isActiveRoute(item.path) ? 'drop-shadow-sm' : ''
                 }`}>
                   {item.label}
@@ -79,11 +77,6 @@ const Navbar: React.FC = () => {
                 )}
               </Link>
             ))}
-          </div>
-
-          {/* Desktop Tools - Solo Theme Toggle */}
-          <div className="hidden md:flex items-center">
-            <ThemeToggle />
           </div>
 
           {/* Mobile menu button */}
@@ -111,7 +104,7 @@ const Navbar: React.FC = () => {
             />
             
             {/* Menu desplegable desde arriba */}
-            <div className="md:hidden fixed top-[4.5rem] left-0 right-0 z-50 bg-gradient-to-b from-purple-950/98 via-purple-900/98 to-purple-950/98 backdrop-blur-xl shadow-2xl border-b-2 border-purple-500/30 animate-slideDown max-h-[calc(100vh-5rem)] overflow-y-auto">
+            <div className="md:hidden fixed top-[4.5rem] xl:top-[6rem] 2xl:top-[7rem] left-0 right-0 z-50 bg-gradient-to-b from-purple-950/98 via-purple-900/98 to-purple-950/98 backdrop-blur-xl shadow-2xl border-b-2 border-purple-500/30 animate-slideDown max-h-[calc(100vh-5rem)] xl:max-h-[calc(100vh-6rem)] 2xl:max-h-[calc(100vh-7rem)] overflow-y-auto">
               <div className="px-4 py-6 space-y-2">
                 {navItems.map((item) => (
                   <Link
@@ -133,11 +126,6 @@ const Navbar: React.FC = () => {
                 <Suspense fallback={null}>
                   <FloatingMiniPlayer isMobile={true} />
                 </Suspense>
-                
-                {/* Mobile Tools - Theme Toggle */}
-                <div className="border-t border-purple-500/30 pt-4 mt-4">
-                  <ThemeToggle />
-                </div>
               </div>
             </div>
           </>
