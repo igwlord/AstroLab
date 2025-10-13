@@ -12,6 +12,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { loginAnonymous } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [hideLoginPage, setHideLoginPage] = useState(false); // Nuevo estado
   const authFlow = useAuthFlow();
 
   // OPCIÓN 1: Acceder al Laboratorio (sin credenciales)
@@ -22,13 +23,13 @@ const LoginPage: React.FC = () => {
       
       await loginAnonymous();
       
-      toast.success('¡Bienvenido al Laboratorio! 🎉', { id: 'guest-auth' });
+      toast.success('¡Bienvenido al Laboratorio! 🎉', { id: 'guest-auth', duration: 2000 });
       authFlow.authSuccess('Acceso concedido', '/dashboard');
       
-      // Pequeño delay para que el usuario vea el toast de éxito
+      // Iniciar loading inmediatamente después del éxito
       setTimeout(() => {
         authFlow.startLoading('/dashboard');
-      }, 800);
+      }, 500);
     } catch (error) {
       toast.error('Error al iniciar sesión como invitado', { id: 'guest-auth' });
       authFlow.error('Error de autenticación');
@@ -42,63 +43,75 @@ const LoginPage: React.FC = () => {
   };
 
   const handleLoginSuccess = (destination: string) => {
-    authFlow.authSuccess('Login exitoso', destination);
+    // Ocultar LoginPage INMEDIATAMENTE para que no reaparezca
+    setHideLoginPage(true);
     
-    // Cerrar el modal primero
+    // Cerrar el modal (fade out 500ms según AuthModal)
     setShowAuthModal(false);
     
-    // Esperar a que el modal termine su animación de cierre (400ms)
+    // Esperar que el modal termine su fade out antes de mostrar loading
     setTimeout(() => {
       authFlow.startLoading(destination);
-    }, 400);
+    }, 500);
   };
 
-  // Mostrar pantalla de carga
+  // Mostrar pantalla de carga (sin mostrar LoginPage debajo)
   if (authFlow.isLoading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <EphemerisLoadingScreen
-          onComplete={() => {
-            const destination = authFlow.state.phase === 'loading' 
-              ? authFlow.state.destination 
-              : '/dashboard';
-            authFlow.completeLoading(destination);
-            
-            // Pequeño delay antes de navegar para el fade out
-            setTimeout(() => {
-              navigate(destination);
-            }, 100);
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="loading-screen"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ 
+            duration: 0.8,
+            delay: 0.5 // Delay de 500ms para que el modal se cierre primero
           }}
-          durationMs={5000}
-        />
-      </motion.div>
+          style={{ position: 'fixed', inset: 0, zIndex: 10000 }}
+        >
+          <EphemerisLoadingScreen
+            onComplete={() => {
+              const destination = authFlow.state.phase === 'loading' 
+                ? authFlow.state.destination 
+                : '/dashboard';
+              authFlow.completeLoading(destination);
+              
+              // Navegar inmediatamente después del fade out
+              setTimeout(() => {
+                navigate(destination, { replace: true });
+              }, 100);
+            }}
+            durationMs={5000}
+          />
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   return (
-    <>
-      {/* Auth Modal con AnimatePresence para transiciones suaves */}
-      <AnimatePresence mode="wait">
-        {showAuthModal && (
-          <AuthModal 
-            onClose={() => setShowAuthModal(false)}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        )}
-      </AnimatePresence>
+    <AnimatePresence mode="wait">
+      {/* Auth Modal con transiciones suaves */}
+      {showAuthModal && (
+        <AuthModal 
+          onClose={() => setShowAuthModal(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
 
-      {/* Login Page con animación de entrada */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8"
-      >
+      {/* Login Page - NO renderizar si hideLoginPage está activo */}
+      {!authFlow.isLoading && !hideLoginPage && (
+        <motion.div
+          key="login-page"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ 
+            duration: 0.5,
+            ease: 'easeInOut'
+          }}
+          className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 sm:p-6 md:p-8"
+        >
         {/* Fondo de estrellas reutilizable */}
         <StarryBackground />
 
@@ -165,8 +178,9 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-      </motion.div>
-    </>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

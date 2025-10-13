@@ -73,14 +73,8 @@ class SupabaseService {
       const normalizedEmail = email.trim().toLowerCase();
       logger.log('📝 Registrando usuario:', normalizedEmail);
       
-      // ⚠️ NOTA: Supabase permite múltiples registros con el mismo email por diseño
-      // La única forma 100% confiable de prevenirlo es con Row Level Security (RLS)
-      // que ya está configurada en la tabla `charts` para aislar datos por user_id
-      // Esto significa que incluso si se crea un duplicado, los datos NO se mezclan
-      logger.log('✅ Procediendo con registro en Supabase...');
-      
-      logger.log('🔍 Email exacto que se enviará a Supabase:', JSON.stringify({ email: normalizedEmail }));
-      
+      // Proceder directamente con el registro
+      // Supabase manejará la detección de duplicados automáticamente
       const { data, error } = await this.client.auth.signUp({
         email: normalizedEmail,
         password,
@@ -95,13 +89,18 @@ class SupabaseService {
       if (error) {
         logger.error('❌ Error de Supabase:', error);
         
-        // Detectar email duplicado
+        // Detectar email duplicado en el mensaje de error
         if (error.message.includes('already') || 
             error.message.includes('exist') ||
-            error.message.includes('duplicate')) {
-          throw new Error('❌ Este email ya está registrado. Intenta iniciar sesión.');
+            error.message.includes('duplicate') ||
+            error.message.includes('User already registered')) {
+          return { 
+            user: null, 
+            error: '❌ Este email ya está registrado. Intenta iniciar sesión.' 
+          };
         }
-        throw error;
+        
+        return { user: null, error: error.message };
       }
 
       logger.log('📧 Respuesta de Supabase:', {
@@ -110,17 +109,16 @@ class SupabaseService {
         userId: data.user?.id,
       });
 
-      // Si Supabase devuelve user pero no session, puede ser que el email ya existe
+      // Si Supabase devuelve user pero no session, puede que necesite confirmar email
       if (data.user && !data.session) {
-        logger.warn('⚠️ Usuario creado pero sin sesión - puede que ya exista');
-        // En algunos casos Supabase permite crear pero no retorna error
+        logger.log('📧 Usuario creado, requiere confirmación de email');
         return { 
           user: data.user, 
-          error: 'Verifica tu email para confirmar la cuenta o intenta iniciar sesión si ya tienes cuenta.' 
+          error: null
         };
       }
 
-      logger.log('✅ Usuario registrado:', data.user?.email);
+      logger.log('✅ Usuario registrado exitosamente:', data.user?.email);
       return { user: data.user, error: null };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error desconocido';

@@ -70,16 +70,16 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           setError(signUpError);
           toast.error(signUpError);
         } else {
-          toast.success('¡Cuenta creada! Bienvenido al Laboratorio 🎉');
+          toast.success('¡Cuenta creada! Bienvenido al Laboratorio 🎉', { duration: 2000 });
           setLoading(false);
-          // Esperar 400ms antes de cerrar para que se vea el toast
+          // Esperar 500ms para fade out del modal
           setTimeout(() => {
             if (onLoginSuccess) {
               onLoginSuccess('/welcome');
             } else {
               navigate('/welcome');
             }
-          }, 400);
+          }, 500);
           return; // No ejecutar finally
         }
       } else {
@@ -88,16 +88,16 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           setError(signInError);
           toast.error(signInError);
         } else {
-          toast.success('¡Login exitoso! Accediendo al laboratorio... 🚀');
+          toast.success('¡Login exitoso! Accediendo al laboratorio... 🚀', { duration: 2000 });
           setLoading(false);
-          // Esperar 400ms antes de cerrar para que se vea el toast
+          // Esperar 500ms para fade out del modal
           setTimeout(() => {
             if (onLoginSuccess) {
               onLoginSuccess('/dashboard');
             } else {
               navigate('/dashboard');
             }
-          }, 400);
+          }, 500);
           return; // No ejecutar finally
         }
       }

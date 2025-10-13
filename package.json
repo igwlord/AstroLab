@@ -1,5 +1,11 @@
 {
   "dependencies": {
-    "gapi-script": "^1.2.0"
+    "dompurify": "^3.2.7",
+    "framer-motion": "^12.23.24",
+    "gapi-script": "^1.2.0",
+    "react-hot-toast": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5"
   }
 }
