@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { createGlossaryParser, GlossaryParser } from '../utils/parseGlossary';
 import { logger } from '../utils/logger';
@@ -46,6 +46,7 @@ const ChartShapesGrid = lazy(() => import('../components/ChartShapesGrid'));
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [parser, setParser] = useState<GlossaryParser | null>(null);
   const [entries, setEntries] = useState<GlossaryEntry[]>([]);
@@ -552,9 +553,20 @@ const GlossaryPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-purple-900 mb-2">
-          {t('glossary.title')}
-        </h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-purple-900">
+            <span className="hidden sm:inline">{t('glossary.title')}</span>
+            <span className="sm:hidden">Glosario</span>
+          </h1>
+          <button
+            onClick={() => navigate('/reflexiones')}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl text-sm"
+            title="Ver mis reflexiones astrológicas"
+          >
+            <span className="text-lg">💭</span>
+            <span className="hidden sm:inline">Reflexiones</span>
+          </button>
+        </div>
         <p className="text-purple-700 text-sm">
           Explora nuestro glosario completo con términos astrológicos y prácticas holísticas.
         </p>

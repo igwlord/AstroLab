@@ -25,6 +25,7 @@ const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ReflexPage = lazy(() => import('./pages/ReflexPage'));
 
 // ============================================
 // RUTAS PROTEGIDAS
@@ -106,6 +107,15 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <GlossaryPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      
+      {/* Reflexiones */}
+      <Route path="/reflexiones" element={
+        <ProtectedRoute>
+          <Layout>
+            <ReflexPage />
           </Layout>
         </ProtectedRoute>
       } />

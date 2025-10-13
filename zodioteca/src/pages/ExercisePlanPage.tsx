@@ -150,14 +150,25 @@ export default function ExercisePlanPage() {
               ← Volver
             </button>
             
-            <button
-              onClick={handleLoadChart}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
-              title="Cambiar carta natal"
-            >
-              <span>🔄</span>
-              <span className="hidden sm:inline">Cambiar Carta</span>
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleLoadChart}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
+                title="Cambiar carta natal"
+              >
+                <span>🔄</span>
+                <span className="hidden sm:inline">Cambiar Carta</span>
+              </button>
+              
+              <button
+                onClick={() => navigate('/reflexiones')}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
+                title="Ver mis reflexiones astrológicas"
+              >
+                <span>💭</span>
+                <span className="hidden sm:inline">Mis Reflexiones</span>
+              </button>
+            </div>
           </div>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-1 md:mb-2">
