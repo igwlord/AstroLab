@@ -24,62 +24,72 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
   // Versión mobile integrada en el menú (COMPACTA)
   if (isMobile) {
     return (
-      <div className="mt-3 pt-3 border-t border-purple-500/30">
+      <div className="mt-3 pt-3 border-t border-purple-500/30 mx-0">
         <div 
-          className="relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-xl border border-purple-500/30 overflow-hidden"
+          className={`relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-xl border border-purple-500/30 overflow-hidden transition-all duration-500 w-full ${
+            isPlaying ? 'p-5' : 'p-3'
+          }`}
         >
+          {/* Imagen de fondo del signo zodiacal - Tatuaje sutil */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center opacity-[0.08] pointer-events-none"
+            style={{
+              filter: 'blur(0.5px)',
+            }}
+          >
+            <span 
+              className="text-[180px] leading-none select-none"
+              style={{
+                color: currentFrequency.color.hex,
+              }}
+            >
+              {currentFrequency.symbol}
+            </span>
+          </div>
+
           {/* Brillo de fondo animado */}
           {isPlaying && (
             <div 
-              className="absolute inset-0 opacity-15 animate-pulse"
+              className="absolute inset-0 opacity-15 animate-pulse pointer-events-none"
               style={{
                 background: `radial-gradient(circle at 50% 0%, ${currentFrequency.color.hex}66, transparent 80%)`,
               }}
             />
           )}
 
-          <div className="relative z-10 p-2.5">
-            {/* Header compacto */}
-            <div className="flex items-center gap-2 mb-2">
-              <div 
-                className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
-                style={{
-                  background: `linear-gradient(135deg, ${currentFrequency.color.hex}ee, ${currentFrequency.color.hex}99)`,
-                }}
-              >
-                <span className="text-base">{currentFrequency.symbol}</span>
+          <div className="relative z-10">
+            {/* Indicador visual arriba a la derecha - 3 capas de ondas */}
+            {isPlaying && (
+              <div className="absolute top-0 right-0 w-10 h-6 flex items-center justify-center">
+                {/* Capa 1: Rápida */}
+                <div className="absolute flex items-center gap-0.5">
+                  <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-4 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.15s', animationDuration: '1s' }}></div>
+                  <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.3s', animationDuration: '1s' }}></div>
+                </div>
+                {/* Capa 2: Color del signo */}
+                <div className="absolute flex items-center justify-center">
+                  <div className="w-0.5 h-4 rounded-full animate-wave" style={{ animationDelay: '0.2s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
+                </div>
               </div>
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-xs truncate">
+            )}
+
+            {/* Header compacto */}
+            <div className={`flex items-center justify-center ${isPlaying ? 'mb-3' : 'mb-2'}`}>
+              <div className="text-center">
+                <h3 className="text-white font-bold text-base">
                   {currentFrequency.name}
                 </h3>
-                <p className="text-purple-200 text-[10px]">
+                <p className="text-purple-200 text-sm">
                   {currentFrequency.frequency} Hz
                 </p>
               </div>
-
-              {/* Indicador visual compacto - 3 capas de ondas */}
-              {isPlaying && (
-                <div className="relative w-8 h-4 flex items-center justify-center">
-                  {/* Capa 1: Rápida */}
-                  <div className="absolute flex items-center gap-0.5">
-                    <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0s', animationDuration: '1s' }}></div>
-                    <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.15s', animationDuration: '1s' }}></div>
-                    <div className="w-0.5 h-2 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0.3s', animationDuration: '1s' }}></div>
-                  </div>
-                  {/* Capa 2: Color del signo */}
-                  <div className="absolute flex items-center justify-center">
-                    <div className="w-0.5 h-3 rounded-full animate-wave" style={{ animationDelay: '0.2s', animationDuration: '1.5s', background: currentFrequency.color.hex }}></div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Barra de volumen con fases lunares - MÓVIL */}
-            <div className="mb-2 px-1">
-              <div className="flex items-center gap-2">
-                <span className="text-lg flex-shrink-0 transition-transform duration-300" style={{ transform: `scale(${0.8 + volume * 0.4})` }}>
+            <div className={`px-0 ${isPlaying ? 'mb-3' : 'mb-2'}`}>
+              <div className="flex items-center gap-3">
+                <span className="text-xl flex-shrink-0 transition-transform duration-300" style={{ transform: `scale(${0.8 + volume * 0.4})` }}>
                   {getMoonPhase(volume)}
                 </span>
                 <input
@@ -88,21 +98,23 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
                   max="100"
                   value={volume * 100}
                   onChange={(e) => setVolume(Number(e.target.value) / 100)}
-                  className="flex-1 h-1.5 rounded-full appearance-none bg-white/20 outline-none cursor-pointer"
+                  className="flex-1 h-2 rounded-full appearance-none bg-white/20 outline-none cursor-pointer"
                   style={{
                     background: `linear-gradient(to right, ${currentFrequency.color.hex} 0%, ${currentFrequency.color.hex} ${volume * 100}%, rgba(255,255,255,0.2) ${volume * 100}%, rgba(255,255,255,0.2) 100%)`,
                   }}
                   aria-label="Volumen"
                 />
-                <span className="text-purple-200 text-[10px] font-medium w-8 text-right">{Math.round(volume * 100)}%</span>
+                <span className="text-purple-200 text-xs font-medium w-10 text-right">{Math.round(volume * 100)}%</span>
               </div>
             </div>
 
             {/* Controles compactos */}
-            <div className="flex items-center justify-center gap-3">
+            <div className={`flex items-center justify-between w-full ${isPlaying ? 'px-0' : 'px-0'}`}>
               <button
                 onClick={previous}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition-all"
+                className={`rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition-all ${
+                  isPlaying ? 'w-11 h-11' : 'w-9 h-9'
+                }`}
                 aria-label="Frecuencia anterior"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -112,18 +124,20 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
 
               <button
                 onClick={toggle}
-                className="w-10 h-10 rounded-full flex items-center justify-center shadow-xl transition-all active:scale-95"
+                className={`rounded-full flex items-center justify-center shadow-xl transition-all active:scale-95 ${
+                  isPlaying ? 'w-16 h-16' : 'w-12 h-12'
+                }`}
                 style={{
                   background: `linear-gradient(135deg, ${currentFrequency.color.hex}ee, ${currentFrequency.color.hex}99)`,
                 }}
                 aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
               >
                 {isPlaying ? (
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`text-white ${isPlaying ? 'w-8 h-8' : 'w-6 h-6'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`text-white ml-0.5 ${isPlaying ? 'w-8 h-8' : 'w-6 h-6'}`} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
@@ -131,7 +145,9 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
 
               <button
                 onClick={next}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition-all"
+                className={`rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition-all ${
+                  isPlaying ? 'w-11 h-11' : 'w-9 h-9'
+                }`}
                 aria-label="Siguiente frecuencia"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>

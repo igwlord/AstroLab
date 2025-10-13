@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
   const [isBiographyOpen, setIsBiographyOpen] = useState(false);
 
   const navItems = [
+    { path: '/dashboard', label: t('navigation.dashboard'), icon: '🏠' },
     { path: '/natal-chart', label: t('navigation.natalChart'), icon: '🎯' },
     { path: '/saved-charts', label: t('navigation.savedCharts'), icon: '💾' },
     { path: '/favorites', label: 'Favoritos', icon: '⭐' },
@@ -56,18 +57,18 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group relative flex items-center space-x-1 px-2 lg:px-3 xl:px-4 py-2 xl:py-2.5 2xl:py-3 rounded-full transition-all duration-300 ${
+                className={`group relative flex items-center space-x-1 px-1.5 lg:px-2 xl:px-3 py-1.5 xl:py-2 2xl:py-2.5 rounded-full transition-all duration-300 ${
                   isActiveRoute(item.path)
                     ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-purple-950 shadow-lg shadow-amber-500/50 scale-105'
                     : 'text-purple-100 hover:bg-purple-800/50 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30'
                 }`}
               >
-                <span className={`text-base lg:text-lg xl:text-xl 2xl:text-2xl transition-transform duration-300 ${
+                <span className={`text-sm lg:text-base xl:text-lg 2xl:text-xl transition-transform duration-300 ${
                   isActiveRoute(item.path) ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'group-hover:scale-110'
                 }`}>
                   {item.icon}
                 </span>
-                <span className={`text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold tracking-tighter ${
+                <span className={`text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-semibold tracking-tighter ${
                   isActiveRoute(item.path) ? 'drop-shadow-sm' : ''
                 }`}>
                   {item.label}
@@ -103,26 +104,28 @@ const Navbar: React.FC = () => {
               onClick={() => setIsMenuOpen(false)}
             />
             
-            {/* Menu desplegable desde arriba */}
-            <div className="md:hidden fixed top-[4.5rem] xl:top-[6rem] 2xl:top-[7rem] left-0 right-0 z-50 bg-gradient-to-b from-purple-950/98 via-purple-900/98 to-purple-950/98 backdrop-blur-xl shadow-2xl border-b-2 border-purple-500/30 animate-slideDown max-h-[calc(100vh-5rem)] xl:max-h-[calc(100vh-6rem)] 2xl:max-h-[calc(100vh-7rem)] overflow-y-auto">
-              <div className="px-4 py-6 space-y-2">
+            {/* Menu desplegable desde arriba - Alineado a la derecha */}
+            <div className="md:hidden fixed top-[4.5rem] xl:top-[6rem] 2xl:top-[7rem] right-3 left-auto w-[340px] max-w-[calc(100vw-1.5rem)] z-50 bg-gradient-to-b from-purple-950/98 via-purple-900/98 to-purple-950/98 backdrop-blur-xl shadow-2xl border-2 border-purple-500/30 rounded-2xl animate-slideDown max-h-[calc(100vh-5rem)] xl:max-h-[calc(100vh-6rem)] 2xl:max-h-[calc(100vh-7rem)] overflow-y-auto">
+              <div className="px-5 py-3 space-y-2 flex flex-col items-end">
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+                    className={`flex items-center justify-end space-x-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                       isActiveRoute(item.path)
                         ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-purple-950 font-bold shadow-lg shadow-amber-500/40'
                         : 'text-purple-100 hover:bg-purple-800/60 active:bg-purple-700/80'
                     }`}
                   >
-                    <span className="text-2xl">{item.icon}</span>
                     <span className="text-base font-semibold">{item.label}</span>
+                    <span className="text-2xl">{item.icon}</span>
                   </Link>
                 ))}
-                
-                {/* Mini Player Mobile - Integrado en el menú */}
+              </div>
+              
+              {/* Mini Player Mobile - Integrado en el menú - Fuera del contenedor con padding */}
+              <div className="px-3 pb-3">
                 <Suspense fallback={null}>
                   <FloatingMiniPlayer isMobile={true} />
                 </Suspense>
