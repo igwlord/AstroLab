@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../context/SupabaseContext';
+import EphemerisLoadingScreen from './EphemerisLoadingScreen';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -21,6 +22,8 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const [loadingDestination, setLoadingDestination] = useState<string>('/dashboard');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +69,9 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         } else {
           console.log('✅ Registro exitoso para:', email);
           onClose(); // Cerrar modal
-          navigate('/welcome'); // Redirigir a página de bienvenida
+          // Mostrar pantalla de carga antes de ir a welcome
+          setLoadingDestination('/welcome');
+          setShowLoadingScreen(true);
         }
       } else {
         const { error: signInError } = await signIn(email, password);
@@ -75,7 +80,9 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         } else {
           console.log('✅ Login exitoso para:', email);
           onClose(); // Cerrar modal
-          navigate('/dashboard'); // Redirigir al dashboard
+          // Mostrar pantalla de carga antes de navegar
+          setLoadingDestination('/dashboard');
+          setShowLoadingScreen(true);
         }
       }
     } catch {
@@ -92,6 +99,15 @@ export default function AuthModal({ onClose }: AuthModalProps) {
     setPassword('');
     setConfirmPassword('');
   };
+
+  // Mostrar pantalla de carga después de login/registro exitoso
+  if (showLoadingScreen) {
+    return (
+      <EphemerisLoadingScreen
+        onComplete={() => navigate(loadingDestination)}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
