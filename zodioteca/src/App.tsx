@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { SupabaseProvider } from './context/SupabaseContext';
 import { AudioPlayerProvider } from './context/AudioPlayerContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { I18nProvider } from './i18n';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -20,12 +21,14 @@ const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
 const ExercisePlanPage = lazy(() => import('./pages/ExercisePlanPage'));
+const SavedPlansPage = lazy(() => import('./pages/SavedPlansPage'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
 const SavedChartsPage = lazy(() => import('./pages/SavedChartsPage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ReflexPage = lazy(() => import('./pages/ReflexPage'));
+const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
 
 // ============================================
 // RUTAS PROTEGIDAS
@@ -102,6 +105,15 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
+      {/* Planes Guardados */}
+      <Route path="/saved-plans" element={
+        <ProtectedRoute>
+          <Layout>
+            <SavedPlansPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
       {/* Glosario */}
       <Route path="/glossary" element={
         <ProtectedRoute>
@@ -156,6 +168,13 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Demo de Notificaciones (solo desarrollo) */}
+      <Route path="/notifications-demo" element={
+        <PublicRoute>
+          <NotificationDemo />
+        </PublicRoute>
+      } />
+      
       {/* Ruta raíz - redirige a login */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       
@@ -183,19 +202,21 @@ function App() {
         <SupabaseProvider>
           <AuthProvider>
             <AudioPlayerProvider>
-              <ToastProvider>
-                <Router>
-                  <ErrorBoundary>
-                    {/* Notificación de actualización de Service Worker */}
-                    <ServiceWorkerUpdatePrompt />
-                    <AppRoutes />
-                    {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
-                    <Suspense fallback={null}>
-                      <FloatingMiniPlayer isMobile={false} />
-                    </Suspense>
-                  </ErrorBoundary>
-                </Router>
-              </ToastProvider>
+              <NotificationProvider>
+                <ToastProvider>
+                  <Router>
+                    <ErrorBoundary>
+                      {/* Notificación de actualización de Service Worker */}
+                      <ServiceWorkerUpdatePrompt />
+                      <AppRoutes />
+                      {/* FloatingMiniPlayer solo en desktop - en mobile está integrado en Navbar */}
+                      <Suspense fallback={null}>
+                        <FloatingMiniPlayer isMobile={false} />
+                      </Suspense>
+                    </ErrorBoundary>
+                  </Router>
+                </ToastProvider>
+              </NotificationProvider>
             </AudioPlayerProvider>
           </AuthProvider>
         </SupabaseProvider>

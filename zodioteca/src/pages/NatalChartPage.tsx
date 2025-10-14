@@ -432,51 +432,51 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
           />
         </Suspense>
       ) : result && (
-        <div ref={chartRef} className="print-content max-w-6xl mx-auto px-2 sm:px-3 md:px-6 space-y-2 sm:space-y-3 md:space-y-6 print:px-2 print:space-y-4">
-          
-          {/* Header Expandido - Estilo Astro-Seek */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
-              <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
+        <div ref={chartRef} className="print-content max-w-6xl mx-auto px-1 sm:px-2 md:px-3 lg:px-6 space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 print:px-2 print:space-y-4">
+
+          {/* Header Expandido - Optimizado para móviles */}
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 lg:p-6 shadow-lg border border-purple-100 dark:border-purple-700">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4">
+              <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2 md:space-y-3">
                 <div>
-                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-100 mb-1">
+                  <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-purple-900 dark:text-purple-100 mb-0.5 sm:mb-1">
                     {personName}
                   </h2>
-                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-purple-700 dark:text-purple-300">
+                  <h3 className="text-xs sm:text-sm md:text-lg lg:text-xl font-semibold text-purple-700 dark:text-purple-300">
                     Carta Natal
                   </h3>
                 </div>
-                
+
                 {chartMetadata && (
-                  <div className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 space-y-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-700 dark:text-gray-300 space-y-0.5 sm:space-y-1 bg-gray-50/50 dark:bg-gray-800/50 rounded-md sm:rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-gray-700">
                     {/* Grid de 2 columnas: etiqueta | valor */}
-                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                    <div className="grid grid-cols-[auto_1fr] gap-x-2 sm:gap-x-3 gap-y-0.5 sm:gap-y-1">
                       {/* Fecha de nacimiento (hora local) */}
-                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs">
                         Fecha de nacimiento (hora local):
                       </div>
-                      <div className="text-gray-900 dark:text-gray-100">
+                      <div className="text-gray-900 dark:text-gray-100 text-[9px] sm:text-[10px] md:text-xs">
                         {chartMetadata.localDate} ({chartMetadata.timezone})
                       </div>
 
                       {/* Hora universal (UT/GMT) */}
-                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs">
                         Hora universal (UT/GMT):
                       </div>
-                      <div className="text-gray-900 dark:text-gray-100">
+                      <div className="text-gray-900 dark:text-gray-100 text-[9px] sm:text-[10px] md:text-xs">
                         {chartMetadata.utcDate}
                       </div>
 
                       {/* Hora sideral local (LST) */}
-                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs">
                         Hora sideral local (LST):
                       </div>
-                      <div className="text-gray-900 dark:text-gray-100">
+                      <div className="text-gray-900 dark:text-gray-100 text-[9px] sm:text-[10px] md:text-xs">
                         {chartMetadata.lst}
                       </div>
 
                       {/* Sistema de casas */}
-                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap">
+                      <div className="text-purple-800 dark:text-purple-300 font-semibold whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs">
                         Sistema de casas:
                       </div>
                       <div className="text-gray-900 dark:text-gray-100">

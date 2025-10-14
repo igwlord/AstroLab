@@ -5,15 +5,18 @@
  * Versión 2.0 - Con Onboarding y Estado Vacío Mejorado
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useChartsStore, type NatalChart } from '../store/useCharts';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
 import { useExercisesOnboarding } from '../hooks/useExercisesOnboarding';
+import { useNotification } from '../hooks/useNotification';
 import PhaseSection from '../components/PhaseSection';
 import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
 import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
+import SavePlanModal from '../components/SavePlanModal';
+import ExercisePlanInsightsModal from '../components/ExercisePlanInsightsModal';
 import { logger } from '../utils/logger';
 
 export default function ExercisePlanPage() {
@@ -22,6 +25,7 @@ export default function ExercisePlanPage() {
   const navigate = useNavigate();
   
   const { currentChart, charts } = useChartsStore();
+  const { showToast, showConfirm } = useNotification();
   
   // Onboarding
   const {
@@ -42,6 +46,11 @@ export default function ExercisePlanPage() {
     getProgress,
     dailyStreak
   } = useExercisePlanStore();
+
+  // Estado local para modales
+  const [showSavePlanModal, setShowSavePlanModal] = useState(false);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
+  const [showWelcomeManual, setShowWelcomeManual] = useState(false);
 
   useEffect(() => {
     async function loadAndGeneratePlan() {
@@ -84,6 +93,7 @@ export default function ExercisePlanPage() {
 
   const handleCloseWelcome = (dontShowAgain: boolean) => {
     markAsSeen(dontShowAgain);
+    setShowWelcomeManual(false);
   };
 
   // Mostrar modal de bienvenida si es primera visita
@@ -142,41 +152,112 @@ export default function ExercisePlanPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-4 md:mb-8">
-          <div className="flex justify-between items-start mb-2 md:mb-4">
+          <div className="mb-2 md:mb-4">
             <button
-              onClick={() => navigate(-1)}
-              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-2 text-sm md:text-base"
+              onClick={() => navigate('/natal-chart')}
+              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-2 text-sm md:text-base mb-3"
+              title="Volver a Carta Natal"
             >
-              ← Volver
+              ← Volver a Carta Natal
             </button>
-            
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={handleLoadChart}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
-                title="Cambiar carta natal"
-              >
-                <span>🔄</span>
-                <span className="hidden sm:inline">Cambiar Carta</span>
-              </button>
+
+            {/* DESKTOP: Título, slogan y chips en líneas separadas pero centrados */}
+            <div className="hidden md:block text-center mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-2">
+                Tu Plan de Ejercicios Holístico
+              </h1>
+              <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
+                Plan de 21 días personalizado basado en tu carta natal
+              </p>
               
-              <button
-                onClick={() => navigate('/reflexiones')}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl"
-                title="Ver mis reflexiones astrológicas"
-              >
-                <span>💭</span>
-                <span className="hidden sm:inline">Mis Reflexiones</span>
-              </button>
+              {/* DESKTOP: Botones horizontales estilo chips/tabs - centrados */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {plan && (
+                  <button
+                    onClick={() => setShowInsightsModal(true)}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                    title="Ver por qué se generó este plan"
+                  >
+                    <span className="text-lg">🔮</span>
+                    <span>Insights</span>
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => setShowWelcomeManual(true)}
+                  className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  title="Ver guía de ejercicios"
+                >
+                  <span className="text-lg">📖</span>
+                  <span>Guía</span>
+                </button>
+                
+                <button
+                  onClick={() => navigate('/saved-plans')}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  title="Ver mis planes guardados"
+                >
+                  <span className="text-lg">📚</span>
+                  <span>Planes</span>
+                </button>
+                
+                <button
+                  onClick={handleLoadChart}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  title="Cambiar carta natal"
+                >
+                  <span className="text-lg">🔄</span>
+                  <span>Cambiar</span>
+                </button>
+                
+                <button
+                  onClick={() => navigate('/reflexiones')}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  title="Ver mis reflexiones astrológicas"
+                >
+                  <span className="text-lg">💭</span>
+                  <span>Reflexiones</span>
+                </button>
+              </div>
             </div>
           </div>
           
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-1 md:mb-2">
-            Tu Plan de Ejercicios Holístico
-          </h1>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-300">
-            Plan de 21 días personalizado basado en tu carta natal
-          </p>
+            {/* MOBILE: Título, slogan y menú desplegable */}
+            <div className="md:hidden text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 dark:text-white mb-1">
+                Tu Plan de Ejercicios Holístico
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Plan de 21 días personalizado basado en tu carta natal
+              </p>
+              
+              {/* MOBILE: Menú desplegable después del título y slogan */}
+              <select
+                onChange={(e) => {
+                  const action = e.target.value;
+                  if (action === 'insights') setShowInsightsModal(true);
+                  else if (action === 'guide') setShowWelcomeManual(true);
+                  else if (action === 'plans') navigate('/saved-plans');
+                  else if (action === 'change') handleLoadChart();
+                  else if (action === 'reflexiones') navigate('/reflexiones');
+                  // Reset select
+                  e.target.value = '';
+                }}
+                className="w-full px-3 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none shadow-lg text-sm touch-manipulation"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  📋 Acciones rápidas...
+                </option>
+                {plan && (
+                  <option value="insights">🔮 Ver Insights del Plan</option>
+                )}
+                <option value="guide">📖 Ver Guía de Ejercicios</option>
+                <option value="plans">📚 Mis Planes Guardados</option>
+                <option value="change">🔄 Cambiar Carta Natal</option>
+                <option value="reflexiones">💭 Mis Reflexiones</option>
+              </select>
+            </div>
         </div>
 
         {/* Resumen del plan */}
@@ -268,15 +349,25 @@ export default function ExercisePlanPage() {
         {/* Botones de acción */}
         <div className="mt-4 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
           <button
-            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg transition-colors text-sm sm:text-base"
-            onClick={() => alert('Guardar plan - TODO: implementar persistencia')}
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg transition-colors text-sm sm:text-base shadow-lg hover:shadow-xl"
+            onClick={() => setShowSavePlanModal(true)}
           >
             💾 Guardar Plan
           </button>
           <button
             className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg transition-colors text-sm sm:text-base"
-            onClick={() => {
-              if (confirm('¿Regenerar plan? Se perderá el progreso actual.')) {
+            onClick={async () => {
+              const confirmed = await showConfirm({
+                title: '¿Regenerar plan de ejercicios?',
+                message: 'Se perderá el progreso actual y se creará un nuevo plan personalizado.',
+                confirmText: 'Sí, regenerar',
+                cancelText: 'No, conservar',
+                type: 'warning',
+                icon: '🔄'
+              });
+              
+              if (confirmed) {
+                showToast('🔄 Regenerando plan...', 'info', 2000);
                 window.location.reload();
               }
             }}
@@ -285,6 +376,34 @@ export default function ExercisePlanPage() {
           </button>
         </div>
       </div>
+
+      {/* Modales */}
+      {plan && (
+        <>
+          {/* Modal de Guardar Plan */}
+          <SavePlanModal
+            isOpen={showSavePlanModal}
+            onClose={() => setShowSavePlanModal(false)}
+            plan={plan}
+            chartName={currentChart?.name || charts.find(c => c.id === plan.chartId)?.name}
+            progress={getProgress()}
+          />
+          
+          {/* Modal de Insights */}
+          <ExercisePlanInsightsModal
+            isOpen={showInsightsModal}
+            onClose={() => setShowInsightsModal(false)}
+            plan={plan}
+          />
+        </>
+      )}
+
+      {/* Modal de Bienvenida (manual) */}
+      <WelcomeExercisesModal
+        isOpen={showWelcomeManual}
+        onClose={handleCloseWelcome}
+        onLoadChart={handleLoadChart}
+      />
     </div>
   );
 }

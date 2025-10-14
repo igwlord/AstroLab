@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAudioPlayer } from '../context/useAudioPlayer';
 
 interface FloatingMiniPlayerProps {
@@ -16,7 +16,85 @@ const getMoonPhase = (volume: number): string => {
 
 const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = false }) => {
   const { currentFrequency, isPlaying, toggle, next, previous, volume, setVolume } = useAudioPlayer();
-  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Estados para el drag & drop (solo PC)
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showDragHint, setShowDragHint] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // Cargar posición guardada del localStorage y mostrar hint si es primera vez
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('miniPlayerPosition');
+    if (savedPosition) {
+      setPosition(JSON.parse(savedPosition));
+    } else {
+      // Mostrar hint solo la primera vez
+      const hasSeenHint = localStorage.getItem('miniPlayerDragHintSeen');
+      if (!hasSeenHint) {
+        setShowDragHint(true);
+        localStorage.setItem('miniPlayerDragHintSeen', 'true');
+        setTimeout(() => setShowDragHint(false), 4000);
+      }
+    }
+  }, []);
+
+  // Guardar posición en localStorage
+  const savePosition = (newPosition: { x: number; y: number }) => {
+    localStorage.setItem('miniPlayerPosition', JSON.stringify(newPosition));
+  };
+
+  // Iniciar arrastre - Área amplia de selección
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    // Solo excluir elementos específicos que necesitan interacción directa
+    const isPlayButton = target.closest('[aria-label="Pausar"], [aria-label="Reproducir"]');
+    const isVolumeSlider = target.closest('input[type="range"]');
+
+    // Si es el botón de play o el slider de volumen, permitir la interacción normal
+    if (isPlayButton || isVolumeSlider) {
+      return;
+    }
+
+    // Para cualquier otro elemento, iniciar arrastre
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  // Mover durante el arrastre
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Permitir movimiento libre por toda la página (sin límites)
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        savePosition(position);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart, position]);
 
   // No mostrar si no hay frecuencia seleccionada
   if (!currentFrequency) return null;
@@ -27,12 +105,17 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
       <div className="mt-3 pt-3 border-t border-purple-500/30 mx-0">
         <div 
           className={`relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-xl border border-purple-500/30 overflow-hidden transition-all duration-500 w-full ${
-            isPlaying ? 'p-5' : 'p-3'
+            isPlaying ? 'p-5 animate-pulse' : 'p-3'
           }`}
+          style={{
+            boxShadow: isPlaying 
+              ? `0 0 20px ${currentFrequency.color.hex}20, 0 0 40px ${currentFrequency.color.hex}10, 0 0 60px ${currentFrequency.color.hex}05, inset 0 0 20px ${currentFrequency.color.hex}05`
+              : undefined,
+          }}
         >
           {/* Imagen de fondo del signo zodiacal - Tatuaje sutil */}
           <div 
-            className="absolute inset-0 flex items-center justify-center opacity-[0.08] pointer-events-none"
+            className="absolute inset-0 flex items-center justify-center opacity-[0.08] pointer-events-none z-0"
             style={{
               filter: 'blur(0.5px)',
             }}
@@ -50,9 +133,9 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
           {/* Brillo de fondo animado */}
           {isPlaying && (
             <div 
-              className="absolute inset-0 opacity-15 animate-pulse pointer-events-none"
+              className="absolute inset-0 opacity-10 animate-pulse pointer-events-none z-0"
               style={{
-                background: `radial-gradient(circle at 50% 0%, ${currentFrequency.color.hex}66, transparent 80%)`,
+                background: `radial-gradient(circle at 50% 0%, ${currentFrequency.color.hex}33, transparent 80%)`,
               }}
             />
           )}
@@ -60,7 +143,7 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
           <div className="relative z-10">
             {/* Indicador visual arriba a la derecha - 3 capas de ondas */}
             {isPlaying && (
-              <div className="absolute top-0 right-0 w-10 h-6 flex items-center justify-center">
+              <div className="absolute top-0 right-0 w-10 h-6 flex items-center justify-center z-20">
                 {/* Capa 1: Rápida */}
                 <div className="absolute flex items-center gap-0.5">
                   <div className="w-0.5 h-3 bg-purple-300/60 rounded-full animate-wave" style={{ animationDelay: '0s', animationDuration: '1s' }}></div>
@@ -161,20 +244,44 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
     );
   }
 
-  // Versión desktop flotante (COMPACTA)
+  // Versión desktop flotante (COMPACTA Y ARRASTRABLE)
   return (
     <>
       {/* Mini Player - Desktop */}
-      <div className="hidden md:block fixed bottom-6 right-6 z-50 animate-slideUp">
+      <div 
+        ref={playerRef}
+        className="hidden md:block fixed z-50 animate-slideUp"
+        style={{
+          left: position.x === 0 && position.y === 0 ? 'auto' : `${position.x}px`,
+          top: position.x === 0 && position.y === 0 ? 'auto' : `${position.y}px`,
+          right: position.x === 0 && position.y === 0 ? '24px' : 'auto',
+          bottom: position.x === 0 && position.y === 0 ? '24px' : 'auto',
+        }}
+      >
+        {/* Hint de arrastre (solo primera vez) */}
+        {showDragHint && (
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap animate-bounce z-50">
+            ✨ Arrástrame para moverme
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-purple-600"></div>
+          </div>
+        )}
+        
         <div 
-          className="relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-purple-500/30 overflow-hidden"
+          className={`relative bg-gradient-to-br from-purple-900/95 via-indigo-900/95 to-purple-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-purple-500/30 overflow-hidden ${
+            isDragging ? 'scale-105 shadow-3xl ring-2 ring-purple-400/50' : ''
+          }`}
           style={{
-            width: isExpanded ? '320px' : '280px',
-            transition: 'all 0.3s ease',
+            width: '280px',
+            transition: isDragging ? 'none' : 'all 0.3s ease',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            boxShadow: isPlaying 
+              ? `0 0 20px ${currentFrequency.color.hex}15, 0 0 40px ${currentFrequency.color.hex}08, 0 0 60px ${currentFrequency.color.hex}03, inset 0 0 20px ${currentFrequency.color.hex}03`
+              : undefined,
           }}
+          onMouseDown={handleMouseDown}
         >
           {/* Decoración de fondo - Estrellas */}
-          <div className="absolute inset-0 opacity-15">
+          <div className="absolute inset-0 opacity-15 z-0">
             <div className="absolute top-2 left-3 text-yellow-200 text-xs">✦</div>
             <div className="absolute top-2 right-3 text-purple-200 text-xs">✧</div>
           </div>
@@ -182,28 +289,25 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
           {/* Brillo de fondo animado cuando está reproduciendo */}
           {isPlaying && (
             <div 
-              className="absolute inset-0 opacity-20 animate-pulse"
+              className="absolute inset-0 opacity-12 animate-pulse pointer-events-none z-0"
               style={{
-                background: `radial-gradient(circle at 50% 50%, ${currentFrequency.color.hex}44, transparent 70%)`,
+                background: `radial-gradient(circle at 50% 50%, ${currentFrequency.color.hex}33, transparent 70%)`,
               }}
             />
           )}
 
-          <div className="relative z-10 p-3">
-            {/* Botón expandir/colapsar - posición absoluta arriba derecha */}
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="absolute top-2 right-2 text-purple-300 hover:text-white transition-colors p-0.5 z-20"
-              aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
+          <div className="relative z-10 px-3 pb-3 pt-6">
+            {/* Barra de agarre mejorada (drag handle) - Más visible y amplia */}
+            <div 
+              className="absolute top-0 left-0 right-0 h-8 flex items-center justify-center opacity-60 hover:opacity-80 transition-opacity cursor-grab active:cursor-grabbing z-20"
+              onMouseDown={handleMouseDown}
             >
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                {isExpanded ? (
-                  <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                ) : (
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                )}
-              </svg>
-            </button>
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
 
             {/* Header centrado con símbolo y nombre */}
             <div className="flex flex-col items-center text-center mb-2.5 pt-1">
@@ -223,18 +327,6 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
                 {currentFrequency.frequency} Hz
               </p>
             </div>
-
-            {/* Info adicional expandida */}
-            {isExpanded && (
-              <div className="mb-2.5 p-1.5 bg-white/5 rounded-lg border border-white/10">
-                <p className="text-purple-200 text-[10px]">
-                  <span className="text-purple-300">🔮</span> {currentFrequency.chakra.name.split(' ')[0]}
-                </p>
-                <p className="text-purple-200 text-[10px] mt-0.5">
-                  <span className="text-purple-300">🌟</span> {currentFrequency.element}
-                </p>
-              </div>
-            )}
 
             {/* Barra de volumen con fases lunares - DESKTOP */}
             <div className="mb-2.5 px-1">
@@ -269,7 +361,7 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
               {/* Botón anterior */}
               <button
                 onClick={previous}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white transition-all focus:outline-none"
                 aria-label="Frecuencia anterior"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -280,11 +372,12 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
               {/* Botón play/pause principal */}
               <button
                 onClick={toggle}
-                className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-400"
+                className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-all focus:outline-none"
                 style={{
                   background: `linear-gradient(135deg, ${currentFrequency.color.hex}ee, ${currentFrequency.color.hex}99)`,
                 }}
                 aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
+                onMouseDown={(e) => e.stopPropagation()}
               >
                 {isPlaying ? (
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -295,24 +388,12 @@ const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({ isMobile = fals
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
-
-                {/* Pulso animado cuando está reproduciendo */}
-                {isPlaying && (
-                  <>
-                    <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping"></div>
-                    <div className="absolute inset-0 rounded-full animate-pulse"
-                      style={{
-                        boxShadow: `0 0 25px ${currentFrequency.color.hex}`,
-                      }}
-                    ></div>
-                  </>
-                )}
               </button>
 
               {/* Botón siguiente - CORREGIDO */}
               <button
                 onClick={next}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white transition-all focus:outline-none"
                 aria-label="Siguiente frecuencia"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>

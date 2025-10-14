@@ -143,23 +143,23 @@ export default function ReflexPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Header */}
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+        {/* Header - Optimizado para móviles */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-6 md:mb-8"
         >
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-3 bg-purple-500/20 rounded-xl backdrop-blur-sm">
-                <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-purple-300" />
+          <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+              <div className="p-1.5 sm:p-2 md:p-3 bg-purple-500/20 rounded-lg sm:rounded-xl backdrop-blur-sm">
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-300" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
                   Mis Reflexiones
                 </h1>
-                <p className="text-purple-300/70 mt-0.5 sm:mt-1 text-sm sm:text-base">
+                <p className="text-purple-300/70 mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base">
                   Un espacio para tus pensamientos astrológicos
                 </p>
               </div>
@@ -169,29 +169,30 @@ export default function ReflexPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCreateReflection}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all text-sm sm:text-base"
+              className="flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all text-xs sm:text-sm md:text-base touch-manipulation"
             >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Nueva Reflexión</span>
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+              <span className="hidden xs:inline">Nueva Reflexión</span>
+              <span className="xs:hidden">+</span>
             </motion.button>
           </div>
 
-          {/* Stats */}
-          <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          {/* Stats - Optimizadas para móviles */}
+          <div className="flex flex-col sm:grid sm:grid-cols-3 gap-1.5 sm:gap-2 md:gap-4 mb-3 sm:mb-4 md:mb-6">
             <StatsCard
-              icon={<Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
+              icon={<Sparkles className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />}
               label="Total"
               value={stats.total}
               color="from-purple-500 to-pink-500"
             />
             <StatsCard
-              icon={<Calendar className="w-4 h-4 sm:w-5 sm:h-5" />}
+              icon={<Calendar className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />}
               label="Este mes"
               value={stats.this_month}
               color="from-blue-500 to-cyan-500"
             />
             <StatsCard
-              icon={<TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />}
+              icon={<TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />}
               label="Esta semana"
               value={stats.this_week}
               color="from-indigo-500 to-purple-500"
