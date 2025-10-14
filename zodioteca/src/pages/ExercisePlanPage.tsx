@@ -455,7 +455,7 @@ export default function ExercisePlanPage() {
         </div>
 
         {/* Fases */}
-        <div className="space-y-3 sm:space-y-4 md:space-y-6">
+        <div className="space-y-3 sm:space-y-4 md:space-y-6 pb-20 md:pb-0">
           <PhaseSection 
             phase={plan.phases.phase1} 
             completedExercises={completedExercises}
@@ -476,7 +476,8 @@ export default function ExercisePlanPage() {
           />
         </div>
 
-        {/* Botones de acción - Optimizados para móvil */}
+        {/* Espaciador para bottom navigation bar en móvil */}
+        <div className="md:hidden h-20"></div>
       </div>
 
       {/* Modal de Guardar Plan */}
