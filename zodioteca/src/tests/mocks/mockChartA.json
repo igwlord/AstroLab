@@ -1,0 +1,25 @@
+{
+  "id": "mock-chart-a",
+  "birth_datetime": "1990-03-15T14:30:00",
+  "location": "Madrid, Spain",
+  "planets": [
+    { "name": "Sun", "sign": "Pisces", "deg": 24.5, "house": 10, "retrograde": false },
+    { "name": "Moon", "sign": "Scorpio", "deg": 12.3, "house": 8, "retrograde": false },
+    { "name": "Mercury", "sign": "Pisces", "deg": 18.7, "house": 10, "retrograde": false },
+    { "name": "Venus", "sign": "Aries", "deg": 5.2, "house": 11, "retrograde": false },
+    { "name": "Mars", "sign": "Capricorn", "deg": 28.1, "house": 9, "retrograde": false },
+    { "name": "Jupiter", "sign": "Cancer", "deg": 9.8, "house": 3, "retrograde": false },
+    { "name": "Saturn", "sign": "Capricorn", "deg": 15.4, "house": 9, "retrograde": false },
+    { "name": "Uranus", "sign": "Capricorn", "deg": 7.6, "house": 9, "retrograde": false },
+    { "name": "Neptune", "sign": "Capricorn", "deg": 13.2, "house": 9, "retrograde": false },
+    { "name": "Pluto", "sign": "Scorpio", "deg": 16.9, "house": 7, "retrograde": false }
+  ],
+  "aspects": [
+    { "a": "Moon", "b": "Saturn", "type": "square", "orb": 2.9 },
+    { "a": "Moon", "b": "Mars", "type": "opposition", "orb": 5.8 },
+    { "a": "Moon", "b": "Pluto", "type": "conjunction", "orb": 4.6 },
+    { "a": "Sun", "b": "Jupiter", "type": "trine", "orb": 5.3 },
+    { "a": "Venus", "b": "Jupiter", "type": "square", "orb": 4.6 },
+    { "a": "Mars", "b": "Saturn", "type": "conjunction", "orb": 2.3 }
+  ]
+}

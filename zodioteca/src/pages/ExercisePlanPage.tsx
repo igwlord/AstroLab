@@ -64,6 +64,26 @@ export default function ExercisePlanPage() {
     loadReflectionStats();
   }, []);
 
+  // Modo DEBUG: cargar mock charts desde query params (solo en desarrollo)
+  useEffect(() => {
+    async function maybeLoadMock() {
+      if (import.meta.env.PROD) return;
+      
+      const params = new URLSearchParams(window.location.search);
+      const debug = params.get('debug');
+      if (!debug) return;
+
+      try {
+        logger.log(`🐛 [DEBUG] Cargando mock: ${debug}`);
+        const mock = await import(`../tests/mocks/${debug}.json`);
+        await generatePlan(mock.default || mock);
+      } catch (e) {
+        logger.error('Mock load failed', e);
+      }
+    }
+    maybeLoadMock();
+  }, [generatePlan]);
+
   useEffect(() => {
     async function loadAndGeneratePlan() {
       // 1. Obtener chart desde state, currentChart o charts
@@ -233,6 +253,23 @@ export default function ExercisePlanPage() {
                 Plan de 21 días personalizado basado en tu carta natal
               </p>
               
+              {/* Low Confidence Warning */}
+              {plan.meta?.lowConfidence && (
+                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <span className="text-yellow-600 dark:text-yellow-400 text-lg">⚠️</span>
+                    <div className="text-left text-sm">
+                      <p className="font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
+                        Plan generado con datos incompletos
+                      </p>
+                      <p className="text-yellow-700 dark:text-yellow-400 text-xs">
+                        {plan.meta.confidenceReasons.join(' • ')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* MOBILE: Menú desplegable después del título y slogan */}
               <select
                 onChange={(e) => {
@@ -262,9 +299,24 @@ export default function ExercisePlanPage() {
 
         {/* Resumen del plan */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 sm:p-4 md:p-6 mb-4 md:mb-6">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-800 dark:text-purple-300 mb-3 md:mb-4">
-            Resumen del Análisis
-          </h2>
+          <div className="mb-3 md:mb-4">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-800 dark:text-purple-300">
+              Resumen del Análisis
+            </h2>
+            {currentChart && (
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {currentChart.name}
+                {currentChart.birthDate && (() => {
+                  // birthDate puede venir como string localizado "16 de julio de 1992, 10:20"
+                  // o como fecha separada + tiempo
+                  const dateStr = currentChart.birthDate.split(',')[0]; // "16 de julio de 1992"
+                  return ` • ${dateStr}`;
+                })()}
+                {currentChart.birthTime && ` • 🕐 ${currentChart.birthTime}`}
+                {currentChart.birthPlace && ` • 📍 ${currentChart.birthPlace}`}
+              </p>
+            )}
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-2 sm:p-3 md:p-4">

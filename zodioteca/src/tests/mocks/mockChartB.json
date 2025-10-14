@@ -1,0 +1,24 @@
+{
+  "id": "mock-chart-b",
+  "birth_datetime": "1985-07-22T10:15:00",
+  "location": "Barcelona, Spain",
+  "planets": [
+    { "name": "Sun", "sign": "Cancer", "deg": 29.2, "house": 7, "retrograde": false },
+    { "name": "Moon", "sign": "Taurus", "deg": 18.4, "house": 5, "retrograde": false },
+    { "name": "Mercury", "sign": "Leo", "deg": 6.8, "house": 8, "retrograde": false },
+    { "name": "Venus", "sign": "Gemini", "deg": 22.1, "house": 6, "retrograde": false },
+    { "name": "Mars", "sign": "Gemini", "deg": 14.5, "house": 6, "retrograde": false },
+    { "name": "Jupiter", "sign": "Aquarius", "deg": 11.3, "house": 2, "retrograde": true },
+    { "name": "Saturn", "sign": "Scorpio", "deg": 25.7, "house": 11, "retrograde": false },
+    { "name": "Uranus", "sign": "Sagittarius", "deg": 16.2, "house": 12, "retrograde": false },
+    { "name": "Neptune", "sign": "Capricorn", "deg": 1.9, "house": 1, "retrograde": false },
+    { "name": "Pluto", "sign": "Scorpio", "deg": 2.4, "house": 11, "retrograde": false }
+  ],
+  "aspects": [
+    { "a": "Moon", "b": "Venus", "type": "trine", "orb": 3.7 },
+    { "a": "Moon", "b": "Jupiter", "type": "trine", "orb": 7.1 },
+    { "a": "Sun", "b": "Moon", "type": "sextile", "orb": 10.8 },
+    { "a": "Venus", "b": "Mars", "type": "conjunction", "orb": 7.6 },
+    { "a": "Sun", "b": "Neptune", "type": "opposition", "orb": 2.7 }
+  ]
+}

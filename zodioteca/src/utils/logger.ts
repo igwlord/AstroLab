@@ -3,7 +3,7 @@
  * En producción, los logs se deshabilitan automáticamente
  */
 
-const isDev = import.meta.env.DEV;
+const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV !== false;
 
 export const logger = {
   log: (...args: unknown[]) => {

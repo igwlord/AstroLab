@@ -1,11 +1,61 @@
 /**
- * SISTEMA DE SCORING MEJORADO (Versión 2.0)
- * Scoring basado en convergencia de indicadores + confianza
+ * SISTEMA DE SCORING MEJORADO (Versión 3.0)
+ * Scoring basado en convergencia de indicadores + confianza + matching energético
  * No depende de cantidad de sugerencias, sino de calidad de evidencia
  */
 
 import type { RuleOutput } from './rulesEngine';
 import type { ChartAnalysis } from './chartAnalyzer';
+
+/**
+ * Matriz de matching energético: Elemento → Ejercicios prioritarios
+ */
+export const ELEMENT_MATCHING: Record<'fire' | 'earth' | 'air' | 'water', string[]> = {
+  fire: [
+    'cardio',
+    'salutation',
+    'pranayama',
+    'hiit',
+    'danza',
+    'vinyasa',
+    'energética',
+    'movimiento'
+  ],
+  earth: [
+    'restaurativo',
+    'tai chi',
+    'caminata',
+    'postural',
+    'pilates',
+    'estiramientos',
+    'grounding',
+    'enraizamiento',
+    'rutina',
+    'estructura'
+  ],
+  air: [
+    'breathwork',
+    'meditación',
+    'respiración',
+    'danza',
+    'concentración',
+    'mindfulness',
+    'mental',
+    'diario',
+    'journaling'
+  ],
+  water: [
+    'yin',
+    'baño',
+    'emocional',
+    'flujo',
+    'nidra',
+    'visualización',
+    'ritual',
+    'sensibilidad',
+    'relajación'
+  ]
+};
 
 export interface ScoredPriority {
   priorityArea: string;

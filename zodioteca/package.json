@@ -13,7 +13,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:precision": "tsx test/precisionTest.ts",
-    "benchmark": "tsx test/benchmark.ts"
+    "benchmark": "tsx test/benchmark.ts",
+    "test:guido": "tsx scripts/validate-guido-chart.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

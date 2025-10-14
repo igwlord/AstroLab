@@ -6,13 +6,25 @@
 
 import type { NatalChart } from './planetNormalizer';
 import { getPlanetDignity, getWeakDignities, getStrongDignities, type DignityInfo } from './dignities';
+import { calculateConfidence } from './chartValidator';
 
 export interface ChartAnalysis {
+  // Confidence del análisis
+  confidence: {
+    score: number;
+    reasons: string[];
+  };
+  
   // Dominancias elementales y modales
   dominances: {
     elements: Record<string, number>;
     modalities: Record<string, number>;
   };
+  
+  // MEJORA 6: Elemento y modalidad dominante calculados
+  dominantElement?: 'fire' | 'earth' | 'air' | 'water';
+  secondaryElement?: 'fire' | 'earth' | 'air' | 'water';
+  dominantModality?: 'cardinal' | 'fixed' | 'mutable';
   
   // Análisis de Luna (crítico para emocional)
   moon?: {
@@ -94,8 +106,131 @@ const SIGN_TO_MODALITY: Record<string, string> = {
 };
 
 /**
+ * Mapea signo a elemento
+ */
+function signToElement(sign: string): 'fire' | 'earth' | 'air' | 'water' {
+  return (SIGN_TO_ELEMENT[sign] || 'fire') as 'fire' | 'earth' | 'air' | 'water';
+}
+
+/**
+ * Calcula pesos de elementos (interno)
+ */
+function calculateElementWeights(chart: NatalChart): Record<'fire' | 'earth' | 'air' | 'water', number> {
+  const weights: Record<'fire' | 'earth' | 'air' | 'water', number> = {
+    fire: 0,
+    earth: 0,
+    air: 0,
+    water: 0
+  };
+
+  const personal = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars']);
+  const social = new Set(['Jupiter', 'Saturn']);
+  const trans = new Set(['Uranus', 'Neptune', 'Pluto']);
+
+  // Analizar planetas
+  for (const p of chart.planets || []) {
+    const elem = signToElement(p.sign);
+    let w = personal.has(p.name) ? 2 : social.has(p.name) ? 1.5 : trans.has(p.name) ? 1 : 1;
+    
+    // Bonus por casa angular
+    if ([1, 4, 7, 10].includes(p.house)) {
+      w += 0.5;
+    }
+    
+    // Bonus por aspectos tensos con Luna/Sol
+    const tenseToLuminaries = chart.aspects?.some(
+      a => ((a.a === p.name && (a.b === 'Moon' || a.b === 'Sun')) ||
+            (a.b === p.name && (a.a === 'Moon' || a.a === 'Sun'))) &&
+           ['square', 'opposition', 'conjunction'].includes(a.type.toLowerCase())
+    );
+    
+    if (tenseToLuminaries) {
+      w += 0.5;
+    }
+    
+    weights[elem] += w;
+  }
+
+  // ASC y MC (si existen en el chart)
+  const chartWithAngles = chart as NatalChart & { angles?: { asc?: { sign: string }; mc?: { sign: string } } };
+  if (chartWithAngles.angles?.asc) {
+    const ascElement = signToElement(chartWithAngles.angles.asc.sign);
+    weights[ascElement] += 1.0;
+  }
+  if (chartWithAngles.angles?.mc) {
+    const mcElement = signToElement(chartWithAngles.angles.mc.sign);
+    weights[mcElement] += 1.0;
+  }
+
+  return weights;
+}
+
+/**
+ * Calcula el elemento dominante de la carta natal
+ * Usa ponderaciones por tipo de planeta, casas angulares, aspectos, ASC y MC
+ */
+export function calculateDominantElement(chart: NatalChart): 'fire' | 'earth' | 'air' | 'water' {
+  const weights = calculateElementWeights(chart);
+  const entries = Object.entries(weights).sort(([, a], [, b]) => b - a) as ['fire' | 'earth' | 'air' | 'water', number][];
+  return entries[0]?.[0] || 'fire';
+}
+
+/**
+ * MEJORA 2: Calcula elemento secundario (para balance energético)
+ */
+export function calculateSecondaryElement(chart: NatalChart): 'fire' | 'earth' | 'air' | 'water' {
+  const weights = calculateElementWeights(chart);
+  const dominant = calculateDominantElement(chart);
+  
+  console.log('📊 [SecondaryElement] Weights completos:', weights);
+  console.log('📊 [SecondaryElement] Dominante calculado:', dominant);
+  
+  // Filtrar el dominante y encontrar el segundo con mayor peso
+  const entries = Object.entries(weights)
+    .filter(([k]) => k !== dominant)
+    .sort(([, a], [, b]) => b - a) as ['fire' | 'earth' | 'air' | 'water', number][];
+  
+  console.log('📊 [SecondaryElement] Candidatos (filtrados + ordenados):', entries);
+  const secondary = entries[0]?.[0] || 'earth';
+  console.log('📊 [SecondaryElement] Secundario elegido:', secondary);
+  
+  return secondary;
+}
+
+/**
+ * MEJORA 1: Calcula modalidad dominante (cardinal/fixed/mutable)
+ */
+export function calculateDominantModality(chart: NatalChart): 'cardinal' | 'fixed' | 'mutable' {
+  const weights: Record<'cardinal' | 'fixed' | 'mutable', number> = {
+    cardinal: 0,
+    fixed: 0,
+    mutable: 0
+  };
+
+  const personal = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars']);
+  const social = new Set(['Jupiter', 'Saturn']);
+
+  for (const p of chart.planets || []) {
+    const modality = (SIGN_TO_MODALITY[p.sign] || 'mutable') as 'cardinal' | 'fixed' | 'mutable';
+    const w = personal.has(p.name) ? 2 : social.has(p.name) ? 1.5 : 1;
+    weights[modality] += w;
+  }
+
+  // ASC siempre cardinal si existe
+  const chartWithAngles = chart as NatalChart & { angles?: { asc?: { sign: string } } };
+  if (chartWithAngles.angles?.asc) {
+    const ascModality = (SIGN_TO_MODALITY[chartWithAngles.angles.asc.sign] || 'cardinal') as 'cardinal' | 'fixed' | 'mutable';
+    weights[ascModality] += 1.5;
+  }
+
+  const entries = Object.entries(weights) as ['cardinal' | 'fixed' | 'mutable', number][];
+  return entries.reduce((max, [k, v]) => v > weights[max] ? k : max, 'cardinal' as 'cardinal' | 'fixed' | 'mutable');
+}
+
+/**
  * Analiza el estrés emocional de la Luna
  * Considera aspectos, casa y dignidad
+ * CORREGIDO: Ahora siempre devuelve valor > 0 cuando hay datos válidos
  */
 function analyzeMoonStress(chart: NatalChart): number {
   const moon = chart.planets?.find(p => p.name === 'Moon');
@@ -110,36 +245,75 @@ function analyzeMoonStress(chart: NatalChart): number {
     aspectsCount: chart.aspects?.length || 0
   });
 
-  let stress = 0;
-  const stressLog: string[] = [];
+  // Stress base: 2.0 (neutro, siempre > 0)
+  let stress = 2.0;
+  const stressLog: string[] = ['Base neutral: 2.0'];
 
-  // Casa 12, 8 o 4 = +1 stress (casas emocionales/inconscientes)
+  // Casa 12, 8 o 4 = +2 stress (casas emocionales/inconscientes)
   if ([4, 8, 12].includes(moon.house)) {
-    stress += 1;
-    stressLog.push(`Casa ${moon.house} (emocional/inconsciente): +1`);
+    stress += 2;
+    stressLog.push(`Casa ${moon.house} (emocional/inconsciente): +2`);
+  }
+
+  // Casa 1, 7, 10 = +0.5 stress (casas públicas/expuestas)
+  if ([1, 7, 10].includes(moon.house)) {
+    stress += 0.5;
+    stressLog.push(`Casa ${moon.house} (pública/angular): +0.5`);
   }
 
   // Analizar aspectos
-  const moonAspects = chart.aspects?.filter(a => a.a === 'Moon' || a.b === 'Moon') || [];
-  console.log('🌙 [MoonStress] Aspectos de la Luna:', moonAspects.length);
+  console.log('🌙 [MoonStress] Total aspectos en carta:', chart.aspects?.length || 0);
+  console.log('🌙 [MoonStress] Muestra de aspectos:', chart.aspects?.slice(0, 3));
+  console.log('🌙 [MoonStress] Tipos únicos en carta:', [...new Set(chart.aspects?.map(a => a.type))]);
   
-  moonAspects.forEach(aspect => {
-    const otherPlanet = aspect.a === 'Moon' ? aspect.b : aspect.a;
-    const isMalefic = ['Saturn', 'Mars', 'Pluto'].includes(otherPlanet);
-    const isBenefic = ['Venus', 'Jupiter'].includes(otherPlanet);
+  const moonAspects = chart.aspects?.filter(a => 
+    a.a === 'Moon' || a.b === 'Moon' ||
+    a.a === 'Luna' || a.b === 'Luna' // ⚠️ SOPORTE ESPAÑOL
+  ) || [];
+  console.log('🌙 [MoonStress] Aspectos de la Luna encontrados:', moonAspects.length);
+  console.log('🌙 [MoonStress] Detalle:', moonAspects);
+  console.log('🌙 [MoonStress] Tipos únicos de Luna:', [...new Set(moonAspects.map(a => a.type))]);
+  
+  let tenseCount = 0;
+  let harmoniousCount = 0;
 
-    // Aspectos duros
-    if (['square', 'opposition'].includes(aspect.type) && aspect.orb <= 3) {
-      const add = isMalefic ? 2 : 1;
+  moonAspects.forEach(aspect => {
+    const moonName = aspect.a === 'Moon' || aspect.a === 'Luna' ? aspect.a : aspect.b;
+    const otherPlanet = moonName === aspect.a ? aspect.b : aspect.a;
+    
+    // Normalizar nombres (español → inglés)
+    const planetMap: Record<string, string> = {
+      'Saturno': 'Saturn', 'Marte': 'Mars', 'Plutón': 'Pluto',
+      'Venus': 'Venus', 'Júpiter': 'Jupiter'
+    };
+    const normalizedPlanet = planetMap[otherPlanet] || otherPlanet;
+    
+    const isMalefic = ['Saturn', 'Mars', 'Pluto'].includes(normalizedPlanet);
+    const isBenefic = ['Venus', 'Jupiter'].includes(normalizedPlanet);
+
+    const typeLower = aspect.type.toLowerCase(); // ⚠️ CRITICAL FIX: Case-insensitive
+
+    // Aspectos duros (orbe más amplio para mejor detección)
+    if (['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower) && aspect.orb <= 8) {
+      const add = isMalefic ? 2.5 : 1.5;
       stress += add;
-      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb}°): +${add}`);
+      tenseCount++;
+      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb.toFixed(1)}°): +${add}`);
     }
 
-    // Aspectos suaves (compensan)
-    if (['trine', 'sextile'].includes(aspect.type) && aspect.orb <= 4) {
-      const subtract = isBenefic ? 1 : 0.5;
+    // Conjunción con maléfico
+    if (['conjunction', 'conjunción'].includes(typeLower) && aspect.orb <= 6 && isMalefic) {
+      stress += 2;
+      tenseCount++;
+      stressLog.push(`Conjunción con ${otherPlanet} (orb ${aspect.orb.toFixed(1)}°): +2`);
+    }
+
+    // Aspectos suaves (compensan ligeramente)
+    if (['trine', 'sextile', 'trígono', 'sextil'].includes(typeLower) && aspect.orb <= 8) {
+      const subtract = isBenefic ? 0.8 : 0.5;
       stress -= subtract;
-      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb}°): -${subtract}`);
+      harmoniousCount++;
+      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb.toFixed(1)}°): -${subtract}`);
     }
   });
 
@@ -148,27 +322,42 @@ function analyzeMoonStress(chart: NatalChart): number {
   console.log('🌙 [MoonStress] Dignidad:', dignity);
   
   if (dignity.type === 'fall') {
-    stress += 1;
-    stressLog.push(`Dignidad en caída: +1`);
+    stress += 1.5;
+    stressLog.push(`Luna en caída (${moon.sign}): +1.5`);
   }
   if (dignity.type === 'detriment') {
-    stress += 1.5;
-    stressLog.push(`Dignidad en detrimento: +1.5`);
+    stress += 2;
+    stressLog.push(`Luna en detrimento (${moon.sign}): +2`);
   }
   if (dignity.type === 'domicile') {
-    stress = Math.max(0, stress - 1);
-    stressLog.push(`Dignidad en domicilio: -1`);
+    stress = Math.max(1, stress - 1.5);
+    stressLog.push(`Luna en domicilio (${moon.sign}): -1.5`);
+  }
+  if (dignity.type === 'exaltation') {
+    stress = Math.max(1, stress - 2);
+    stressLog.push(`Luna en exaltación (${moon.sign}): -2`);
   }
 
+  // Luna sin aspectos (void of course - stress medio-alto)
+  if (moonAspects.length === 0) {
+    stress += 2;
+    stressLog.push('Luna sin aspectos (void of course): +2');
+  }
+
+  // Normalizar 0-10 con precisión de 1 decimal
   const finalStress = Math.max(0, Math.min(10, stress));
+  const rounded = Math.round(finalStress * 10) / 10;
   
   console.log('🌙 [MoonStress] Resultado:', {
-    rawStress: stress,
-    finalStress,
+    rawStress: stress.toFixed(2),
+    finalStress: rounded,
+    tenseAspects: tenseCount,
+    harmoniousAspects: harmoniousCount,
+    dignity: dignity.type,
     log: stressLog
   });
 
-  return finalStress; // Normalizar 0-10
+  return rounded;
 }
 
 /**
@@ -202,15 +391,16 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     .filter(([, count]) => count >= 3)
     .map(([house]) => Number(house));
 
-  // Contar aspectos tensos y armónicos
+  // Contar aspectos tensos y armónicos (CASE-INSENSITIVE + BILINGUAL)
   let tensionsCount = 0;
   let harmoniesCount = 0;
 
   for (const a of chart.aspects || []) {
-    if (['square', 'opposition'].includes(a.type) && a.orb <= 3) {
+    const typeLower = a.type.toLowerCase();
+    if (['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower) && a.orb <= 8) {
       tensionsCount++;
     }
-    if (['trine', 'sextile'].includes(a.type) && a.orb <= 4) {
+    if (['trine', 'sextile', 'trígono', 'sextil'].includes(typeLower) && a.orb <= 8) {
       harmoniesCount++;
     }
   }
@@ -220,20 +410,37 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   console.log('📊 [ChartAnalyzer] Planetas encontrados:', chart.planets?.map(p => p.name).join(', '));
   console.log('📊 [ChartAnalyzer] Total de aspectos en la carta:', chart.aspects?.length || 0);
   
+  // Filtrar aspectos hard con logging (CASE-INSENSITIVE)
+  const hardAspects = chart.aspects?.filter(a => {
+    const isMoonAspect = a.a === 'Moon' || a.b === 'Moon' || a.a === 'Luna' || a.b === 'Luna';
+    const typeLower = a.type.toLowerCase(); // ⚠️ CRITICAL FIX: Case-insensitive
+    const isHardType = ['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower);
+    const isInOrb = a.orb <= 8;
+    
+    if (isMoonAspect) {
+      console.log(`🌙 [AspectCheck] ${a.a} ${a.type} ${a.b} (orb ${a.orb}°) → hard=${isHardType}, inOrb=${isInOrb}`);
+    }
+    
+    return isMoonAspect && isHardType && isInOrb;
+  }) || [];
+
+  // Filtrar aspectos soft con logging (CASE-INSENSITIVE)
+  const softAspects = chart.aspects?.filter(a => {
+    const isMoonAspect = a.a === 'Moon' || a.b === 'Moon' || a.a === 'Luna' || a.b === 'Luna';
+    const typeLower = a.type.toLowerCase(); // ⚠️ CRITICAL FIX: Case-insensitive
+    const isSoftType = ['trine', 'sextile', 'trígono', 'sextil'].includes(typeLower);
+    const isInOrb = a.orb <= 8;
+    return isMoonAspect && isSoftType && isInOrb;
+  }) || [];
+
+  console.log(`🌙 [AspectCount] Hard: ${hardAspects.length}, Soft: ${softAspects.length}`);
+
   const moonAnalysis = moon ? {
     house: moon.house,
     sign: moon.sign,
     dignity: getPlanetDignity('Moon', moon.sign),
-    hardAspects: chart.aspects?.filter(a => 
-      (a.a === 'Moon' || a.b === 'Moon') && 
-      ['square', 'opposition'].includes(a.type) && 
-      a.orb <= 3
-    ).length || 0,
-    softAspects: chart.aspects?.filter(a => 
-      (a.a === 'Moon' || a.b === 'Moon') && 
-      ['trine', 'sextile'].includes(a.type) && 
-      a.orb <= 4
-    ).length || 0,
+    hardAspects: hardAspects.length,
+    softAspects: softAspects.length,
     stressScore: analyzeMoonStress(chart)
   } : undefined;
 
@@ -267,8 +474,20 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     notes.push(`${weakDignities.length} planetas en dignidad débil`);
   }
 
+  // MEJORA 7: Calcular y agregar elemento/modalidad dominantes
+  const dominantElement = calculateDominantElement(chart);
+  const secondaryElement = calculateSecondaryElement(chart);
+  const dominantModality = calculateDominantModality(chart);
+
+  // MEJORA 8: Calcular confidence una sola vez
+  const confidence = calculateConfidence(chart);
+
   return {
+    confidence,
     dominances: { elements, modalities },
+    dominantElement,
+    secondaryElement,
+    dominantModality,
     moon: moonAnalysis,
     mercury: mercuryAnalysis,
     weakDignities,

@@ -4,12 +4,18 @@
  * Plan de 21 días: 7 días fácil / 7 días medio / 7 días variado
  */
 
-import type { NatalChart } from '../../store/useCharts';
+import type { NatalChart } from './planetNormalizer';
 import { normalizeChart } from './planetNormalizer';
 import { validateAndNormalize } from './chartValidator';
-import { analyzeChart, type ChartAnalysis } from './chartAnalyzer';
+import { 
+  analyzeChart, 
+  calculateDominantElement, 
+  calculateSecondaryElement,
+  calculateDominantModality,
+  type ChartAnalysis 
+} from './chartAnalyzer';
 import { evaluateRules } from './rulesEngine';
-import { scorePriorities, filterLowConfidence, summarizeTopPriorities, type ScoredPriority } from './scoring';
+import { scorePriorities, filterLowConfidence, summarizeTopPriorities, ELEMENT_MATCHING, type ScoredPriority } from './scoring';
 import { detectConflicts, resolveConflicts, hasBlockingConflicts } from './conflictDetector';
 import { getExercisesByIds, EXERCISE_DATABASE, type ExerciseTemplate } from './exerciseDatabase';
 import { logger } from '../../utils/logger';
@@ -36,6 +42,13 @@ export interface ExercisePlan {
   // Metadata
   totalExercises: number;
   estimatedDailyMinutes: number;
+  
+  // Meta v3.0: Confidence tracking
+  meta?: {
+    confidence: number;
+    confidenceReasons: string[];
+    lowConfidence?: boolean;
+  };
 }
 
 export interface ExercisePhase {
@@ -116,7 +129,7 @@ export async function generateExercisePlan(
 
   // FASE 5: SELECCIÓN DE EJERCICIOS
   logger.log('🎯 Fase 5: Seleccionando ejercicios...');
-  const selectedExercises = selectExercises(priorities, options?.excludeExerciseIds);
+  const selectedExercises = selectExercises(priorities, analysis, validationResult.chart, options?.excludeExerciseIds);
   logger.log(`   - Ejercicios candidatos: ${selectedExercises.length}`);
 
   // FASE 6: DETECCIÓN Y RESOLUCIÓN DE CONFLICTOS
@@ -136,13 +149,23 @@ export async function generateExercisePlan(
   logger.log('📅 Fase 7: Distribuyendo en fases...');
   const phases = distributeIntoPhases(finalExercises, priorities, analysis);
 
+  // FASE 7.5: USAR CONFIDENCE DEL ANÁLISIS (no recalcular)
+  logger.log('📊 Fase 7.5: Usando confidence del análisis...');
+  const confidence = analysis.confidence;
+  logger.log(`   - Confidence score: ${confidence.score.toFixed(2)}`);
+  if (confidence.score < 0.6) {
+    logger.warn('   ⚠️ LOW CONFIDENCE PLAN:', confidence.reasons);
+  } else {
+    logger.log(`   ✅ ALTA CONFIDENCE (${confidence.score >= 0.85 ? 'hour exact' : 'good'})`);
+  }
+
   // FASE 8: ENSAMBLAR PLAN
   const plan: ExercisePlan = {
     id: generatePlanId(),
     userId: options?.userId,
     chartId: options?.chartId || 'unknown',
     createdAt: new Date().toISOString(),
-    version: '2.0.0',
+    version: '3.0.0',
     chartAnalysis: analysis,
     priorities,
     topAreas: areas,
@@ -152,32 +175,130 @@ export async function generateExercisePlan(
       phase3: phases[2]
     },
     totalExercises: finalExercises.length,
-    estimatedDailyMinutes: Math.round(
-      finalExercises.reduce((sum, e) => sum + (e.duration || 10), 0) / 21
-    )
+    estimatedDailyMinutes: Math.max(
+      10, // MÍNIMO 10 min para efecto transformativo
+      Math.round(finalExercises.reduce((sum, e) => sum + (e.duration || 10), 0) / 21)
+    ),
+    meta: {
+      confidence: confidence.score,
+      confidenceReasons: confidence.reasons,
+      lowConfidence: confidence.score < 0.6
+    }
   };
 
-  logger.log('✅ PLAN GENERADO CON ÉXITO');
+  logger.log('✅ PLAN GENERADO CON ÉXITO (v3.0)');
   logger.log(`   - Total: ${plan.totalExercises} ejercicios`);
   logger.log(`   - Tiempo diario estimado: ${plan.estimatedDailyMinutes} min`);
+  logger.log(`   - Confidence: ${plan.meta?.confidence.toFixed(2)} ${plan.meta?.lowConfidence ? '⚠️ LOW' : '✓'}`);
   
   return plan;
 }
 
 /**
- * Selecciona ejercicios basándose en las prioridades scoredadas
- * GARANTIZA 6 ejercicios únicos con progresión de dificultad
+ * MEJORA 4: Scoring inteligente con modalidad y elemento secundario
+ * Considera: categoría, elemento, intensidad, seguridad, diversidad, modalidad
+ */
+function matchScore(
+  exercise: ExerciseTemplate,
+  priorities: ScoredPriority[],
+  dominantElement: 'fire' | 'earth' | 'air' | 'water',
+  secondaryElement: 'fire' | 'earth' | 'air' | 'water',
+  modality: 'cardinal' | 'fixed' | 'mutable',
+  moonStress: number,
+  usedCategories: Set<string>
+): number {
+  const elementPriorityList = ELEMENT_MATCHING[dominantElement] || [];
+  const secondaryPriorityList = ELEMENT_MATCHING[secondaryElement] || [];
+
+  // 1. Category Match (30% - reducido para dar espacio a modalidad)
+  const categoryMatch = priorities.some(p => p.priorityArea === exercise.category) ? 1 : 0;
+
+  // 2. Element Match (25% - dominante)
+  const elementMatch = elementPriorityList.some(ex => 
+    exercise.title.toLowerCase().includes(ex.toLowerCase()) ||
+    exercise.category.toLowerCase().includes(ex.toLowerCase())
+  ) ? 1 : 0;
+
+  // MEJORA: Bonus por elemento secundario (10%)
+  const secondaryMatch = secondaryPriorityList.some(ex => 
+    exercise.title.toLowerCase().includes(ex.toLowerCase()) ||
+    exercise.category.toLowerCase().includes(ex.toLowerCase())
+  ) ? 0.5 : 0;
+
+  // MEJORA: Intensity ajustado por moon stress (10%)
+  const targetIntensity = moonStress >= 7 ? 1 : moonStress >= 4 ? 2 : 3;
+  const exIntensity = exercise.intensity ?? 2;
+  const intensityMatch = Math.max(0, 1 - Math.abs(exIntensity - targetIntensity) / 2);
+
+  // 4. Safety Score (10%)
+  const safetyScore = exercise.safetyInfo?.riskLevel === 'high' ? 0 : 1;
+
+  // MEJORA: Modalidad match (10%)
+  const modalityMatch = (() => {
+    const tags = exercise.therapeuticTags;
+    const cat = exercise.category.toLowerCase();
+    
+    if (modality === 'cardinal') {
+      // Cardinal necesita estructura, dirección, inicio
+      if (tags?.modalities?.some(m => ['Coaching Ontológico', 'Gestalt'].includes(m))) return 1;
+      if (cat.includes('breathwork') || cat.includes('meditation')) return 0.7;
+      if (tags?.movement) return 0.5;
+    } else if (modality === 'fixed') {
+      // Fixed necesita persistencia, grounding, estabilidad
+      if (cat.includes('grounding') || cat.includes('body')) return 1;
+      if (tags?.modalities?.some(m => ['Terapia Centrada en el Cuerpo', 'Bioenergética'].includes(m))) return 0.8;
+      if (tags?.somatic) return 0.6;
+    } else if (modality === 'mutable') {
+      // Mutable necesita adaptación, fluidez, variación
+      if (tags?.creative || tags?.ritual) return 1;
+      if (cat.includes('dance') || cat.includes('creative')) return 0.8;
+      if (tags?.breathwork) return 0.6;
+    }
+    return 0;
+  })();
+
+  // 5. Diversity Penalty (5%)
+  const diversityPenalty = usedCategories.has(exercise.category) ? 0.15 : 0;
+
+  const score =
+    0.30 * categoryMatch +
+    0.25 * elementMatch +
+    0.10 * secondaryMatch +
+    0.10 * intensityMatch +
+    0.10 * safetyScore +
+    0.10 * modalityMatch -
+    diversityPenalty;
+
+  return Math.max(0, Math.min(1, score));
+}
+
+/**
+ * MEJORA 3 y 5: Selecciona ejercicios con elemento secundario, modalidad y moon stress
  */
 function selectExercises(
   priorities: ScoredPriority[],
+  analysis: ChartAnalysis,
+  chart: NatalChart,
   excludeIds?: string[]
 ): ExerciseTemplate[] {
   const selected: ExerciseTemplate[] = [];
   const usedIds = new Set<string>(excludeIds || []);
+  const usedCategories = new Set<string>();
 
-  logger.log('   🔍 Iniciando selección de 6 ejercicios...');
+  const dominantElement = calculateDominantElement(chart);
+  const secondaryElement = calculateSecondaryElement(chart);
+  const modality = calculateDominantModality(chart);
+  const moonStress = analysis.moon?.stressScore || 5;
 
-  // PASO 1: Recolectar ejercicios de prioridades
+  logger.log(`   🔍 Selección inteligente:`);
+  logger.log(`      Elemento dominante: ${dominantElement}`);
+  logger.log(`      Elemento secundario: ${secondaryElement}`);
+  logger.log(`      Modalidad: ${modality}`);
+  logger.log(`      Moon stress: ${moonStress.toFixed(1)}/10`);
+
+  // PASO 1: Recolectar candidatos de prioridades y calcular matchScore
+  const candidates: Array<{ exercise: ExerciseTemplate; score: number }> = [];
+
   for (const priority of priorities) {
     const exerciseIds = priority.suggestions;
     logger.log(`   📌 Prioridad "${priority.priorityArea}": ${exerciseIds.length} sugerencias`);
@@ -187,19 +308,96 @@ function selectExercises(
 
       const exercise = getExercisesByIds([exId])[0];
       if (exercise) {
-        selected.push(exercise);
-        usedIds.add(exId);
-        logger.log(`      ✓ Agregado: ${exercise.title} (intensidad: ${exercise.intensity})`);
+        const score = matchScore(
+          exercise, 
+          priorities, 
+          dominantElement, 
+          secondaryElement,
+          modality,
+          moonStress,
+          usedCategories
+        );
+        candidates.push({ exercise, score });
+        logger.log(`      📊 ${exercise.title}: score ${score.toFixed(2)}`);
       }
-
-      // Solo necesitamos 6 ejercicios
-      if (selected.length >= 6) break;
     }
-
-    if (selected.length >= 6) break;
   }
 
-  logger.log(`   📊 Ejercicios de prioridades: ${selected.length}`);
+  // Ordenar por score descendente
+  const sortedCandidates = candidates.sort((a, b) => b.score - a.score);
+  
+  // MEJORA 5: Balance por fases
+  // Fase 1 (días 1-7): 70% dominante, 30% secundario
+  // Fase 2 (días 8-14): 50% dominante, 50% secundario
+  // Fase 3 (días 15-21): Balance según stress
+  
+  const dominantExercises = sortedCandidates
+    .filter(c => {
+      const list = ELEMENT_MATCHING[dominantElement] || [];
+      return list.some(ex => 
+        c.exercise.title.toLowerCase().includes(ex.toLowerCase()) ||
+        c.exercise.category.toLowerCase().includes(ex.toLowerCase())
+      );
+    })
+    .slice(0, 4); // 4 ejercicios del elemento dominante
+
+  const secondaryExercises = sortedCandidates
+    .filter(c => {
+      const list = ELEMENT_MATCHING[secondaryElement] || [];
+      return list.some(ex => 
+        c.exercise.title.toLowerCase().includes(ex.toLowerCase()) ||
+        c.exercise.category.toLowerCase().includes(ex.toLowerCase())
+      ) && !dominantExercises.some(d => d.exercise.id === c.exercise.id);
+    })
+    .slice(0, 2); // 2 ejercicios del elemento secundario
+
+  // Combinar: primero dominantes, luego secundarios
+  const balancedSelection = [...dominantExercises, ...secondaryExercises].slice(0, 6);
+  
+  for (const { exercise } of balancedSelection) {
+    selected.push(exercise);
+    usedIds.add(exercise.id);
+    usedCategories.add(exercise.category);
+  }
+
+  logger.log(`   📊 Ejercicios seleccionados con balance:`);
+  logger.log(`      Dominante (${dominantElement}): ${dominantExercises.length}`);
+  logger.log(`      Secundario (${secondaryElement}): ${secondaryExercises.length}`);
+
+  // MEJORA CRÍTICA: Si secondary element es EARTH y hay alto stress, forzar al menos 1 ejercicio de grounding
+  const needsGrounding = secondaryElement === 'earth' && moonStress >= 6;
+  const hasGroundingExercise = selected.some(ex => {
+    const title = ex.title.toLowerCase();
+    const cat = ex.category.toLowerCase();
+    return title.includes('walk') || title.includes('earthing') || title.includes('tai chi') || 
+           title.includes('postural') || cat.includes('físico') || cat.includes('grounding');
+  });
+
+  if (needsGrounding && !hasGroundingExercise && selected.length < 6) {
+    logger.log('   🌍 BOOST: Elemento secundario EARTH + alto moon stress → agregando ejercicio grounding');
+    
+    // Buscar ejercicios de grounding en base de datos
+    const groundingExercises = EXERCISE_DATABASE.filter(e => {
+      const title = e.title.toLowerCase();
+      const cat = e.category.toLowerCase();
+      return !usedIds.has(e.id) && (
+        e.id === 'mindful-walk-15' || 
+        e.id === 'earthing-10min' ||
+        title.includes('tai chi') ||
+        title.includes('walk') ||
+        title.includes('postural') ||
+        cat.includes('físico')
+      );
+    }).sort((a, b) => (a.intensity || 1) - (b.intensity || 1));
+
+    if (groundingExercises.length > 0) {
+      const groundingEx = groundingExercises[0];
+      selected.push(groundingEx);
+      usedIds.add(groundingEx.id);
+      usedCategories.add(groundingEx.category);
+      logger.log(`      ✅ Grounding añadido: ${groundingEx.title}`);
+    }
+  }
 
   // PASO 2: Si no llegamos a 6, usar fallback balanceado
   if (selected.length < 6) {
@@ -495,6 +693,15 @@ function distributeIntoPhases(
   analysis: ChartAnalysis
 ): [ExercisePhase, ExercisePhase, ExercisePhase] {
   logger.log(`   - Distribuyendo ${exercises.length} ejercicios en 3 fases (2 por fase)...`);
+  
+  // CORRECCIÓN CRÍTICA 1: Dedupe por ID antes de distribuir
+  const uniqueExercises = Array.from(new Map(exercises.map(e => [e.id, e])).values());
+  logger.log(`   🔍 Deduplicación: ${exercises.length} → ${uniqueExercises.length} ejercicios únicos`);
+  
+  if (uniqueExercises.length < 6) {
+    logger.warn(`   ⚠️ Solo ${uniqueExercises.length} ejercicios únicos disponibles (esperado: 6)`);
+  }
+  
   logger.log(`   🔮 Calculando geometrías sagradas y chakras según carta...`);
 
   // Los ejercicios ya vienen ordenados por intensidad de menor a mayor
@@ -502,9 +709,9 @@ function distributeIntoPhases(
   // Fase 2: ejercicios 3-4 (medios)
   // Fase 3: ejercicios 5-6 (más desafiantes)
   
-  const phase1Exercises = exercises.slice(0, 2);
-  const phase2Exercises = exercises.slice(2, 4);
-  const phase3Exercises = exercises.slice(4, 6);
+  const phase1Exercises = uniqueExercises.slice(0, 2);
+  const phase2Exercises = uniqueExercises.slice(2, 4);
+  const phase3Exercises = uniqueExercises.slice(4, 6);
 
   const topPriority = priorities[0]?.priorityArea || 'equilibrio';
 

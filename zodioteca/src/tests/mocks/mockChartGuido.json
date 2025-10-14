@@ -1,0 +1,30 @@
+{
+  "id": "guido-test-chart",
+  "birth_datetime": "1988-10-16T20:50:00.000Z",
+  "location": "Buenos Aires, Argentina",
+  "planets": [
+    { "name": "Sun", "sign": "Libra", "deg": 23.71, "house": 7, "retrograde": false },
+    { "name": "Moon", "sign": "Capricorn", "deg": 2.80, "house": 9, "retrograde": false },
+    { "name": "Mercury", "sign": "Libra", "deg": 12.70, "house": 7, "retrograde": true },
+    { "name": "Venus", "sign": "Virgo", "deg": 14.38, "house": 6, "retrograde": false },
+    { "name": "Mars", "sign": "Aries", "deg": 0.73, "house": 12, "retrograde": true },
+    { "name": "Jupiter", "sign": "Gemini", "deg": 5.30, "house": 2, "retrograde": true },
+    { "name": "Saturn", "sign": "Sagittarius", "deg": 27.70, "house": 9, "retrograde": false },
+    { "name": "Uranus", "sign": "Sagittarius", "deg": 27.77, "house": 9, "retrograde": false },
+    { "name": "Neptune", "sign": "Capricorn", "deg": 7.64, "house": 9, "retrograde": false },
+    { "name": "Pluto", "sign": "Scorpio", "deg": 11.76, "house": 8, "retrograde": false }
+  ],
+  "aspects": [
+    { "a": "Moon", "b": "Saturn", "type": "square", "orb": 5.1 },
+    { "a": "Moon", "b": "Uranus", "type": "square", "orb": 4.97 },
+    { "a": "Moon", "b": "Neptune", "type": "conjunction", "orb": 4.84 },
+    { "a": "Sun", "b": "Mars", "type": "opposition", "orb": 7.02 },
+    { "a": "Mercury", "b": "Mars", "type": "opposition", "orb": 8.03 },
+    { "a": "Saturn", "b": "Uranus", "type": "conjunction", "orb": 0.07 },
+    { "a": "Mars", "b": "Pluto", "type": "quincunx", "orb": 9.03 }
+  ],
+  "angles": {
+    "asc": { "sign": "Aries", "deg": 8.14 },
+    "mc": { "sign": "Capricorn", "deg": 8.92 }
+  }
+}

@@ -5,6 +5,7 @@
  */
 
 import type { NatalChart } from './planetNormalizer';
+import { logger } from '../../utils/logger';
 
 export interface ValidationResult {
   valid: boolean;
@@ -174,6 +175,62 @@ export function sanitizeChart(chart: NatalChart): NatalChart {
             isApplying: a.isApplying
           }))
       : []
+  };
+}
+
+/**
+ * Calcula el nivel de confianza de una carta natal (0-1)
+ * Basado en completitud de datos
+ */
+export function calculateConfidence(chart: NatalChart): {
+  score: number;
+  reasons: string[];
+} {
+  let score = 1.0;
+  const reasons: string[] = [];
+
+  // Sin hora de nacimiento (si birthTime no existe o está vacío)
+  if (!chart.birth_datetime || chart.birth_datetime === '') {
+    score -= 0.35;
+    reasons.push('Sin hora de nacimiento → casas imprecisas');
+  }
+
+  // Planetas incompletos
+  if (!chart.planets || chart.planets.length < 10) {
+    score -= 0.15;
+    reasons.push(`Solo ${chart.planets?.length || 0} planetas detectados (esperado: 10+)`);
+  }
+
+  // Aspectos insuficientes
+  if (!chart.aspects || chart.aspects.length < 5) {
+    score -= 0.2;
+    reasons.push(`Solo ${chart.aspects?.length || 0} aspectos detectados (esperado: 5+)`);
+  }
+
+  // Casas incompletas (verificar si todos los planetas tienen house válido)
+  const planetsWithValidHouse = chart.planets?.filter(p => p.house >= 1 && p.house <= 12).length || 0;
+  if (planetsWithValidHouse < (chart.planets?.length || 0)) {
+    score -= 0.2;
+    reasons.push(`Planetas sin casa válida: ${(chart.planets?.length || 0) - planetsWithValidHouse}`);
+  }
+
+  // Luna sin aspectos (reduce info emocional)
+  const moonAspects = chart.aspects?.filter(a => a.a === 'Moon' || a.b === 'Moon').length || 0;
+  if (moonAspects === 0) {
+    score -= 0.1;
+    reasons.push('Luna sin aspectos → análisis emocional limitado');
+  }
+
+  const finalScore = Math.max(0, Math.min(1, score));
+  
+  logger.log('📊 [Confidence] Calculado:', {
+    score: finalScore.toFixed(2),
+    reasons: reasons.length > 0 ? reasons : ['Carta completa']
+  });
+
+  return {
+    score: finalScore,
+    reasons: reasons.length > 0 ? reasons : ['Carta natal completa y confiable']
   };
 }
 

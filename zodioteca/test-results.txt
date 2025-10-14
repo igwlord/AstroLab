@@ -1,0 +1,276 @@
+
+> zodioteca@0.0.0 test:guido
+> tsx scripts/validate-guido-chart.ts
+
+
+============================================================
+[1m[36m­ƒôï VALIDACI├ôN SISTEMA v3.0 - CARTA NATAL GUIDO[0m
+============================================================
+
+
+============================================================
+[1m[36mTEST 1: Elemento Dominante[0m
+============================================================
+
+[1m[36m­ƒöì An├ílisis:[0m
+Luna: Capricornio (tierra) - Casa 9
+Sol: Libra (aire) - Casa 7
+Mercurio: Libra (aire) Rx
+Venus: Virgo (tierra)
+Marte: Aries (fuego) Rx
+J├║piter: G├®minis (aire) Rx
+Saturno: Sagitario (fuego)
+Urano: Sagitario (fuego)
+Neptuno: Capricornio (tierra)
+Plut├│n: Escorpio (agua)
+
+[1m[32mÔ£à Resultado:[0m
+Elemento: FIRE
+Esperado: FIRE, EARTH o AIR (competencia cercana)
+Estado: CORRECTO Ô£ô
+Explicaci├│n: FIRE=7.0 (Mars+Saturn+Uranus con aspectos + ASC Aries)
+             EARTH=6.5, AIR=6.5
+
+
+============================================================
+[1m[36mTEST 2: Estr├®s Lunar[0m
+============================================================
+
+[1m[36m­ƒöì Factores de Estr├®s:[0m
+Luna en Capricornio (ca├¡da) - Casa 9
+Aspectos tensos:
+- ÔÿÉ Luna cuadratura Saturno (orbe 5.1┬░)
+- ÔÿÉ Luna cuadratura Urano (orbe 4.97┬░)
+- Ôùï Luna conjunci├│n Neptuno (orbe 4.84┬░)
+
+Estr├®s esperado: ÔëÑ 5.0/10 (ALTO)
+
+
+============================================================
+[1m[36mTEST 3: Confianza del Plan[0m
+============================================================
+
+­ƒôè [Confidence] Calculado: { score: '1.00', reasons: [ 'Carta completa' ] }
+[1m[36m­ƒöì Factores de Confianza:[0m
+Ô£ô Planetas: 10/10
+Ô£ô Aspectos: 7 aspectos
+Ô£ô Luna con aspectos: 3 aspectos
+Ô£ô Datos completos
+
+Penalizaciones: Carta natal completa y confiable
+
+[1m[32mÔ£à Resultado:[0m
+Confianza: 100%
+Esperado: ÔëÑ 85%
+Estado: CORRECTO Ô£ô
+
+
+============================================================
+[1m[36mTEST 4: Generaci├│n de Plan v3.0[0m
+============================================================
+
+ÔÅ│ Generando plan completo...
+
+­ƒÜÇ INICIANDO GENERACI├ôN DE PLAN (v2.0)
+­ƒôï Fase 1: Validaci├│n de carta...
+­ƒöì Fase 2: An├ílisis de carta...
+­ƒôè [ChartAnalyzer] Planetas encontrados: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto
+­ƒôè [ChartAnalyzer] Total de aspectos en la carta: 7
+­ƒîÖ [MoonStress] Analizando Luna: { sign: 'Capricorn', house: 9, aspectsCount: 7 }
+­ƒîÖ [MoonStress] Aspectos de la Luna: 3
+­ƒîÖ [MoonStress] Dignidad: {
+  type: 'detriment',
+  strength: -2,
+  description: 'Moon est├í en detrimento en Capricorn (m├íxima debilidad)'
+}
+­ƒîÖ [MoonStress] Resultado: {
+  rawStress: '8.00',
+  finalStress: 8,
+  tenseAspects: 2,
+  harmoniousAspects: 0,
+  dignity: 'detriment',
+  log: [
+    'Base neutral: 2.0',
+    'square con Saturn (orb 5.1┬░): +2.5',
+    'square con Uranus (orb 5.0┬░): +1.5',
+    'Luna en detrimento (Capricorn): +2'
+  ]
+}
+­ƒôè [ChartAnalyzer] An├ílisis de Luna completado: {
+  house: 9,
+  sign: 'Capricorn',
+  dignity: {
+    type: 'detriment',
+    strength: -2,
+    description: 'Moon est├í en detrimento en Capricorn (m├íxima debilidad)'
+  },
+  hardAspects: 0,
+  softAspects: 0,
+  stressScore: 8
+}
+   - Luna estr├®s: 8/10
+   - Tensiones: 0, Armon├¡as: 0
+   - Dignidades d├®biles: 5
+ÔÜÖ´©Å  Fase 3: Evaluando reglas...
+[Rule emotional-stress-moon] Triggered: {
+  priorityArea: 'Emocional',
+  severity: 3,
+  indicators: [ 'Luna en detrimento' ],
+  confidence: 0.7
+}
+[Rule communication-mercury-retro] Triggered: {
+  priorityArea: 'Comunicaci├│n',
+  severity: 2,
+  indicators: [ 'Mercurio retr├│grado', '4 planetas mutables' ],
+  confidence: 0.85
+}
+[Rule grounding-mutable-stellium] Triggered: {
+  priorityArea: 'Grounding',
+  severity: 2,
+  indicators: [ '4 planetas mutables (energ├¡a dispersa)', 'Stellium en casa(s) 9' ],
+  confidence: 0.8
+}
+[Rule weak-dignities] Triggered: {
+  priorityArea: 'Integraci├│n',
+  severity: 2,
+  indicators: [
+    'Sun en fall (Libra)',
+    'Moon en detriment (Capricorn)',
+    'Venus en fall (Virgo)',
+    'Jupiter en detriment (Gemini)',
+    'Neptune en fall (Capricorn)'
+  ],
+  confidence: 0.75
+}
+[Rule maintenance-baseline] Triggered: {
+  priorityArea: 'Mantenimiento',
+  severity: 1,
+  indicators: [ 'No patrones cr├¡ticos detectados' ],
+  confidence: 0.6
+}
+   - Reglas activadas: 5
+­ƒôè Fase 4: Scoring y priorizaci├│n...
+   - Prioridades finales: 5
+   - Top ├íreas: Emocional, Integraci├│n, Comunicaci├│n
+   - Top 3:
+1. Emocional (score: 76, confianza: 70%)
+2. Integraci├│n (score: 73, confianza: 75%)
+3. Comunicaci├│n (score: 62, confianza: 85%)
+­ƒÄ» Fase 5: Seleccionando ejercicios...
+   ­ƒöì Selecci├│n inteligente:
+      Elemento dominante: fire
+      Elemento secundario: earth
+      Modalidad: cardinal
+      Moon stress: 8.0/10
+   ­ƒôî Prioridad "Emocional": 4 sugerencias
+      ­ƒôè Respiraci├│n 4-6-8: score 0.20
+      ­ƒôè Diario Emocional de 10 Minutos: score 0.50
+   ­ƒôî Prioridad "Integraci├│n": 4 sugerencias
+   ­ƒôî Prioridad "Comunicaci├│n": 4 sugerencias
+      ­ƒôè Diario Emocional de 10 Minutos: score 0.50
+   ­ƒôî Prioridad "Grounding": 4 sugerencias
+   ­ƒôî Prioridad "Mantenimiento": 4 sugerencias
+      ­ƒôè Respiraci├│n 4-6-8: score 0.20
+   ­ƒôè Ejercicios seleccionados con balance:
+      Dominante (fire): 0
+      Secundario (earth): 0
+   ÔÜá´©Å Insuficientes ejercicios, activando fallback...
+      Ô£ô Fallback: Respiraci├│n 4-6-8 (Respiraci├│n)
+      Ô£ô Fallback: Diario Emocional de 10 Minutos (Emocional)
+      Ô£ô Fallback: Relajaci├│n Muscular Progresiva (F├¡sico)
+      Ô£ô Fallback: Checklist de Rutina Matutina (Estructura)
+      Ô£ô Fallback: Leer Ficci├│n (20 min) (Mental)
+      Ô£ô Fallback: Dibujo Libre (Doodling) (Creatividad)
+   Ô£à Total seleccionado: 6 ejercicios
+      1. Respiraci├│n 4-6-8 (intensidad: 1, categor├¡a: Respiraci├│n)
+      2. Diario Emocional de 10 Minutos (intensidad: 1, categor├¡a: Emocional)
+      3. Relajaci├│n Muscular Progresiva (intensidad: 1, categor├¡a: F├¡sico)
+      4. Checklist de Rutina Matutina (intensidad: 1, categor├¡a: Estructura)
+      5. Leer Ficci├│n (20 min) (intensidad: 1, categor├¡a: Mental)
+      6. Dibujo Libre (Doodling) (intensidad: 1, categor├¡a: Creatividad)
+   - Ejercicios candidatos: 6
+ÔÜö´©Å  Fase 6: Detectando conflictos...
+   - Conflictos detectados: 0
+   - Ejercicios finales: 6 (removidos: 0)
+­ƒôà Fase 7: Distribuyendo en fases...
+   - Distribuyendo 6 ejercicios en 3 fases (2 por fase)...
+   ­ƒö« Calculando geometr├¡as sagradas y chakras seg├║n carta...
+   ­ƒö« Signo dominante: Aries (elemento: fire, dignidades d├®biles: 5, luna stress: 8)
+   ­ƒö« Fase 1: Tetraedro (Aries) + Chakra Root
+   ­ƒö« Signo dominante: Aries (elemento: fire, dignidades d├®biles: 5, luna stress: 8)
+   ­ƒö« Fase 2: Esfera (Aries) + Chakra Sacral
+   ­ƒö« Signo dominante: Aries (elemento: fire, dignidades d├®biles: 5, luna stress: 8)
+   ­ƒö« Fase 3: Flor de la Vida (Aries) + Chakra Crown
+   Ô£ô Fase 1 (f├ícil): Respiraci├│n 4-6-8, Diario Emocional de 10 Minutos
+   Ô£ô Fase 2 (medio): Relajaci├│n Muscular Progresiva, Checklist de Rutina Matutina
+   Ô£ô Fase 3 (variado): Leer Ficci├│n (20 min), Dibujo Libre (Doodling)
+­ƒôè Fase 7.5: Calculando confidence...
+­ƒôè [Confidence] Calculado: { score: '1.00', reasons: [ 'Carta completa' ] }
+   - Confidence score: 1.00
+Ô£à PLAN GENERADO CON ├ëXITO (v3.0)
+   - Total: 6 ejercicios
+   - Tiempo diario estimado: 3 min
+   - Confidence: 1.00 Ô£ô
+[1m[36m­ƒöì Plan Generado:[0m
+Versi├│n: 3.0.0
+Total ejercicios: 6
+Ejercicios ├║nicos: 6
+Elemento dominante: fire
+Estr├®s lunar: 8.0/10
+
+[1m[32mÔ£à Validaciones:[0m
+Ô£ô Versi├│n: Ô£ô (3.0.0)
+Ô£ô Estr├®s lunar: Ô£ô (8.0/10)
+Ô£ô Confianza incluida: Ô£ô
+Ô£ô Confianza alta: Ô£ô (100%)
+Ô£ô 3 fases: Ô£ô
+
+
+============================================================
+[1m[36mTEST 5: Ejercicios Seleccionados[0m
+============================================================
+
+[1m[36m­ƒöì Por Fase:[0m
+FASE 1 (d├¡as 1-7, nivel f├ícil): 2 ejercicios
+  1. Respiraci├│n 4-6-8 (Respiraci├│n)
+  2. Diario Emocional de 10 Minutos (Emocional)
+
+FASE 2 (d├¡as 8-14, nivel medio): 2 ejercicios
+  1. Relajaci├│n Muscular Progresiva (F├¡sico)
+  2. Checklist de Rutina Matutina (Estructura)
+
+FASE 3 (d├¡as 15-21, nivel variado): 2 ejercicios
+  1. Leer Ficci├│n (20 min) (Mental)
+  2. Dibujo Libre (Doodling) (Creatividad)
+
+[1m[33mÔ£à Ejercicios de Tierra/Grounding:[0m
+Total: 0/6
+Nombres: Ninguno
+Estado: REVISAR ÔÜá
+
+[1m[32mÔ£à Ejercicios para Estr├®s:[0m
+Total: 2/6
+Nombres: Respiraci├│n 4-6-8, Diario Emocional de 10 Minutos
+Estado: CORRECTO Ô£ô
+
+
+============================================================
+[1m[36m­ƒôè RESUMEN DE VALIDACI├ôN[0m
+============================================================
+
+[1mTests pasados: 6/7 (86%)[0m
+
+Ô£à [32mElemento dominante[0m
+Ô£à [32mEstr├®s lunar alto[0m
+Ô£à [32mConfianza alta[0m
+Ô£à [32mPlan v3.0[0m
+Ô£à [32mEstructura completa[0m
+ÔØî [31mEjercicios de grounding[0m
+Ô£à [32mManejo de estr├®s[0m
+
+============================================================
+[1m[33mÔÜá´©Å  VALIDACI├ôN PARCIAL[0m
+El sistema funciona pero hay aspectos a revisar.
+
+
+

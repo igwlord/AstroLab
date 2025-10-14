@@ -1,0 +1,10 @@
+{
+  "id": "mock-chart-minimal",
+  "birth_datetime": "",
+  "location": "Unknown",
+  "planets": [
+    { "name": "Sun", "sign": "Leo", "deg": 15.0, "house": 1, "retrograde": false },
+    { "name": "Moon", "sign": "Capricorn", "deg": 8.5, "house": 6, "retrograde": false }
+  ],
+  "aspects": []
+}
