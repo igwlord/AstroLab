@@ -536,7 +536,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     }
                   }}
                   disabled={!result}
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md sm:rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base"
+                  className="relative overflow-hidden px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md sm:rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-600/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:translate-x-[-100%] hover:before:animate-[shine_1.5s_ease-in-out]"
                   title="Plan de Ejercicios Holístico"
                 >
                   <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

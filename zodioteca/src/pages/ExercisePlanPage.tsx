@@ -210,7 +210,7 @@ export default function ExercisePlanPage() {
                     title="Ver análisis de tu carta"
                   >
                     <span className="text-lg">🔮</span>
-                    <span>Tu Carta</span>
+                    <span>Tu Plan</span>
                   </button>
                 )}
                 
@@ -229,7 +229,7 @@ export default function ExercisePlanPage() {
                   title="Ver mis planes guardados"
                 >
                   <span className="text-lg">📚</span>
-                  <span>Planes</span>
+                  <span>Planes guardados</span>
                 </button>
                 
                 <button
@@ -274,7 +274,7 @@ export default function ExercisePlanPage() {
               <select
                 onChange={(e) => {
                   const action = e.target.value;
-                  if (action === 'tucarta') navigate('/ejercicios/tu-carta');
+                  if (action === 'tuplan') navigate('/ejercicios/tu-carta');
                   else if (action === 'guide') navigate('/ejercicios/guia');
                   else if (action === 'plans') navigate('/saved-plans');
                   else if (action === 'reflexiones') navigate('/reflexiones');
@@ -288,7 +288,7 @@ export default function ExercisePlanPage() {
                   📋 Acciones rápidas...
                 </option>
                 {plan && (
-                  <option value="tucarta">🔮 Ver Tu Carta</option>
+                  <option value="tuplan">🔮 Ver Tu Plan</option>
                 )}
                 <option value="guide">📖 Ver Guía</option>
                 <option value="plans">📚 Planes Guardados</option>
