@@ -158,6 +158,16 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
   const cityInputRef = useRef<HTMLInputElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   
+  // Estados separados para coordenadas manuales
+  const [latDegrees, setLatDegrees] = useState<number>(0);
+  const [latMinutes, setLatMinutes] = useState<number>(0);
+  const [latSeconds, setLatSeconds] = useState<number>(0);
+  const [latDirection, setLatDirection] = useState<'N' | 'S'>('S');
+  const [lonDegrees, setLonDegrees] = useState<number>(0);
+  const [lonMinutes, setLonMinutes] = useState<number>(0);
+  const [lonSeconds, setLonSeconds] = useState<number>(0);
+  const [lonDirection, setLonDirection] = useState<'E' | 'W'>('W');
+  
   // Sistema de casas - inicializar desde el store solo una vez
   const [houseSystem, setHouseSystemState] = useState(() => useSettingsStore.getState().astro.houseSystem);
   
@@ -643,84 +653,282 @@ export default function NatalChartForm({ defaultValues, onSubmit, onCancel }: Na
         <>
         {/* Modo Coordenadas Manuales */}
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Latitud */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-white/90 mb-1.5">
-                Latitud *
-              </label>
+          {/* Latitud - Estilo Astro-Seek */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-white/90 mb-1.5">
+              Latitud: *
+            </label>
+            <div className="flex items-center gap-1.5">
               <input
                 type="number"
-                step="0.0001"
-                min="-90"
+                min="0"
                 max="90"
-                value={formData.location.lat || ''}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, lat: parseFloat(e.target.value) || undefined }
-                }))}
-                className="w-full px-3 py-2.5 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                placeholder="-34.6037"
+                value={latDegrees || ''}
+                onChange={(e) => {
+                  const degrees = parseInt(e.target.value) || 0;
+                  setLatDegrees(degrees);
+                  const direction = latDirection === 'N' ? 1 : -1;
+                  const newLat = direction * (degrees + latMinutes / 60 + latSeconds / 3600);
+                  console.log('🌍 Latitud calculada:', { degrees, minutes: latMinutes, seconds: latSeconds, direction: latDirection, result: newLat });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lat: newLat }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="34"
               />
-              <p className="text-[10px] text-gray-500 dark:text-white/40 mt-1">Sur: negativo, Norte: positivo</p>
-            </div>
-
-            {/* Longitud */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-white/90 mb-1.5">
-                Longitud *
-              </label>
+              <span className="text-gray-600 dark:text-gray-400 text-xs">°</span>
+              
               <input
                 type="number"
-                step="0.0001"
-                min="-180"
-                max="180"
-                value={formData.location.lon || ''}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, lon: parseFloat(e.target.value) || undefined }
-                }))}
-                className="w-full px-3 py-2.5 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                placeholder="-58.3816"
+                min="0"
+                max="59"
+                value={latMinutes || ''}
+                onChange={(e) => {
+                  const minutes = parseInt(e.target.value) || 0;
+                  setLatMinutes(minutes);
+                  const direction = latDirection === 'N' ? 1 : -1;
+                  const newLat = direction * (latDegrees + minutes / 60 + latSeconds / 3600);
+                  console.log('🌍 Latitud calculada:', { degrees: latDegrees, minutes, seconds: latSeconds, direction: latDirection, result: newLat });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lat: newLat }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="36"
               />
-              <p className="text-[10px] text-gray-500 dark:text-white/40 mt-1">Oeste: negativo, Este: positivo</p>
+              <span className="text-gray-600 dark:text-gray-400 text-xs">'</span>
+              
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={latSeconds || ''}
+                onChange={(e) => {
+                  const seconds = parseInt(e.target.value) || 0;
+                  setLatSeconds(seconds);
+                  const direction = latDirection === 'N' ? 1 : -1;
+                  const newLat = direction * (latDegrees + latMinutes / 60 + seconds / 3600);
+                  console.log('🌍 Latitud calculada:', { degrees: latDegrees, minutes: latMinutes, seconds, direction: latDirection, result: newLat });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lat: newLat }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="13"
+              />
+              <span className="text-gray-600 dark:text-gray-400 text-xs">"</span>
+              
+              <select
+                value={latDirection}
+                onChange={(e) => {
+                  const newDirection = e.target.value as 'N' | 'S';
+                  setLatDirection(newDirection);
+                  const direction = newDirection === 'N' ? 1 : -1;
+                  const newLat = direction * (latDegrees + latMinutes / 60 + latSeconds / 3600);
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lat: newLat }
+                  }));
+                }}
+                className="px-2.5 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              >
+                <option value="N">Norte</option>
+                <option value="S">Sur</option>
+              </select>
             </div>
+            <p className="text-[10px] text-gray-500 dark:text-white/40 mt-1">
+              Ejemplo: Buenos Aires = 34° 36' 13" Sur
+            </p>
+          </div>
+
+          {/* Longitud - Estilo Astro-Seek */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-white/90 mb-1.5">
+              Longitud: *
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                min="0"
+                max="180"
+                value={lonDegrees || ''}
+                onChange={(e) => {
+                  const degrees = parseInt(e.target.value) || 0;
+                  setLonDegrees(degrees);
+                  const direction = lonDirection === 'E' ? 1 : -1;
+                  const newLon = direction * (degrees + lonMinutes / 60 + lonSeconds / 3600);
+                  console.log('🌍 Longitud calculada:', { degrees, minutes: lonMinutes, seconds: lonSeconds, direction: lonDirection, result: newLon });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lon: newLon }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="58"
+              />
+              <span className="text-gray-600 dark:text-gray-400 text-xs">°</span>
+              
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={lonMinutes || ''}
+                onChange={(e) => {
+                  const minutes = parseInt(e.target.value) || 0;
+                  setLonMinutes(minutes);
+                  const direction = lonDirection === 'E' ? 1 : -1;
+                  const newLon = direction * (lonDegrees + minutes / 60 + lonSeconds / 3600);
+                  console.log('🌍 Longitud calculada:', { degrees: lonDegrees, minutes, seconds: lonSeconds, direction: lonDirection, result: newLon });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lon: newLon }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="22"
+              />
+              <span className="text-gray-600 dark:text-gray-400 text-xs">'</span>
+              
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={lonSeconds || ''}
+                onChange={(e) => {
+                  const seconds = parseInt(e.target.value) || 0;
+                  setLonSeconds(seconds);
+                  const direction = lonDirection === 'E' ? 1 : -1;
+                  const newLon = direction * (lonDegrees + lonMinutes / 60 + seconds / 3600);
+                  console.log('🌍 Longitud calculada:', { degrees: lonDegrees, minutes: lonMinutes, seconds, direction: lonDirection, result: newLon });
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lon: newLon }
+                  }));
+                }}
+                className="w-14 px-2 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="54"
+              />
+              <span className="text-gray-600 dark:text-gray-400 text-xs">"</span>
+              
+              <select
+                value={lonDirection}
+                onChange={(e) => {
+                  const newDirection = e.target.value as 'E' | 'W';
+                  setLonDirection(newDirection);
+                  const direction = newDirection === 'E' ? 1 : -1;
+                  const newLon = direction * (lonDegrees + lonMinutes / 60 + lonSeconds / 3600);
+                  setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lon: newLon }
+                  }));
+                }}
+                className="px-2.5 py-2 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              >
+                <option value="E">Este</option>
+                <option value="W">Oeste</option>
+              </select>
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-white/40 mt-1">
+              Ejemplo: Buenos Aires = 58° 22' 54" Oeste
+            </p>
           </div>
 
           {/* Timezone */}
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-white/90 mb-1.5">
-              Timezone (IANA) *
+              Zona Horaria (Timezone) *
             </label>
-            <input
-              type="text"
+            <select
               value={formData.location.tzId || ''}
               onChange={(e) => setFormData(prev => ({
                 ...prev,
                 location: { ...prev.location, tzId: e.target.value || undefined }
               }))}
-              className="w-full px-3 py-2.5 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-              placeholder="Europe/Bratislava"
-            />
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 mt-1.5 border border-blue-200 dark:border-blue-600/30">
-              <p className="text-[10px] text-blue-800 dark:text-blue-200 font-medium mb-1">
-                🌍 Formato IANA: Continente/Ciudad
-              </p>
-              <p className="text-[10px] text-blue-700 dark:text-blue-300 space-y-0.5">
-                <span className="block">• Europa: Europe/Bratislava, Europe/Madrid, Europe/London</span>
-                <span className="block">• América: America/New_York, America/Argentina/Buenos_Aires</span>
-                <span className="block">• Asia: Asia/Tokyo, Asia/Shanghai</span>
-                <span className="block">• Oceanía: Pacific/Auckland, Australia/Sydney</span>
-              </p>
-              <a 
-                href="https://www.iana.org/time-zones" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block"
-              >
-                📋 Ver lista completa de timezones →
-              </a>
-            </div>
+              className="w-full px-3 py-2.5 bg-white dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-gray-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            >
+              <option value="">Selecciona una zona horaria...</option>
+              
+              <optgroup label="🌎 América del Sur">
+                <option value="America/Argentina/Buenos_Aires">Argentina - Buenos Aires (UTC-3)</option>
+                <option value="America/Argentina/Cordoba">Argentina - Córdoba (UTC-3)</option>
+                <option value="America/Argentina/Mendoza">Argentina - Mendoza (UTC-3)</option>
+                <option value="America/Argentina/Ushuaia">Argentina - Ushuaia (UTC-3)</option>
+                <option value="America/Santiago">Chile - Santiago (UTC-3/-4)</option>
+                <option value="America/Sao_Paulo">Brasil - São Paulo (UTC-3)</option>
+                <option value="America/Rio_Branco">Brasil - Río Branco (UTC-5)</option>
+                <option value="America/Bogota">Colombia - Bogotá (UTC-5)</option>
+                <option value="America/Lima">Perú - Lima (UTC-5)</option>
+                <option value="America/Caracas">Venezuela - Caracas (UTC-4)</option>
+                <option value="America/La_Paz">Bolivia - La Paz (UTC-4)</option>
+                <option value="America/Asuncion">Paraguay - Asunción (UTC-3/-4)</option>
+                <option value="America/Montevideo">Uruguay - Montevideo (UTC-3)</option>
+                <option value="America/Guayaquil">Ecuador - Guayaquil (UTC-5)</option>
+              </optgroup>
+              
+              <optgroup label="🌎 América Central y Caribe">
+                <option value="America/Mexico_City">México - Ciudad de México (UTC-6)</option>
+                <option value="America/Cancun">México - Cancún (UTC-5)</option>
+                <option value="America/Guatemala">Guatemala (UTC-6)</option>
+                <option value="America/Panama">Panamá (UTC-5)</option>
+                <option value="America/Costa_Rica">Costa Rica (UTC-6)</option>
+                <option value="America/Havana">Cuba - La Habana (UTC-5)</option>
+              </optgroup>
+              
+              <optgroup label="🌎 América del Norte">
+                <option value="America/New_York">EE.UU. - Nueva York (UTC-5/-4)</option>
+                <option value="America/Chicago">EE.UU. - Chicago (UTC-6/-5)</option>
+                <option value="America/Denver">EE.UU. - Denver (UTC-7/-6)</option>
+                <option value="America/Los_Angeles">EE.UU. - Los Ángeles (UTC-8/-7)</option>
+                <option value="America/Toronto">Canadá - Toronto (UTC-5/-4)</option>
+                <option value="America/Vancouver">Canadá - Vancouver (UTC-8/-7)</option>
+              </optgroup>
+              
+              <optgroup label="🌍 Europa">
+                <option value="Europe/Madrid">España - Madrid (UTC+1/+2)</option>
+                <option value="Europe/Barcelona">España - Barcelona (UTC+1/+2)</option>
+                <option value="Europe/London">Reino Unido - Londres (UTC+0/+1)</option>
+                <option value="Europe/Paris">Francia - París (UTC+1/+2)</option>
+                <option value="Europe/Rome">Italia - Roma (UTC+1/+2)</option>
+                <option value="Europe/Berlin">Alemania - Berlín (UTC+1/+2)</option>
+                <option value="Europe/Amsterdam">Países Bajos - Ámsterdam (UTC+1/+2)</option>
+                <option value="Europe/Lisbon">Portugal - Lisboa (UTC+0/+1)</option>
+                <option value="Europe/Athens">Grecia - Atenas (UTC+2/+3)</option>
+                <option value="Europe/Moscow">Rusia - Moscú (UTC+3)</option>
+              </optgroup>
+              
+              <optgroup label="🌏 Asia">
+                <option value="Asia/Tokyo">Japón - Tokio (UTC+9)</option>
+                <option value="Asia/Shanghai">China - Shanghái (UTC+8)</option>
+                <option value="Asia/Seoul">Corea del Sur - Seúl (UTC+9)</option>
+                <option value="Asia/Dubai">EAU - Dubái (UTC+4)</option>
+                <option value="Asia/Kolkata">India - Calcuta (UTC+5:30)</option>
+                <option value="Asia/Bangkok">Tailandia - Bangkok (UTC+7)</option>
+                <option value="Asia/Singapore">Singapur (UTC+8)</option>
+              </optgroup>
+              
+              <optgroup label="🌏 Oceanía">
+                <option value="Australia/Sydney">Australia - Sídney (UTC+10/+11)</option>
+                <option value="Australia/Melbourne">Australia - Melbourne (UTC+10/+11)</option>
+                <option value="Pacific/Auckland">Nueva Zelanda - Auckland (UTC+12/+13)</option>
+              </optgroup>
+              
+              <optgroup label="🌍 África">
+                <option value="Africa/Johannesburg">Sudáfrica - Johannesburgo (UTC+2)</option>
+                <option value="Africa/Cairo">Egipto - El Cairo (UTC+2)</option>
+                <option value="Africa/Lagos">Nigeria - Lagos (UTC+1)</option>
+              </optgroup>
+              
+              <optgroup label="⏰ Otros">
+                <option value="UTC">UTC (Tiempo Universal Coordinado)</option>
+              </optgroup>
+            </select>
+            <p className="text-[10px] text-gray-500 dark:text-white/40 mt-1">
+              💡 Selecciona la zona horaria del lugar de nacimiento
+            </p>
           </div>
 
           {/* Nombre de ubicación (opcional) */}
