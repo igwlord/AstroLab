@@ -15,6 +15,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
+import AccordionSection from '../components/AccordionSection';
 
 export default function ExerciseChartPage() {
   const navigate = useNavigate();
@@ -180,17 +181,14 @@ export default function ExerciseChartPage() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="space-y-6">
-          {/* 1. CONFIGURACIÓN ELEMENTAL Y MODAL - Optimizado móvil */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="text-xl sm:text-2xl">⭐</span>
-              <h2 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-white">
-                Tu Configuración Base
-              </h2>
-            </div>
-
+        {/* Content - Con Acordeones */}
+        <div className="space-y-4">
+          {/* 1. CONFIGURACIÓN ELEMENTAL Y MODAL */}
+          <AccordionSection 
+            title="Tu Configuración Base" 
+            icon="⭐" 
+            defaultOpen={true}
+          >
             {/* Interpretación Holística Elementos - Móvil optimizado */}
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border-l-4 border-purple-500">
               <h3 className="font-bold text-purple-900 dark:text-purple-100 mb-2 text-sm sm:text-base">🔥 Tu Balance Elemental</h3>
@@ -308,16 +306,14 @@ export default function ExerciseChartPage() {
                 );
               })()}
             </div>
-          </section>
+          </AccordionSection>
 
-          {/* Análisis de Planetas */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="text-xl">📊</span>
-              <h2 className="text-lg font-bold text-purple-900 dark:text-white">
-                Análisis de Planetas
-              </h2>
-            </div>
+          {/* 2. ANÁLISIS DE PLANETAS */}
+          <AccordionSection 
+            title="Análisis de Planetas" 
+            icon="📊" 
+            defaultOpen={false}
+          >
 
             <div className="space-y-4">
               {/* Luna - SIEMPRE visible */}
@@ -428,16 +424,15 @@ export default function ExerciseChartPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </AccordionSection>
 
           {/* 2. DIGNIDADES PLANETARIAS */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="text-xl sm:text-2xl">👑</span>
-              <h2 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-white">
-                Dignidades Planetarias
-              </h2>
-            </div>
+          <AccordionSection
+            title="Dignidades Planetarias"
+            icon="👑"
+            defaultOpen={false}
+            count={chartAnalysis.strongDignities.length + chartAnalysis.weakDignities.length}
+          >
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Las dignidades planetarias revelan qué planetas funcionan con facilidad (talentos innatos) y cuáles requieren trabajo consciente (áreas de crecimiento).
             </p>
@@ -506,17 +501,16 @@ export default function ExerciseChartPage() {
                 </div>
               )}
             </div>
-          </section>
+          </AccordionSection>
 
           {/* 3. STELLIUMS Y CONCENTRACIONES */}
           {chartAnalysis.stelliumHouses.length > 0 && (
-            <section className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <span className="text-xl sm:text-2xl">🌟</span>
-                <h2 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-white">
-                  Stelliums - Concentraciones de Energía
-                </h2>
-              </div>
+            <AccordionSection
+              title="Stelliums - Concentraciones de Energía"
+              icon="🌟"
+              defaultOpen={false}
+              count={chartAnalysis.stelliumHouses.length}
+            >
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Un <strong>stellium</strong> ocurre cuando 3 o más planetas se concentran en la misma casa. Esto indica un área de vida de <strong>importancia crucial</strong> para ti.
               </p>
@@ -559,17 +553,15 @@ export default function ExerciseChartPage() {
                   );
                 })}
               </div>
-            </section>
+            </AccordionSection>
           )}
 
           {/* 4. POLARIZACIONES Y DESBALANCES */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="text-xl sm:text-2xl">⚖️</span>
-              <h2 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-white">
-                Polarizaciones y Desbalances
-              </h2>
-            </div>
+          <AccordionSection
+            title="Polarizaciones y Desbalances"
+            icon="⚖️"
+            defaultOpen={false}
+          >
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Los desbalances elementales y modales revelan áreas donde necesitas trabajar para lograr mayor equilibrio interior.
             </p>
@@ -672,18 +664,16 @@ export default function ExerciseChartPage() {
                 return null;
               })()}
             </div>
-          </section>
+          </AccordionSection>
 
           {/* 5. SÍNTESIS: POR QUÉ ESTOS EJERCICIOS */}
-          <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-indigo-900/30 rounded-xl p-6 shadow-xl border-2 border-purple-300 dark:border-purple-600">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="text-xl sm:text-2xl">🎯</span>
-              <h2 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-white">
-                Síntesis: Por Qué Este Plan es Para Ti
-              </h2>
-            </div>
-
-            <div className="space-y-4">
+          <AccordionSection
+            title="Síntesis: Por Qué Este Plan es Para Ti"
+            icon="🎯"
+            defaultOpen={false}
+          >
+            <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-indigo-900/30 rounded-xl p-6 border-2 border-purple-300 dark:border-purple-600">
+              <div className="space-y-4 sm:space-y-6">
               {/* Resumen de Áreas Prioritarias */}
               <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
@@ -804,8 +794,9 @@ export default function ExerciseChartPage() {
                   </ul>
                 </div>
               )}
+              </div>
             </div>
-          </section>
+          </AccordionSection>
 
           {/* Botón de acción - Móvil optimizado */}
           <div className="text-center mt-6">
