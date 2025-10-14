@@ -3,7 +3,7 @@
  * Incluye: planetas personales, aspectos, transpersonales, etc.
  */
 
-import { X } from 'lucide-react';
+import { X } from '../utils/icons';
 import type { DailyWeather } from '../services/dailyWeather';
 import { normalizeAspectKey, getAspectUI } from '../constants/aspectsStandard';
 

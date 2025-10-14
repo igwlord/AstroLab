@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Check, Clock, Calendar } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Clock, Calendar } from '../utils/icons';
 import type { ExerciseTemplate } from '../services/exercises/exerciseDatabase';
 
 interface ExerciseCardProps {

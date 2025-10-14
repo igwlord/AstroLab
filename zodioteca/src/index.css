@@ -1,6 +1,8 @@
+/* stylelint-disable at-rule-no-unknown */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* stylelint-enable at-rule-no-unknown */
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -467,15 +469,16 @@ html.dark .bg-cyan-500 {
    - .modal-icon-*: Iconos en 3 tamaños
    =================================================== */
 
+/* stylelint-disable at-rule-no-unknown */
 @layer utilities {
   /* Container principal de modal - Optimizado móvil */
   .modal-content {
-    @apply p-3 sm:p-4 md:p-5 lg:p-6 space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6;
+    @apply p-3 sm:p-4 md:p-4 lg:p-5 space-y-3 sm:space-y-4 md:space-y-4 lg:space-y-5;
   }
   
   /* Secciones internas - Compactas en móvil */
   .modal-section {
-    @apply p-2.5 sm:p-3 md:p-4 lg:p-5 rounded-lg sm:rounded-xl;
+    @apply p-2.5 sm:p-3 md:p-3 lg:p-4 rounded-lg sm:rounded-xl;
   }
   
   /* Títulos H3 - Progressive enhancement */
@@ -528,6 +531,7 @@ html.dark .bg-cyan-500 {
     @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl;
   }
 }
+/* stylelint-enable at-rule-no-unknown */
 
 /* ===================================================
    NOTAS DE OPTIMIZACIÓN FASE 7

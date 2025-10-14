@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, TrendingUp, Cloud, Zap } from 'lucide-react';
+import { Sparkles, TrendingUp, Cloud, Zap } from '../utils/icons';
 
 export default function WelcomePage() {
   const navigate = useNavigate();

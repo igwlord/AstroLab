@@ -3,7 +3,7 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Trash2, X } from '../utils/icons';
 import type { Reflection } from '../types/reflection';
 
 interface ReflectionDeleteConfirmProps {

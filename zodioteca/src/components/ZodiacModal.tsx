@@ -13,14 +13,24 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
+      const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.documentElement.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.documentElement.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
     }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -81,12 +91,13 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center pt-16 pb-4 px-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 pb-8 px-4 md:px-8 bg-black/75 overflow-y-auto"
       onClick={handleBackdropClick}
+      style={{ isolation: 'isolate' }}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[calc(100vh-5rem)] sm:max-h-[88vh] my-auto overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn"
+        className="relative w-full max-w-4xl h-auto max-h-[calc(100vh-8rem)] overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl flex flex-col bg-white dark:bg-gray-900"
       >
         {/* Header con gradiente del elemento */}
         <div className={`relative bg-gradient-to-r ${elementStyle.gradient} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>
@@ -155,7 +166,7 @@ const ZodiacModal: React.FC<ZodiacModalProps> = ({ sign, isOpen, onClose }) => {
         </div>
 
         {/* Contenido scrolleable */}
-        <div className="bg-white dark:bg-gray-900 overflow-y-auto max-h-[calc(88vh-100px)] sm:max-h-[calc(90vh-140px)] md:max-h-[calc(90vh-180px)] lg:max-h-[calc(90vh-200px)] modal-content">
+        <div className="bg-white dark:bg-gray-900 overflow-y-auto flex-1 min-h-0 overscroll-contain modal-content">
           {/* Descripción extensa */}
           <section>
             <h3 className="modal-h3 text-purple-900 dark:text-purple-100 flex items-center gap-2">

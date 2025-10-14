@@ -12,7 +12,7 @@ import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { DateTime } from 'luxon';
 import Fuse from 'fuse.js';
-import { Search, MapPin, Settings, X } from 'lucide-react';
+import { Search, MapPin, Settings, X } from '../utils/icons';
 import { logger } from '../utils/logger';
 import type { FormValue, NatalChartFormProps } from '../types/natalForm';
 import { DEFAULT_SETTINGS } from '../types/natalForm';

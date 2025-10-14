@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { cn } from '../utils/cn';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from '../utils/icons';
 
 interface Step {
   id: string;

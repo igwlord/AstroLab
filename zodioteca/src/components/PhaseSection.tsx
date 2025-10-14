@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from '../utils/icons';
 import ExerciseCard from './ExerciseCard';
 import type { ExercisePhase } from '../services/exercises/planGenerator';
 

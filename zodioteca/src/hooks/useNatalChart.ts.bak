@@ -1,0 +1,184 @@
+/**
+ * 🎯 Hook personalizado para manejo de Carta Natal
+ * 
+ * Extrae la lógica de cálculo y gestión de estado de NatalChartPage
+ * para reducir el tamaño del componente y mejorar reusabilidad.
+ * 
+ * Optimización: Reduce NatalChartPage de ~3000 líneas a ~800 líneas
+ */
+
+import { useState, useCallback, useRef } from 'react';
+import { calculateNatalChart, type NatalChart } from '../services/realAstroCalculator';
+import { calculateChartStatistics } from '../utils/chartStatistics';
+import { detectChartShape } from '../utils/chartShapeAnalyzer';
+import { detectPolarizations } from '../utils/polarizationDetector';
+import type { FormValue } from '../types/natalForm';
+import type { ChartStatistics } from '../types/chartStatistics';
+import type { HouseSystem } from '../types/houseSystem';
+import { logger } from '../utils/logger';
+
+export interface ChartMetadata {
+  localDate: string;
+  utcDate: string;
+  lst: string;
+  timezone: string;
+  latitude: string;
+  longitude: string;
+  city: string;
+  country: string;
+  countryCode: string;
+  houseSystem: string;
+}
+
+export interface UseNatalChartReturn {
+  // Estado
+  result: NatalChart | null;
+  statistics: ChartStatistics | null;
+  chartMetadata: ChartMetadata | null;
+  personName: string;
+  isCalculating: boolean;
+  error: string | null;
+  savedFormData: FormValue | null;
+  chartRef: React.RefObject<HTMLDivElement>;
+  
+  // Acciones
+  calculate: (formData: FormValue, houseSystem: HouseSystem) => Promise<void>;
+  recalculate: (newHouseSystem: HouseSystem) => Promise<void>;
+  reset: () => void;
+}
+
+export function useNatalChart(): UseNatalChartReturn {
+  // Estado principal
+  const [result, setResult] = useState<NatalChart | null>(null);
+  const [statistics, setStatistics] = useState<ChartStatistics | null>(null);
+  const [chartMetadata, setChartMetadata] = useState<ChartMetadata | null>(null);
+  const [personName, setPersonName] = useState<string>('');
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [savedFormData, setSavedFormData] = useState<FormValue | null>(null);
+  
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Calcula una carta natal completa con todos los análisis
+   */
+  const calculate = useCallback(async (formData: FormValue, houseSystem: HouseSystem) => {
+    logger.log('🔮 Iniciando cálculo de carta natal...');
+    logger.log('📋 Datos del formulario:', formData);
+    
+    setIsCalculating(true);
+    setError(null);
+
+    try {
+      // Guardar datos del formulario para recálculo
+      setSavedFormData(formData);
+
+      // Construir nombre completo
+      const fullName = [formData.name, formData.surname]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      setPersonName(fullName || 'Carta sin nombre');
+
+      // Calcular carta natal
+      const startTime = performance.now();
+      const chart = await calculateNatalChart(formData);
+      const calcTime = performance.now() - startTime;
+      
+      logger.log(`✅ Carta calculada en ${Math.round(calcTime)}ms`);
+
+      // Calcular estadísticas
+      const stats = calculateChartStatistics(chart);
+      logger.log('📊 Estadísticas calculadas');
+
+      // Detectar configuraciones
+      const chartShape = detectChartShape(chart);
+      logger.log('🔷 Forma de la carta detectada:', chartShape);
+
+      const polarizations = detectPolarizations(chart);
+      logger.log('⚖️ Polarizaciones detectadas');
+
+      // Construir metadata
+      const metadata: ChartMetadata = {
+        localDate: new Date(formData.datetime).toLocaleString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        utcDate: new Date(formData.datetime).toISOString(),
+        lst: chart.houses.lst || 'N/A',
+        timezone: formData.timezone || 'UTC',
+        latitude: formData.latitude.toString(),
+        longitude: formData.longitude.toString(),
+        city: formData.city || 'Ubicación desconocida',
+        country: formData.country || '',
+        countryCode: formData.countryCode || '',
+        houseSystem: houseSystem
+      };
+
+      // Actualizar estado
+      setResult(chart);
+      setStatistics(stats);
+      setChartMetadata(metadata);
+      setError(null);
+
+      logger.log('✅ Cálculo completado exitosamente');
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      logger.error('❌ Error calculando carta natal:', err);
+      setError(errorMessage);
+      setResult(null);
+      setStatistics(null);
+      setChartMetadata(null);
+    } finally {
+      setIsCalculating(false);
+    }
+  }, []);
+
+  /**
+   * Recalcula la carta con un sistema de casas diferente
+   */
+  const recalculate = useCallback(async (newHouseSystem: HouseSystem) => {
+    if (!savedFormData) {
+      logger.warn('⚠️ No hay datos guardados para recalcular');
+      return;
+    }
+
+    logger.log(`🔄 Recalculando con sistema de casas: ${newHouseSystem}`);
+    await calculate(savedFormData, newHouseSystem);
+  }, [savedFormData, calculate]);
+
+  /**
+   * Resetea todo el estado
+   */
+  const reset = useCallback(() => {
+    logger.log('🔄 Reseteando carta natal');
+    setResult(null);
+    setStatistics(null);
+    setChartMetadata(null);
+    setPersonName('');
+    setError(null);
+    setSavedFormData(null);
+  }, []);
+
+  return {
+    // Estado
+    result,
+    statistics,
+    chartMetadata,
+    personName,
+    isCalculating,
+    error,
+    savedFormData,
+    chartRef,
+    
+    // Acciones
+    calculate,
+    recalculate,
+    reset
+  };
+}

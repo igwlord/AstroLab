@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SupabaseProvider } from './context/SupabaseContext';
@@ -7,6 +7,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { I18nProvider } from './i18n';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
+import DashboardLoadingFallback from './components/DashboardLoadingFallback';
+import NatalChartLoadingFallback from './components/NatalChartLoadingFallback';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ServiceWorkerUpdatePrompt } from './utils/sw-update-prompt';
 import { ToastProvider } from './components/ToastProvider';
@@ -18,9 +20,14 @@ const FloatingMiniPlayer = lazy(() => import('./components/FloatingMiniPlayer'))
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
+
+// 🚀 Dashboard con preload desde login/welcome
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
 const ExercisePlanPage = lazy(() => import('./pages/ExercisePlanPage'));
+const ExerciseChartPage = lazy(() => import('./pages/ExerciseChartPage'));
+const ExerciseGuidePage = lazy(() => import('./pages/ExerciseGuidePage'));
 const SavedPlansPage = lazy(() => import('./pages/SavedPlansPage'));
 const GlossaryPage = lazy(() => import('./pages/GlossaryPage'));
 const FrequenciesPage = lazy(() => import('./pages/FrequenciesPage'));
@@ -43,7 +50,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // RUTAS PÚBLICAS
 // ============================================
 
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // 🚀 Precargar Dashboard desde TODAS las rutas públicas
+  // (login, signup, reset-password, welcome)
+  useEffect(() => {
+    const path = window.location.pathname;
+    const publicRoutes = ['/', '/login', '/welcome', '/reset-password'];
+    
+    if (publicRoutes.includes(path)) {
+      // Preload Dashboard después de 1 segundo (usuario leyendo/completando form)
+      const timer = setTimeout(() => {
+        import('./pages/Dashboard').then(() => {
+          console.log(`✅ Dashboard precargado desde ${path}`);
+        });
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
+  return <>{children}</>;
+};
 
 // ============================================
 // APP
@@ -78,20 +104,24 @@ function AppRoutes() {
           </PublicRoute>
         } />
       
-      {/* Dashboard */}
+      {/* Dashboard con skeleton específico */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout>
-            <Dashboard />
+            <Suspense fallback={<DashboardLoadingFallback />}>
+              <Dashboard />
+            </Suspense>
           </Layout>
         </ProtectedRoute>
       } />
       
-      {/* Carta Natal */}
+      {/* Carta Natal con skeleton específico */}
       <Route path="/natal-chart" element={
         <ProtectedRoute>
           <Layout>
-            <NatalChartPage />
+            <Suspense fallback={<NatalChartLoadingFallback />}>
+              <NatalChartPage />
+            </Suspense>
           </Layout>
         </ProtectedRoute>
       } />
@@ -101,6 +131,24 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <ExercisePlanPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      {/* Ejercicios - Tu Carta */}
+      <Route path="/ejercicios/tu-carta" element={
+        <ProtectedRoute>
+          <Layout>
+            <ExerciseChartPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      {/* Ejercicios - Guía */}
+      <Route path="/ejercicios/guia" element={
+        <ProtectedRoute>
+          <Layout>
+            <ExerciseGuidePage />
           </Layout>
         </ProtectedRoute>
       } />

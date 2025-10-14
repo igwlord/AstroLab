@@ -1,7 +1,7 @@
 import { Fragment, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Trash2, FileDown, Edit3 } from 'lucide-react';
+import { X, Trash2, Edit3 } from '../utils/icons';
 import type { ChartWithStatus } from '../services/chartStorage';
 import { adaptChartData } from '../utils/chartAdapter';
 import ChartViewTabs from './ChartViewTabs';
@@ -15,7 +15,6 @@ import PolarizationsChartView from './PolarizationsChartView';
 import { detectChartShape } from '../utils/chartShapeAnalyzer';
 import type { PlanetPosition } from '../types/chartShape';
 import type { NatalChart } from '../services/realAstroCalculator';
-import { exportChartToPDF } from '../services/pdfExportService';
 
 // Helper: Obtener offset del signo (0° Aries = 0°, 0° Tauro = 30°, etc.)
 const getSignOffset = (sign: string): number => {
@@ -72,20 +71,6 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
     if (onEdit) {
       onEdit(chart);
       onClose();
-    }
-  };
-
-  const handleExportPDF = async () => {
-    try {
-      await exportChartToPDF(chart, {
-        includeAllTabs: true,
-        quality: 0.95
-      });
-      // Mostrar confirmación
-      alert('✅ PDF generado exitosamente!');
-    } catch (error) {
-      console.error('Error al exportar PDF:', error);
-      alert('❌ Error al generar el PDF. Por favor, intenta de nuevo.');
     }
   };
 
@@ -306,15 +291,6 @@ const SavedChartModal: FC<SavedChartModalProps> = ({
                           <span className="hidden sm:inline">Editar</span>
                         </button>
                       )}
-                      
-                      <button
-                        onClick={handleExportPDF}
-                        className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
-                        title="Exportar PDF"
-                      >
-                        <FileDown className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                        <span className="hidden sm:inline">PDF</span>
-                      </button>
                     </div>
 
                     {/* Acción destructiva - lado derecho */}

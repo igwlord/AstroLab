@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../utils/icons';
 import type { ChartWithStatus } from '../services/chartStorage';
 import NatalChartWheelPro from './NatalChartWheelPro';
 import { adaptChartData } from '../utils/chartAdapter';

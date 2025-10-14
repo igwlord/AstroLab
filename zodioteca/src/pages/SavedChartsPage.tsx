@@ -27,7 +27,7 @@ import {
   Loader,
   FileDown,
   FileUp,
-} from 'lucide-react';
+} from '../utils/icons';
 
 const SavedChartsPage: FC = () => {
   const { t } = useI18n();

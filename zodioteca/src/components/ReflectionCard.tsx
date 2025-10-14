@@ -4,7 +4,7 @@
  */
 
 import { motion } from 'framer-motion';
-import { Edit2, Trash2, Calendar, Tag, FileText } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Tag, FileText } from '../utils/icons';
 import type { Reflection } from '../types/reflection';
 
 interface ReflectionCardProps {

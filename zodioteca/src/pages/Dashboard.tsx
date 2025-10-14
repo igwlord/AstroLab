@@ -3,19 +3,20 @@ import AstrologicalWeatherCard from '../components/AstrologicalWeatherCard';
 import DailyChartWheel from '../components/DailyChartWheel';
 import WeatherDetailsModal from '../components/WeatherDetailsModal';
 import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
-import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
+import { useDailyWeather } from '../hooks/useDailyWeather';
 import { logger } from '../utils/logger';
 import type { PlanetData } from '../components/DailyChartWheel';
-import { Info } from 'lucide-react';
+import { Info } from '../utils/icons';
 import { PLANET_COLORS } from '../constants/designTokens';
 
 const Dashboard: React.FC = () => {
   const [chartSize, setChartSize] = useState(500);
   const [planets, setPlanets] = useState<PlanetData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [weather, setWeather] = useState<DailyWeather | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fadeIn, setFadeIn] = useState(true);
+  
+  // Usar hook compartido para el clima (evita duplicación)
+  const { weather, isLoading } = useDailyWeather();
 
   useEffect(() => {
     const updateSize = () => {
@@ -36,95 +37,87 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Cargar datos astrológicos reales
+  // Mapear planetas del weather cuando esté disponible
   useEffect(() => {
-    const loadAstrologicalData = async () => {
-      try {
-        setIsLoading(true);
-        const weatherData: DailyWeather = await getDailyAstrologicalWeather();
-        setWeather(weatherData);
-        
-        // Mapear planetas del weather a formato del Chart Wheel
-        const planetsData: PlanetData[] = [];
-        
-        // Colores tradicionales astrológicos
-        const planetColors: Record<string, string> = {
-          sun: PLANET_COLORS.sun.primary,      // Sol: dorado
-          moon: PLANET_COLORS.moon.primary,     // Luna: plateado
-          mercury: PLANET_COLORS.mercury.primary,  // Mercurio: amarillo limón
-          venus: PLANET_COLORS.venus.primary,    // Venus: rosa
-          mars: PLANET_COLORS.mars.primary,     // Marte: rojo brillante
-          jupiter: PLANET_COLORS.jupiter.primary,  // Júpiter: azul cielo
-          saturn: PLANET_COLORS.saturn.primary,   // Saturno: marrón/ocre
-          uranus: PLANET_COLORS.uranus.primary,   // Urano: turquesa
-          neptune: PLANET_COLORS.neptune.primary,  // Neptuno: azul violeta
-          pluto: PLANET_COLORS.pluto.primary     // Plutón: carmesí oscuro
-        };
+    if (!weather) return;
 
-        const planetSymbols: Record<string, string> = {
-          sun: '☉',
-          moon: '☽',
-          mercury: '☿',
-          venus: '♀',
-          mars: '♂',
-          jupiter: '♃',
-          saturn: '♄',
-          uranus: '♅',
-          neptune: '♆',
-          pluto: '♇'
-        };
+    try {
+      // Mapear planetas del weather a formato del Chart Wheel
+      const planetsData: PlanetData[] = [];
+      
+      // Colores tradicionales astrológicos
+      const planetColors: Record<string, string> = {
+        sun: PLANET_COLORS.sun.primary,
+        moon: PLANET_COLORS.moon.primary,
+        mercury: PLANET_COLORS.mercury.primary,
+        venus: PLANET_COLORS.venus.primary,
+        mars: PLANET_COLORS.mars.primary,
+        jupiter: PLANET_COLORS.jupiter.primary,
+        saturn: PLANET_COLORS.saturn.primary,
+        uranus: PLANET_COLORS.uranus.primary,
+        neptune: PLANET_COLORS.neptune.primary,
+        pluto: PLANET_COLORS.pluto.primary
+      };
 
-        const planetNames: Record<string, string> = {
-          sun: 'Sol',
-          moon: 'Luna',
-          mercury: 'Mercurio',
-          venus: 'Venus',
-          mars: 'Marte',
-          jupiter: 'Júpiter',
-          saturn: 'Saturno',
-          uranus: 'Urano',
-          neptune: 'Neptuno',
-          pluto: 'Plutón'
-        };
+      const planetSymbols: Record<string, string> = {
+        sun: '☉',
+        moon: '☽',
+        mercury: '☿',
+        venus: '♀',
+        mars: '♂',
+        jupiter: '♃',
+        saturn: '♄',
+        uranus: '♅',
+        neptune: '♆',
+        pluto: '♇'
+      };
 
-        // Agregar cada planeta si existe
-        const planetKeys = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'] as const;
-        
-        for (const key of planetKeys) {
-          const planetPos = weatherData[key];
-          if (planetPos) {
-            planetsData.push({
-              name: planetNames[key],
-              symbol: planetSymbols[key],
-              degree: planetPos.longitude, // Usar longitude (0-360°) en lugar de degree (0-30°)
-              sign: planetPos.sign,
-              retrograde: planetPos.retrograde || false,
-              color: planetColors[key]
-            });
-          }
+      const planetNames: Record<string, string> = {
+        sun: 'Sol',
+        moon: 'Luna',
+        mercury: 'Mercurio',
+        venus: 'Venus',
+        mars: 'Marte',
+        jupiter: 'Júpiter',
+        saturn: 'Saturno',
+        uranus: 'Urano',
+        neptune: 'Neptuno',
+        pluto: 'Plutón'
+      };
+
+      // Agregar cada planeta si existe
+      const planetKeys = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'] as const;
+      
+      for (const key of planetKeys) {
+        const planetPos = weather[key];
+        if (planetPos) {
+          planetsData.push({
+            name: planetNames[key],
+            symbol: planetSymbols[key],
+            degree: planetPos.longitude,
+            sign: planetPos.sign,
+            retrograde: planetPos.retrograde || false,
+            color: planetColors[key]
+          });
         }
-
-        setPlanets(planetsData);
-      } catch (error) {
-        logger.error('Error cargando clima astrológico:', error);
-        // Si falla, usar datos de ejemplo
-        setPlanets([
-          { name: 'Sol', symbol: '☉', degree: 194, sign: 'Libra', color: PLANET_COLORS.sun.primary },
-          { name: 'Luna', symbol: '☽', degree: 14, sign: 'Aries', color: PLANET_COLORS.moon.primary },
-        ]);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    loadAstrologicalData();
-  }, []);
+      setPlanets(planetsData);
+    } catch (error) {
+      logger.error('Error mapeando planetas:', error);
+      // Si falla, usar datos de ejemplo
+      setPlanets([
+        { name: 'Sol', symbol: '☉', degree: 194, sign: 'Libra', color: PLANET_COLORS.sun.primary },
+        { name: 'Luna', symbol: '☽', degree: 14, sign: 'Aries', color: PLANET_COLORS.moon.primary },
+      ]);
+    }
+  }, [weather]);
 
   // Fade in del dashboard
   useEffect(() => {
     const timer = setTimeout(() => setFadeIn(false), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [setFadeIn]);
 
   return (
     <div className={`min-h-[calc(100vh-64px)] flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 transition-opacity duration-700 ${fadeIn ? 'opacity-0' : 'opacity-100'}`}>
@@ -133,6 +126,7 @@ const Dashboard: React.FC = () => {
           <DashboardSkeleton />
         ) : (
           <>
+            {/* Ambos componentes usan el mismo hook singleton - sin duplicación */}
             <AstrologicalWeatherCard />
             <div className="relative bg-gradient-to-br from-gray-900/80 via-purple-950/80 to-gray-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-purple-400/40 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />

@@ -29,14 +29,24 @@ const StandardModal: React.FC<StandardModalProps> = ({
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
+      const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.documentElement.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.documentElement.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
     }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
 
   // Cerrar con tecla Escape
@@ -62,16 +72,13 @@ const StandardModal: React.FC<StandardModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center pt-16 pb-4 px-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 pb-8 px-4 md:px-8 bg-black/75 overflow-y-auto"
       onClick={handleBackdropClick}
-      style={{ willChange: 'opacity' }}
+      style={{ isolation: 'isolate' }}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-4xl max-h-[calc(100vh-5rem)] sm:max-h-[88vh] my-auto flex flex-col overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl animate-scaleIn bg-white dark:bg-gray-900"
-        style={{ 
-          willChange: 'transform, opacity'
-        }}
+        className="relative w-full max-w-4xl h-auto max-h-[calc(100vh-8rem)] flex flex-col overflow-hidden rounded-lg sm:rounded-2xl shadow-2xl bg-white dark:bg-gray-900"
       >
         {/* Header con gradiente - altura fija */}
         <div className={`relative flex-shrink-0 bg-gradient-to-r ${gradientColors} text-white p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden`}>
@@ -126,7 +133,7 @@ const StandardModal: React.FC<StandardModalProps> = ({
         </div>
 
         {/* Contenido scrolleable - toma el espacio restante */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </div>

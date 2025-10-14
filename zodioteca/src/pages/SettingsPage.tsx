@@ -4,7 +4,7 @@ import { useThemeStore } from '../store/useTheme';
 import { useAuth } from '../context/useAuth';
 import { useSupabase } from '../context/SupabaseContext';
 import ThemeToggle from '../components/ThemeToggle';
-import { LogOut, Cloud, RefreshCw, Loader } from 'lucide-react';
+import { LogOut, Cloud, RefreshCw, Loader } from '../utils/icons';
 import { useAstrologicalToast } from '../utils/astrologicalToast';
 
 const SettingsPage: React.FC = () => {

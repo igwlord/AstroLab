@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Loader2, Tag } from 'lucide-react';
+import { X, Save, Loader2, Tag } from '../utils/icons';
 import { createReflection, updateReflection } from '../services/reflectionsService';
 import type { Reflection, ReflectionInput } from '../types/reflection';
 
@@ -77,12 +77,12 @@ export default function ReflectionModal({ reflection, onClose }: ReflectionModal
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[60] flex items-start justify-center pt-20 sm:pt-24 p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="w-full max-w-2xl max-h-[calc(100vh-6rem)] bg-gradient-to-br from-purple-900/95 to-indigo-900/95 backdrop-blur-xl border border-purple-300/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          className="w-full max-w-2xl max-h-[90vh] bg-gradient-to-br from-purple-900/95 to-indigo-900/95 backdrop-blur-xl border border-purple-300/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-purple-300/20">

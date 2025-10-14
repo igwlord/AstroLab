@@ -30,7 +30,7 @@ import { verifyChart, printVerificationReport, exportChartToText } from '../util
 import { logger } from '../utils/logger';
 import { saveChartLocal } from '../services/chartStorage';
 import { detectPolarizations } from '../utils/polarizationDetector';
-import { Save, Check } from 'lucide-react';
+import { Save, Check } from '../utils/icons';
 import { useSettingsStore } from '../store/useSettings';
 import { useChartsStore } from '../store/useCharts';
 import { useNavigate } from 'react-router-dom';

@@ -14,7 +14,7 @@ import {
   Tag,
   TrendingUp,
   Sparkles
-} from 'lucide-react';
+} from '../utils/icons';
 import { 
   getReflections, 
   getReflectionStats,
@@ -144,6 +144,16 @@ export default function ReflexPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white">
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+        {/* Botón Volver */}
+        <div className="mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="text-purple-300 hover:text-purple-100 flex items-center gap-2 text-sm transition-colors"
+          >
+            ← Volver
+          </button>
+        </div>
+
         {/* Header - Optimizado para móviles */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -172,8 +182,7 @@ export default function ReflexPage() {
               className="flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all text-xs sm:text-sm md:text-base touch-manipulation"
             >
               <Plus className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-              <span className="hidden xs:inline">Nueva Reflexión</span>
-              <span className="xs:hidden">+</span>
+              <span className="hidden sm:inline">Nueva Reflexión</span>
             </motion.button>
           </div>
 

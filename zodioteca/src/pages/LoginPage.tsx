@@ -90,7 +90,7 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {/* Auth Modal con transiciones suaves */}
       {showAuthModal && (
         <AuthModal 

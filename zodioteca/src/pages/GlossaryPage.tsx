@@ -5,44 +5,31 @@ import { createGlossaryParser, GlossaryParser } from '../utils/parseGlossary';
 import { logger } from '../utils/logger';
 import type { GlossaryEntry } from '../types/glossary';
 import { GLOSSARY_CATEGORIES } from '../types/glossary';
-import { ZODIAC_SIGNS } from '../types/zodiacSign';
-import { PLANETS } from '../types/planet';
-import { HOUSES } from '../types/house';
-import { HOUSE_SYSTEMS_GLOSSARY } from '../types/houseSystem';
-import { ASPECTS } from '../types/aspect';
-import { MOON_SIGNS } from '../types/moonSign';
-import { ASCENDANTS } from '../types/ascendant';
-import { ASTEROIDS } from '../types/asteroid';
-import { CELESTIAL_BODIES } from '../types/celestialBody';
-import { CONFIGURATIONS } from '../types/configuration';
-import { RELATIONAL_TECHNIQUES } from '../types/relational';
-import { DIGNITIES } from '../types/dignity';
-import { POLARIZATIONS } from '../types/polarization';
-import { ADVANCED_DIMENSIONS } from '../types/advancedDimension';
-import { COORDINATE_SYSTEMS } from '../types/coordinateSystem';
-import CHART_SHAPES_GLOSSARY from '../data/chartShapesGlossary';
 import GlossaryEntryComponent from '../components/GlossaryEntry';
 import GlossarySearch, { type SearchResult } from '../components/GlossarySearch';
 import GlossaryCategories from '../components/GlossaryCategories';
+import { useGlossarySearch } from '../hooks/useGlossarySearch';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-// Lazy load grids - reduce initial bundle by ~30 KB
-const ZodiacSignsGrid = lazy(() => import('../components/ZodiacSignsGrid'));
-const PlanetsGrid = lazy(() => import('../components/PlanetsGrid'));
-const HousesGrid = lazy(() => import('../components/HousesGrid'));
-const HouseSystemsGrid = lazy(() => import('../components/HouseSystemsGrid'));
-const AspectsGrid = lazy(() => import('../components/AspectsGrid'));
-const MoonSignsGrid = lazy(() => import('../components/MoonSignsGrid'));
-const AscendantsGrid = lazy(() => import('../components/AscendantsGrid'));
-const AsteroidsGrid = lazy(() => import('../components/AsteroidsGrid'));
-const CelestialBodiesGrid = lazy(() => import('../components/CelestialBodiesGrid'));
-const AdvancedDimensionsGrid = lazy(() => import('../components/AdvancedDimensionsGrid'));
-const ConfigurationsGrid = lazy(() => import('../components/ConfigurationsGrid'));
-const RelationalGrid = lazy(() => import('../components/RelationalGrid'));
-const DignitiesGrid = lazy(() => import('../components/DignitiesGrid'));
-const PolarizationsGrid = lazy(() => import('../components/PolarizationsGrid'));
-const CoordinateSystemsGrid = lazy(() => import('../components/CoordinateSystemsGrid'));
-const ChartShapesGrid = lazy(() => import('../components/ChartShapesGrid'));
+// Dynamic grid component map - loads only the selected category's grid
+const GRID_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  'signs': lazy(() => import('../components/ZodiacSignsGrid')),
+  'planets': lazy(() => import('../components/PlanetsGrid')),
+  'houses': lazy(() => import('../components/HousesGrid')),
+  'house-systems': lazy(() => import('../components/HouseSystemsGrid')),
+  'aspects': lazy(() => import('../components/AspectsGrid')),
+  'lunar': lazy(() => import('../components/MoonSignsGrid')),
+  'ascendants': lazy(() => import('../components/AscendantsGrid')),
+  'asteroids': lazy(() => import('../components/AsteroidsGrid')),
+  'celestial': lazy(() => import('../components/CelestialBodiesGrid')),
+  'advanced': lazy(() => import('../components/AdvancedDimensionsGrid')),
+  'configurations': lazy(() => import('../components/ConfigurationsGrid')),
+  'relational': lazy(() => import('../components/RelationalGrid')),
+  'dignities': lazy(() => import('../components/DignitiesGrid')),
+  'polarizations': lazy(() => import('../components/PolarizationsGrid')),
+  'coordinates': lazy(() => import('../components/CoordinateSystemsGrid')),
+  'chart-shapes': lazy(() => import('../components/ChartShapesGrid')),
+};
 
 const GlossaryPage: React.FC = () => {
   const { t } = useI18n();
@@ -55,6 +42,14 @@ const GlossaryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('signs');
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+
+  // Lazy load del índice de búsqueda (solo cuando se necesita)
+  const { searchIndex, isLoadingIndex, loadSearchIndex } = useGlossarySearch();
+
+  // Dynamically select grid component based on category (only loads selected grid)
+  const CurrentGrid = useMemo(() => {
+    return GRID_COMPONENTS[selectedCategory] || null;
+  }, [selectedCategory]);
 
   // Set initial category from URL query params
   useEffect(() => {
@@ -86,9 +81,21 @@ const GlossaryPage: React.FC = () => {
     loadGlossary();
   }, []);
 
-  // Crear índice de búsqueda completo con todos los contenidos
+  // Lazy load search index cuando el usuario empiece a buscar
+  useEffect(() => {
+    // Solo cargar si hay texto de búsqueda y el índice no está cargado
+    if (searchTerm.trim() && !searchIndex && !isLoadingIndex) {
+      logger.info('[GlossaryPage] Usuario buscando, cargando índice...');
+      loadSearchIndex();
+    }
+  }, [searchTerm, searchIndex, isLoadingIndex, loadSearchIndex]);
+  
+  // Agregar entradas genéricas del glosario al índice (si existe)
   const allSearchableContent = useMemo(() => {
-    const content: SearchResult[] = [];
+    if (!searchIndex) return [];
+    
+    // Si no hay entries genéricos, solo devolver el índice pre-cargado
+    if (entries.length === 0) return searchIndex;
     
     // Helper para obtener info de categoría
     const getCategoryInfo = (categoryId: string) => {
@@ -98,247 +105,23 @@ const GlossaryPage: React.FC = () => {
         icon: cat?.icon || '📖'
       };
     };
-
-    // Indexar signos zodiacales
-    ZODIAC_SIGNS.forEach(sign => {
-      const catInfo = getCategoryInfo('signs');
-      content.push({
-        id: `sign-${sign.id}`,
-        title: sign.name,
-        category: 'signs',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: `${sign.element} • ${sign.modality} • ${sign.dateRange}`,
-        matchType: 'title'
-      });
-    });
-
-    // Indexar planetas
-    PLANETS.forEach(planet => {
-      const catInfo = getCategoryInfo('planets');
-      content.push({
-        id: `planet-${planet.name.toLowerCase()}`,
-        title: planet.name,
-        category: 'planets',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: planet.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar casas
-    HOUSES.forEach(house => {
-      const catInfo = getCategoryInfo('houses');
-      content.push({
-        id: `house-${house.number}`,
-        title: `Casa ${house.number}`,
-        category: 'houses',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: house.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar sistemas de casas
-    Object.values(HOUSE_SYSTEMS_GLOSSARY).forEach(system => {
-      const catInfo = getCategoryInfo('house-systems');
-      content.push({
-        id: `house-system-${system.id}`,
-        title: system.name,
-        category: 'house-systems',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: `${system.subtitle} • ${system.type} • ${system.era}`,
-        matchType: 'title'
-      });
-    });
-
-    // Indexar aspectos
-    ASPECTS.forEach(aspect => {
-      const catInfo = getCategoryInfo('aspects');
-      content.push({
-        id: `aspect-${aspect.name.toLowerCase()}`,
-        title: aspect.name,
-        category: 'aspects',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: `${aspect.angle}° • ${aspect.description.substring(0, 50)}...`,
-        matchType: 'title'
-      });
-    });
-
-    // Indexar lunas
-    MOON_SIGNS.forEach(moon => {
-      const catInfo = getCategoryInfo('lunar');
-      content.push({
-        id: `moon-${moon.sign.toLowerCase()}`,
-        title: `Luna en ${moon.sign}`,
-        category: 'lunar',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: moon.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar ascendentes
-    ASCENDANTS.forEach(asc => {
-      const catInfo = getCategoryInfo('ascendants');
-      content.push({
-        id: `ascendant-${asc.sign.toLowerCase()}`,
-        title: `Ascendente en ${asc.sign}`,
-        category: 'ascendants',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: asc.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar asteroides
-    ASTEROIDS.forEach(asteroid => {
-      const catInfo = getCategoryInfo('asteroids');
-      content.push({
-        id: `asteroid-${asteroid.name.toLowerCase()}`,
-        title: asteroid.name,
-        category: 'asteroids',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: asteroid.function.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar cuerpos celestes
-    CELESTIAL_BODIES.forEach(body => {
-      const catInfo = getCategoryInfo('celestial');
-      content.push({
-        id: `celestial-${body.name.toLowerCase()}`,
-        title: body.name,
-        category: 'celestial',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: body.astrology.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar configuraciones
-    CONFIGURATIONS.forEach(config => {
-      const catInfo = getCategoryInfo('configurations');
-      content.push({
-        id: `configuration-${config.name.toLowerCase()}`,
-        title: config.name,
-        category: 'configurations',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: config.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar técnicas relacionales
-    RELATIONAL_TECHNIQUES.forEach(tech => {
-      const catInfo = getCategoryInfo('relational');
-      content.push({
-        id: `relational-${tech.name.toLowerCase()}`,
-        title: tech.name,
-        category: 'relational',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: tech.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar dignidades
-    DIGNITIES.forEach(dignity => {
-      const catInfo = getCategoryInfo('dignities');
-      content.push({
-        id: `dignity-${dignity.name.toLowerCase()}`,
-        title: dignity.name,
-        category: 'dignities',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: dignity.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar polarizaciones
-    POLARIZATIONS.forEach(polar => {
-      const catInfo = getCategoryInfo('polarizations');
-      content.push({
-        id: `polarization-${polar.name.toLowerCase()}`,
-        title: polar.name,
-        category: 'polarizations',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: polar.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar sistemas de coordenadas
-    COORDINATE_SYSTEMS.forEach(system => {
-      const catInfo = getCategoryInfo('coordinates');
-      content.push({
-        id: `coordinate-${system.id}`,
-        title: system.name,
-        category: 'coordinates',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: system.base.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar dimensiones avanzadas
-    ADVANCED_DIMENSIONS.forEach(dim => {
-      const catInfo = getCategoryInfo('advanced');
-      content.push({
-        id: `advanced-${dim.name.toLowerCase()}`,
-        title: dim.name,
-        category: 'advanced',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: dim.description.substring(0, 100) + '...',
-        matchType: 'title'
-      });
-    });
-
-    // Indexar formas de carta natal
-    CHART_SHAPES_GLOSSARY.forEach(shape => {
-      const catInfo = getCategoryInfo('chart-shapes');
-      content.push({
-        id: `chart-shape-${shape.id}`,
-        title: shape.name,
-        category: 'chart-shapes',
-        categoryName: catInfo.name,
-        categoryIcon: catInfo.icon,
-        snippet: shape.shortDescription,
-        matchType: 'title'
-      });
-    });
-
-    // Indexar entradas del glosario genérico
-    entries.forEach(entry => {
+    
+    // Combinar índice pre-cargado con entries genéricos
+    const genericEntries: SearchResult[] = entries.map(entry => {
       const catInfo = getCategoryInfo(entry.category);
-      content.push({
+      return {
         id: `entry-${entry.id}`,
         title: entry.title,
         category: entry.category,
         categoryName: catInfo.name,
         categoryIcon: catInfo.icon,
         snippet: entry.content.substring(0, 100) + '...',
-        matchType: 'title'
-      });
+        matchType: 'title' as const
+      };
     });
-
-    return content;
-  }, [entries]);
+    
+    return [...searchIndex, ...genericEntries];
+  }, [searchIndex, entries]);
 
   // Buscar en todo el contenido indexado
   const searchResults = useMemo(() => {
@@ -445,61 +228,48 @@ const GlossaryPage: React.FC = () => {
   }, [entries, selectedCategory, searchTerm, parser]);
 
   // Calculate entry counts by category
+  // Usa searchIndex si está cargado, si no, valores hardcoded conocidos
   const entryCounts = useMemo(() => {
     const counts: { [key: string]: number } = {};
     
-    GLOSSARY_CATEGORIES.forEach(category => {
-      if (category.id === 'all') {
-        counts[category.id] = entries.length;
-      } else if (category.id === 'signs') {
-        // Para la categoría de signos, contamos los 12 signos del zodíaco
-        counts[category.id] = ZODIAC_SIGNS.length;
-      } else if (category.id === 'planets') {
-        // Para la categoría de planetas, contamos los 10 planetas
-        counts[category.id] = PLANETS.length;
-      } else if (category.id === 'houses') {
-        // Para la categoría de casas, contamos las 12 casas
-        counts[category.id] = HOUSES.length;
-      } else if (category.id === 'aspects') {
-        // Para la categoría de aspectos, contamos los 10 aspectos
-        counts[category.id] = ASPECTS.length;
-      } else if (category.id === 'lunar') {
-        // Para la categoría de lunas, contamos las 12 lunas
-        counts[category.id] = MOON_SIGNS.length;
-      } else if (category.id === 'ascendants') {
-        // Para la categoría de ascendentes, contamos los 12 ascendentes
-        counts[category.id] = ASCENDANTS.length;
-      } else if (category.id === 'asteroids') {
-        // Para la categoría de asteroides, contamos los 7 asteroides
-        counts[category.id] = ASTEROIDS.length;
-      } else if (category.id === 'celestial') {
-        // Para la categoría de otros cuerpos celestes, contamos los 11 cuerpos
-        counts[category.id] = CELESTIAL_BODIES.length;
-      } else if (category.id === 'advanced') {
-        // Para la categoría de dimensiones astrológicas, contamos las 7 dimensiones
-        counts[category.id] = ADVANCED_DIMENSIONS.length;
-      } else if (category.id === 'configurations') {
-        // Para la categoría de configuraciones, contamos las 7 configuraciones
-        counts[category.id] = CONFIGURATIONS.length;
-      } else if (category.id === 'relational') {
-        // Para la categoría relacional, contamos las 6 técnicas
-        counts[category.id] = RELATIONAL_TECHNIQUES.length;
-      } else if (category.id === 'dignities') {
-        // Para la categoría de dignidades, contamos las 9 dignidades
-        counts[category.id] = DIGNITIES.length;
-      } else if (category.id === 'polarizations') {
-        // Para la categoría de polarizaciones, contamos las 8 polarizaciones
-        counts[category.id] = POLARIZATIONS.length;
-      } else if (category.id === 'chart-shapes') {
-        // Para la categoría de formas de carta natal, contamos las 7 formas
-        counts[category.id] = 7;
-      } else {
-        counts[category.id] = entries.filter(entry => entry.category === category.id).length;
-      }
-    });
+    // Si el índice de búsqueda está cargado, contar desde ahí
+    if (searchIndex) {
+      GLOSSARY_CATEGORIES.forEach(category => {
+        if (category.id === 'all') {
+          counts[category.id] = searchIndex.length + entries.length;
+        } else {
+          counts[category.id] = searchIndex.filter(item => item.category === category.id).length;
+        }
+      });
+    } else {
+      // Valores hardcoded hasta que se cargue el índice (lazy)
+      const hardcodedCounts: { [key: string]: number } = {
+        'all': entries.length,
+        'signs': 12,
+        'planets': 10,
+        'houses': 12,
+        'house-systems': 10,
+        'aspects': 10,
+        'lunar': 12,
+        'ascendants': 12,
+        'asteroids': 7,
+        'celestial': 11,
+        'advanced': 7,
+        'configurations': 7,
+        'relational': 6,
+        'dignities': 9,
+        'polarizations': 8,
+        'coordinates': 5,
+        'chart-shapes': 7
+      };
+      
+      GLOSSARY_CATEGORIES.forEach(category => {
+        counts[category.id] = hardcodedCounts[category.id] || 0;
+      });
+    }
 
     return counts;
-  }, [entries]);
+  }, [searchIndex, entries]);
 
   // Toggle entry expansion
   const toggleEntry = (entryId: string) => {
@@ -647,87 +417,11 @@ const GlossaryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Results Grid - Lazy loaded for performance */}
+      {/* Results Grid - Dynamic lazy loading (only loads selected category) */}
       <Suspense fallback={<div className="flex justify-center py-8"><LoadingSpinner /></div>}>
-        {selectedCategory === 'signs' ? (
-          /* Mostrar grid de signos zodiacales */
+        {CurrentGrid ? (
           <div>
-            <ZodiacSignsGrid />
-          </div>
-        ) : selectedCategory === 'planets' ? (
-          /* Mostrar grid de planetas */
-          <div>
-            <PlanetsGrid />
-          </div>
-        ) : selectedCategory === 'houses' ? (
-          /* Mostrar grid de casas */
-          <div>
-            <HousesGrid />
-          </div>
-        ) : selectedCategory === 'house-systems' ? (
-          /* Mostrar grid de sistemas de casas */
-          <div>
-            <HouseSystemsGrid />
-          </div>
-        ) : selectedCategory === 'aspects' ? (
-          /* Mostrar grid de aspectos */
-          <div>
-            <AspectsGrid />
-          </div>
-        ) : selectedCategory === 'lunar' ? (
-          /* Mostrar grid de lunas */
-          <div>
-            <MoonSignsGrid />
-          </div>
-        ) : selectedCategory === 'ascendants' ? (
-          /* Mostrar grid de ascendentes */
-          <div>
-            <AscendantsGrid />
-          </div>
-        ) : selectedCategory === 'asteroids' ? (
-          /* Mostrar grid de asteroides */
-          <div>
-            <AsteroidsGrid />
-          </div>
-        ) : selectedCategory === 'celestial' ? (
-          /* Mostrar grid de otros cuerpos celestes */
-          <div>
-            <CelestialBodiesGrid />
-          </div>
-        ) : selectedCategory === 'advanced' ? (
-          /* Mostrar grid de dimensiones astrológicas avanzadas */
-          <div>
-            <AdvancedDimensionsGrid />
-          </div>
-        ) : selectedCategory === 'configurations' ? (
-          /* Mostrar grid de configuraciones planetarias */
-          <div>
-            <ConfigurationsGrid />
-          </div>
-        ) : selectedCategory === 'relational' ? (
-          /* Mostrar grid de astrología relacional */
-          <div>
-            <RelationalGrid />
-          </div>
-        ) : selectedCategory === 'dignities' ? (
-          /* Mostrar grid de dignidades planetarias */
-          <div>
-            <DignitiesGrid />
-          </div>
-        ) : selectedCategory === 'polarizations' ? (
-          /* Mostrar grid de polarizaciones planetarias */
-          <div>
-            <PolarizationsGrid />
-          </div>
-        ) : selectedCategory === 'coordinates' ? (
-          /* Mostrar grid de sistemas de coordenadas celestes */
-          <div>
-            <CoordinateSystemsGrid />
-          </div>
-        ) : selectedCategory === 'chart-shapes' ? (
-          /* Mostrar grid de formas de carta natal */
-          <div>
-            <ChartShapesGrid />
+            <CurrentGrid />
           </div>
         ) : filteredEntries.length === 0 ? (
         <div className="text-center py-16">

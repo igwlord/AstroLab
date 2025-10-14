@@ -1,0 +1,187 @@
+/**
+ * 🎯 Hook para exportación de gráficos
+ * 
+ * Maneja la exportación a PDF, PNG y texto de cartas natales
+ * con lazy loading de librerías pesadas.
+ */
+
+import { useState, useCallback } from 'react';
+import { exportChartToPDF, type ExportOptions } from '../utils/pdfExport';
+import { logger } from '../utils/logger';
+import type { NatalChart } from '../services/realAstroCalculator';
+
+export interface UseChartExportReturn {
+  isExporting: boolean;
+  exportError: string | null;
+  
+  // Exportación a PDF
+  exportPDF: (elementId: string, filename?: string, options?: ExportOptions) => Promise<void>;
+  
+  // Exportación a PNG
+  exportPNG: (elementId: string, filename?: string) => Promise<void>;
+  
+  // Exportación a texto
+  exportText: (chart: NatalChart, personName: string) => void;
+  
+  // Limpiar error
+  clearError: () => void;
+}
+
+export function useChartExport(): UseChartExportReturn {
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  /**
+   * Exporta elemento a PDF usando lazy loading
+   */
+  const exportPDF = useCallback(async (
+    elementId: string,
+    filename: string = 'carta-natal.pdf',
+    options?: ExportOptions
+  ) => {
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      await exportChartToPDF(elementId, filename, options);
+      logger.log('✅ Exportación a PDF completada');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('❌ Error exportando PDF:', error);
+      setExportError(`Error al exportar PDF: ${message}`);
+      throw error;
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  /**
+   * Exporta elemento a PNG
+   */
+  const exportPNG = useCallback(async (
+    elementId: string,
+    filename: string = 'carta-natal.png'
+  ) => {
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      logger.log('🖼️ Exportando a PNG...');
+      
+      // Dynamic import de html2canvas
+      const { default: html2canvas } = await import('html2canvas');
+      
+      const element = document.getElementById(elementId);
+      if (!element) {
+        throw new Error(`Elemento "${elementId}" no encontrado`);
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+
+      // Convertir canvas a blob y descargar
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error('Error generando imagen');
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        logger.log('✅ PNG exportado correctamente');
+      }, 'image/png');
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('❌ Error exportando PNG:', error);
+      setExportError(`Error al exportar PNG: ${message}`);
+      throw error;
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  /**
+   * Exporta carta a formato texto
+   */
+  const exportText = useCallback((chart: NatalChart, personName: string) => {
+    setExportError(null);
+
+    try {
+      logger.log('📄 Exportando a texto...');
+
+      let textContent = `═══════════════════════════════════════════\n`;
+      textContent += `       CARTA NATAL - ${personName.toUpperCase()}\n`;
+      textContent += `═══════════════════════════════════════════\n\n`;
+
+      // Planetas
+      textContent += `PLANETAS\n`;
+      textContent += `─────────────────────────────────────────\n`;
+      chart.planets.forEach(planet => {
+        textContent += `${planet.name.padEnd(15)} ${planet.sign.padEnd(12)} ${planet.position.toFixed(2)}°\n`;
+      });
+
+      // Casas
+      textContent += `\n\nCASAS\n`;
+      textContent += `─────────────────────────────────────────\n`;
+      chart.houses.forEach(house => {
+        textContent += `Casa ${house.number.toString().padEnd(2)}          ${house.sign.padEnd(12)} ${house.position.toFixed(2)}°\n`;
+      });
+
+      // Aspectos
+      if (chart.aspects && chart.aspects.length > 0) {
+        textContent += `\n\nASPECTOS\n`;
+        textContent += `─────────────────────────────────────────\n`;
+        chart.aspects.forEach(aspect => {
+          textContent += `${aspect.planet1.padEnd(10)} ${aspect.type.padEnd(15)} ${aspect.planet2}\n`;
+        });
+      }
+
+      textContent += `\n═══════════════════════════════════════════\n`;
+      textContent += `Generado por AstroLab - Laboratorio Astrológico\n`;
+      textContent += `Fecha: ${new Date().toLocaleString('es-ES')}\n`;
+      textContent += `═══════════════════════════════════════════\n`;
+
+      // Descargar archivo
+      const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${personName.replace(/\s+/g, '_')}_carta-natal.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      logger.log('✅ Texto exportado correctamente');
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('❌ Error exportando texto:', error);
+      setExportError(`Error al exportar texto: ${message}`);
+      throw error;
+    }
+  }, []);
+
+  /**
+   * Limpia el error de exportación
+   */
+  const clearError = useCallback(() => {
+    setExportError(null);
+  }, []);
+
+  return {
+    isExporting,
+    exportError,
+    exportPDF,
+    exportPNG,
+    exportText,
+    clearError
+  };
+}

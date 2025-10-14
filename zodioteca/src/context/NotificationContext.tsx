@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type {
   NotificationContextType,
@@ -7,6 +7,10 @@ import type {
   AlertDialogOptions,
   NotificationType,
 } from '../types/notification.types';
+import { NotificationContext } from './NotificationContextBase';
+
+// Re-exportar el contexto para conveniencia
+export { NotificationContext };
 
 interface DialogState {
   isOpen: boolean;
@@ -107,11 +111,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     </NotificationContext.Provider>
   );
 }
-
-// Contexto exportado
-export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
-
-// Exportar componentes y provider solamente
 
 // Componentes internos
 function ToastContainer({

@@ -99,15 +99,29 @@ const SIGN_TO_MODALITY: Record<string, string> = {
  */
 function analyzeMoonStress(chart: NatalChart): number {
   const moon = chart.planets?.find(p => p.name === 'Moon');
-  if (!moon) return 0;
+  if (!moon) {
+    console.log('🌙 [MoonStress] No se encontró la Luna en la carta');
+    return 0;
+  }
+
+  console.log('🌙 [MoonStress] Analizando Luna:', {
+    sign: moon.sign,
+    house: moon.house,
+    aspectsCount: chart.aspects?.length || 0
+  });
 
   let stress = 0;
+  const stressLog: string[] = [];
 
   // Casa 12, 8 o 4 = +1 stress (casas emocionales/inconscientes)
-  if ([4, 8, 12].includes(moon.house)) stress += 1;
+  if ([4, 8, 12].includes(moon.house)) {
+    stress += 1;
+    stressLog.push(`Casa ${moon.house} (emocional/inconsciente): +1`);
+  }
 
   // Analizar aspectos
   const moonAspects = chart.aspects?.filter(a => a.a === 'Moon' || a.b === 'Moon') || [];
+  console.log('🌙 [MoonStress] Aspectos de la Luna:', moonAspects.length);
   
   moonAspects.forEach(aspect => {
     const otherPlanet = aspect.a === 'Moon' ? aspect.b : aspect.a;
@@ -116,22 +130,45 @@ function analyzeMoonStress(chart: NatalChart): number {
 
     // Aspectos duros
     if (['square', 'opposition'].includes(aspect.type) && aspect.orb <= 3) {
-      stress += isMalefic ? 2 : 1;
+      const add = isMalefic ? 2 : 1;
+      stress += add;
+      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb}°): +${add}`);
     }
 
     // Aspectos suaves (compensan)
     if (['trine', 'sextile'].includes(aspect.type) && aspect.orb <= 4) {
-      stress -= isBenefic ? 1 : 0.5;
+      const subtract = isBenefic ? 1 : 0.5;
+      stress -= subtract;
+      stressLog.push(`${aspect.type} con ${otherPlanet} (orb ${aspect.orb}°): -${subtract}`);
     }
   });
 
   // Ajuste por dignidad
   const dignity = getPlanetDignity('Moon', moon.sign);
-  if (dignity.type === 'fall') stress += 1;
-  if (dignity.type === 'detriment') stress += 1.5;
-  if (dignity.type === 'domicile') stress = Math.max(0, stress - 1);
+  console.log('🌙 [MoonStress] Dignidad:', dignity);
+  
+  if (dignity.type === 'fall') {
+    stress += 1;
+    stressLog.push(`Dignidad en caída: +1`);
+  }
+  if (dignity.type === 'detriment') {
+    stress += 1.5;
+    stressLog.push(`Dignidad en detrimento: +1.5`);
+  }
+  if (dignity.type === 'domicile') {
+    stress = Math.max(0, stress - 1);
+    stressLog.push(`Dignidad en domicilio: -1`);
+  }
 
-  return Math.max(0, Math.min(10, stress)); // Normalizar 0-10
+  const finalStress = Math.max(0, Math.min(10, stress));
+  
+  console.log('🌙 [MoonStress] Resultado:', {
+    rawStress: stress,
+    finalStress,
+    log: stressLog
+  });
+
+  return finalStress; // Normalizar 0-10
 }
 
 /**
@@ -180,6 +217,9 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
 
   // Analizar Luna
   const moon = chart.planets?.find(p => p.name === 'Moon');
+  console.log('📊 [ChartAnalyzer] Planetas encontrados:', chart.planets?.map(p => p.name).join(', '));
+  console.log('📊 [ChartAnalyzer] Total de aspectos en la carta:', chart.aspects?.length || 0);
+  
   const moonAnalysis = moon ? {
     house: moon.house,
     sign: moon.sign,
@@ -196,6 +236,8 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     ).length || 0,
     stressScore: analyzeMoonStress(chart)
   } : undefined;
+
+  console.log('📊 [ChartAnalyzer] Análisis de Luna completado:', moonAnalysis);
 
   // Analizar Mercurio
   const mercury = chart.planets?.find(p => p.name === 'Mercury');

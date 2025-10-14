@@ -10,12 +10,12 @@
  * - Botón compartir (Web Share API + fallback clipboard)
  * - Link "Saber más" al Glosario
  * - Loading skeleton y error handling
+ * - Optimización: Recibe weather como prop para evitar cálculos duplicados
  */
 
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getDailyAstrologicalWeather, type DailyWeather } from '../services/dailyWeather';
-import { Share2, BookOpen } from 'lucide-react';
+import { useDailyWeather } from '../hooks/useDailyWeather';
+import { Share2, BookOpen } from '../utils/icons';
 import { logger } from '../utils/logger';
 
 /**
@@ -41,36 +41,8 @@ function getSignElement(sign: string | undefined): { element: string; emoji: str
 }
 
 export default function AstrologicalWeatherCard() {
-  const [weather, setWeather] = useState<DailyWeather | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // ===========================
-  // EFECTOS
-  // ===========================
-
-  useEffect(() => {
-    loadWeather();
-  }, []);
-
-  // ===========================
-  // FUNCIONES DE CARGA
-  // ===========================
-
-  async function loadWeather() {
-    try {
-      setError(null);
-      setIsLoading(true);
-
-      const data = await getDailyAstrologicalWeather();
-      setWeather(data);
-    } catch (err) {
-      logger.error('Error cargando clima astrológico:', err);
-      setError('No se pudo cargar el clima astrológico. Por favor intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // Usar hook compartido (singleton pattern - solo 1 carga para toda la app)
+  const { weather, isLoading, error, refresh } = useDailyWeather();
 
   // ===========================
   // HANDLERS
@@ -158,7 +130,7 @@ ${weather.summary}
               {error || 'Intenta nuevamente'}
             </p>
             <button
-              onClick={loadWeather}
+              onClick={refresh}
               className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold transition-colors"
             >
               Reintentar

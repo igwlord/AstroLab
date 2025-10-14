@@ -16,7 +16,7 @@ import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
 import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
 import SavePlanModal from '../components/SavePlanModal';
-import ExercisePlanInsightsModal from '../components/ExercisePlanInsightsModal';
+import { getReflectionStats } from '../services/reflectionsService';
 import { logger } from '../utils/logger';
 
 export default function ExercisePlanPage() {
@@ -47,10 +47,22 @@ export default function ExercisePlanPage() {
     dailyStreak
   } = useExercisePlanStore();
 
-  // Estado local para modales
+  // Estado local para modales y reflexiones
   const [showSavePlanModal, setShowSavePlanModal] = useState(false);
-  const [showInsightsModal, setShowInsightsModal] = useState(false);
-  const [showWelcomeManual, setShowWelcomeManual] = useState(false);
+  const [totalReflections, setTotalReflections] = useState<number>(0);
+
+  // Cargar estadísticas de reflexiones
+  useEffect(() => {
+    async function loadReflectionStats() {
+      try {
+        const stats = await getReflectionStats();
+        setTotalReflections(stats.total);
+      } catch (error) {
+        logger.error('Error loading reflection stats:', error);
+      }
+    }
+    loadReflectionStats();
+  }, []);
 
   useEffect(() => {
     async function loadAndGeneratePlan() {
@@ -93,7 +105,6 @@ export default function ExercisePlanPage() {
 
   const handleCloseWelcome = (dontShowAgain: boolean) => {
     markAsSeen(dontShowAgain);
-    setShowWelcomeManual(false);
   };
 
   // Mostrar modal de bienvenida si es primera visita
@@ -174,17 +185,17 @@ export default function ExercisePlanPage() {
               <div className="flex flex-wrap justify-center gap-2">
                 {plan && (
                   <button
-                    onClick={() => setShowInsightsModal(true)}
+                    onClick={() => navigate('/ejercicios/tu-carta')}
                     className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                    title="Ver por qué se generó este plan"
+                    title="Ver análisis de tu carta"
                   >
                     <span className="text-lg">🔮</span>
-                    <span>Insights</span>
+                    <span>Tu Carta</span>
                   </button>
                 )}
                 
                 <button
-                  onClick={() => setShowWelcomeManual(true)}
+                  onClick={() => navigate('/ejercicios/guia')}
                   className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                   title="Ver guía de ejercicios"
                 >
@@ -199,15 +210,6 @@ export default function ExercisePlanPage() {
                 >
                   <span className="text-lg">📚</span>
                   <span>Planes</span>
-                </button>
-                
-                <button
-                  onClick={handleLoadChart}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-full transition-all text-sm flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                  title="Cambiar carta natal"
-                >
-                  <span className="text-lg">🔄</span>
-                  <span>Cambiar</span>
                 </button>
                 
                 <button
@@ -235,10 +237,9 @@ export default function ExercisePlanPage() {
               <select
                 onChange={(e) => {
                   const action = e.target.value;
-                  if (action === 'insights') setShowInsightsModal(true);
-                  else if (action === 'guide') setShowWelcomeManual(true);
+                  if (action === 'tucarta') navigate('/ejercicios/tu-carta');
+                  else if (action === 'guide') navigate('/ejercicios/guia');
                   else if (action === 'plans') navigate('/saved-plans');
-                  else if (action === 'change') handleLoadChart();
                   else if (action === 'reflexiones') navigate('/reflexiones');
                   // Reset select
                   e.target.value = '';
@@ -250,12 +251,11 @@ export default function ExercisePlanPage() {
                   📋 Acciones rápidas...
                 </option>
                 {plan && (
-                  <option value="insights">🔮 Ver Insights del Plan</option>
+                  <option value="tucarta">🔮 Ver Tu Carta</option>
                 )}
-                <option value="guide">📖 Ver Guía de Ejercicios</option>
-                <option value="plans">📚 Mis Planes Guardados</option>
-                <option value="change">🔄 Cambiar Carta Natal</option>
-                <option value="reflexiones">💭 Mis Reflexiones</option>
+                <option value="guide">📖 Ver Guía</option>
+                <option value="plans">📚 Planes Guardados</option>
+                <option value="reflexiones">💭 Reflexiones</option>
               </select>
             </div>
         </div>
@@ -281,10 +281,10 @@ export default function ExercisePlanPage() {
             
             <div className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-2 sm:p-3 md:p-4">
               <div className="text-xs sm:text-sm text-pink-600 dark:text-pink-400 font-medium mb-0.5 sm:mb-1">
-                Tiempo Diario
+                Reflexiones 📝
               </div>
               <div className="text-lg sm:text-2xl md:text-3xl font-bold text-pink-900 dark:text-white">
-                {plan.estimatedDailyMinutes} min
+                {totalReflections}
               </div>
             </div>
             
@@ -377,33 +377,16 @@ export default function ExercisePlanPage() {
         </div>
       </div>
 
-      {/* Modales */}
+      {/* Modal de Guardar Plan */}
       {plan && (
-        <>
-          {/* Modal de Guardar Plan */}
-          <SavePlanModal
-            isOpen={showSavePlanModal}
-            onClose={() => setShowSavePlanModal(false)}
-            plan={plan}
-            chartName={currentChart?.name || charts.find(c => c.id === plan.chartId)?.name}
-            progress={getProgress()}
-          />
-          
-          {/* Modal de Insights */}
-          <ExercisePlanInsightsModal
-            isOpen={showInsightsModal}
-            onClose={() => setShowInsightsModal(false)}
-            plan={plan}
-          />
-        </>
+        <SavePlanModal
+          isOpen={showSavePlanModal}
+          onClose={() => setShowSavePlanModal(false)}
+          plan={plan}
+          chartName={currentChart?.name || charts.find(c => c.id === plan.chartId)?.name}
+          progress={getProgress()}
+        />
       )}
-
-      {/* Modal de Bienvenida (manual) */}
-      <WelcomeExercisesModal
-        isOpen={showWelcomeManual}
-        onClose={handleCloseWelcome}
-        onLoadChart={handleLoadChart}
-      />
     </div>
   );
 }
