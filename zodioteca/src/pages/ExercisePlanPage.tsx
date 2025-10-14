@@ -181,19 +181,20 @@ export default function ExercisePlanPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 p-3 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-4 md:mb-8">
-          <div className="mb-2 md:mb-4">
-            <button
-              onClick={() => navigate('/natal-chart')}
-              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-2 text-sm md:text-base mb-3"
-              title="Volver a Carta Natal"
-            >
-              ← Volver a Carta Natal
-            </button>
-
-            {/* DESKTOP: Título, slogan y chips en líneas separadas pero centrados */}
-            <div className="hidden md:block text-center mb-4">
+        {/* Header - Optimizado sin duplicados */}
+        <div className="mb-3 md:mb-6">
+          {/* DESKTOP: Título, slogan y navegación */}
+          <div className="hidden md:block">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => navigate('/natal-chart')}
+                className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-2 text-sm font-medium"
+                title="Volver a Carta Natal"
+              >
+                ← Volver a Carta Natal
+              </button>
+            </div>
+            <div className="text-center">
               <h1 className="text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-2">
                 Tu Plan de Ejercicios Holístico
               </h1>
@@ -244,117 +245,183 @@ export default function ExercisePlanPage() {
             </div>
           </div>
           
-            {/* MOBILE: Título, slogan y menú desplegable */}
-            <div className="md:hidden text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 dark:text-white mb-1">
-                Tu Plan de Ejercicios Holístico
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Plan de 21 días personalizado basado en tu carta natal
-              </p>
-              
-              {/* Low Confidence Warning */}
-              {plan.meta?.lowConfidence && (
-                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <span className="text-yellow-600 dark:text-yellow-400 text-lg">⚠️</span>
-                    <div className="text-left text-sm">
-                      <p className="font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
-                        Plan generado con datos incompletos
-                      </p>
-                      <p className="text-yellow-700 dark:text-yellow-400 text-xs">
-                        {plan.meta.confidenceReasons.join(' • ')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* MOBILE: Menú desplegable después del título y slogan */}
-              <select
-                onChange={(e) => {
-                  const action = e.target.value;
-                  if (action === 'tuplan') navigate('/ejercicios/tu-carta');
-                  else if (action === 'guide') navigate('/ejercicios/guia');
-                  else if (action === 'plans') navigate('/saved-plans');
-                  else if (action === 'reflexiones') navigate('/reflexiones');
-                  // Reset select
-                  e.target.value = '';
-                }}
-                className="w-full px-3 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none shadow-lg text-sm touch-manipulation"
-                defaultValue=""
+          {/* MOBILE: Header compacto y limpio */}
+          <div className="md:hidden">
+            {/* Navegación compacta sin cartel innecesario */}
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => navigate('/natal-chart')}
+                className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 flex items-center gap-1.5 text-sm font-medium p-1.5 -ml-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                title="Volver a Carta Natal"
               >
-                <option value="" disabled>
-                  📋 Acciones rápidas...
-                </option>
-                {plan && (
-                  <option value="tuplan">🔮 Ver Tu Plan</option>
-                )}
-                <option value="guide">📖 Ver Guía</option>
-                <option value="plans">📚 Planes Guardados</option>
-                <option value="reflexiones">💭 Reflexiones</option>
-              </select>
+                ← Volver
+              </button>
+            </div>
+
+            {/* Título y slogan optimizados */}
+            <div className="text-center mb-3">
+                <h1 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-white mb-1 leading-tight">
+                  Tu Plan Holístico
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  21 días personalizado para tu carta natal
+                </p>
+              </div>
+              
+              {/* Bottom Navigation Bar - Nueva navegación móvil */}
+              <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-2 py-2 z-50 safe-area-inset-bottom">
+                <div className="flex justify-around items-center max-w-md mx-auto">
+                  <button
+                    onClick={() => navigate('/ejercicios/tu-carta')}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors min-w-[60px]"
+                    title="Ver Tu Plan"
+                  >
+                    <span className="text-lg">🔮</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Tu Plan</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/ejercicios/guia')}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors min-w-[60px]"
+                    title="Ver Guía"
+                  >
+                    <span className="text-lg">📖</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Guía</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/saved-plans')}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors min-w-[60px]"
+                    title="Planes Guardados"
+                  >
+                    <span className="text-lg">📚</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Guardados</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/reflexiones')}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors min-w-[60px]"
+                    title="Reflexiones"
+                  >
+                    <span className="text-lg">💭</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Reflexiones</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Espacio para bottom nav */}
+              <div className="h-16"></div>
             </div>
         </div>
 
-        {/* Resumen del plan */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 sm:p-4 md:p-6 mb-4 md:mb-6">
-          <div className="mb-3 md:mb-4">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-800 dark:text-purple-300">
-              Resumen del Análisis
-            </h2>
+        {/* Resumen del plan - Más compacto */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 sm:p-4 md:p-6 mb-3 md:mb-4">
+          <div className="mb-2 md:mb-3">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-800 dark:text-purple-300">
+                Resumen del Análisis
+              </h2>
+              
+              {/* Botones de acción integrados */}
+              <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
+                <button
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2 sm:px-3 rounded-lg transition-colors text-xs sm:text-sm shadow-md hover:shadow-lg"
+                  onClick={() => setShowSavePlanModal(true)}
+                  title="Guardar Plan"
+                >
+                  <span className="hidden sm:inline">💾 Guardar</span>
+                  <span className="sm:hidden">💾</span>
+                </button>
+                <button
+                  className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-1.5 px-2 sm:px-3 rounded-lg transition-colors text-xs sm:text-sm"
+                  onClick={async () => {
+                    const confirmed = await showConfirm({
+                      title: '¿Regenerar plan?',
+                      message: 'Se perderá el progreso actual.',
+                      confirmText: 'Regenerar',
+                      cancelText: 'Cancelar',
+                      type: 'warning',
+                      icon: '🔄'
+                    });
+
+                    if (confirmed) {
+                      showToast('🔄 Regenerando...', 'info', 1500);
+                      window.location.reload();
+                    }
+                  }}
+                  title="Regenerar Plan"
+                >
+                  <span className="hidden sm:inline">🔄 Regenerar</span>
+                  <span className="sm:hidden">🔄</span>
+                </button>
+              </div>
+            </div>
+            
             {currentChart && (
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {currentChart.name}
+                {currentChart.name || 'Carta Natal'}
                 {currentChart.birthDate && (() => {
-                  // birthDate puede venir como string localizado "16 de julio de 1992, 10:20"
-                  // o como fecha separada + tiempo
-                  const dateStr = currentChart.birthDate.split(',')[0]; // "16 de julio de 1992"
-                  return ` • ${dateStr}`;
+                  const dateStr = currentChart.birthDate.split(',')[0];
+                  return ` • 📅 ${dateStr}`;
                 })()}
-                {currentChart.birthTime && ` • 🕐 ${currentChart.birthTime}`}
-                {currentChart.birthPlace && ` • 📍 ${currentChart.birthPlace}`}
+                {currentChart.birthTime ? ` • 🕐 ${currentChart.birthTime}` : ' • 🕐 Hora no especificada'}
+                {currentChart.birthPlace ? ` • 📍 ${currentChart.birthPlace}` : ' • 📍 Ubicación no especificada'}
               </p>
             )}
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-2 sm:p-3 md:p-4">
-              <div className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-medium mb-0.5 sm:mb-1">
-                Progreso Total
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-3 md:gap-4 mb-3 md:mb-4">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-purple-200 dark:border-purple-700">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">📊</span>
+                <div className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-medium">
+                  Progreso
+                </div>
               </div>
-              <div className="text-lg sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-white">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-white">
                 {getProgress().completed}/{plan.totalExercises}
               </div>
-              <div className="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 mt-0.5 sm:mt-1">
+              <div className="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
                 {getProgress().percent}% completado
               </div>
             </div>
-            
-            <div className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-2 sm:p-3 md:p-4">
-              <div className="text-xs sm:text-sm text-pink-600 dark:text-pink-400 font-medium mb-0.5 sm:mb-1">
-                Reflexiones 📝
+
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-pink-200 dark:border-pink-700">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">📝</span>
+                <div className="text-xs sm:text-sm text-pink-600 dark:text-pink-400 font-medium">
+                  Reflexiones
+                </div>
               </div>
-              <div className="text-lg sm:text-2xl md:text-3xl font-bold text-pink-900 dark:text-white">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-pink-900 dark:text-white">
                 {totalReflections}
               </div>
             </div>
-            
-            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 sm:p-3 md:p-4">
-              <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium mb-0.5 sm:mb-1">
-                Luna Estrés
+
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-blue-200 dark:border-blue-700">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">🌙</span>
+                <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium">
+                  Luna Estrés
+                </div>
               </div>
-              <div className="text-lg sm:text-2xl md:text-3xl font-bold text-blue-900 dark:text-white">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-900 dark:text-white">
                 {plan.chartAnalysis.moon?.stressScore || 0}/10
               </div>
             </div>
 
-            <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-2 sm:p-3 md:p-4">
-              <div className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-medium mb-0.5 sm:mb-1">
-                Racha Diaria 🔥
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-green-200 dark:border-green-700">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">🔥</span>
+                <div className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-medium">
+                  Racha
+                </div>
               </div>
-              <div className="text-lg sm:text-2xl md:text-3xl font-bold text-green-900 dark:text-white">
-                {dailyStreak} días
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-900 dark:text-white">
+                {dailyStreak}
+              </div>
+              <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+                días
               </div>
             </div>
           </div>
@@ -398,35 +465,7 @@ export default function ExercisePlanPage() {
           />
         </div>
 
-        {/* Botones de acción */}
-        <div className="mt-4 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
-          <button
-            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg transition-colors text-sm sm:text-base shadow-lg hover:shadow-xl"
-            onClick={() => setShowSavePlanModal(true)}
-          >
-            💾 Guardar Plan
-          </button>
-          <button
-            className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg transition-colors text-sm sm:text-base"
-            onClick={async () => {
-              const confirmed = await showConfirm({
-                title: '¿Regenerar plan de ejercicios?',
-                message: 'Se perderá el progreso actual y se creará un nuevo plan personalizado.',
-                confirmText: 'Sí, regenerar',
-                cancelText: 'No, conservar',
-                type: 'warning',
-                icon: '🔄'
-              });
-              
-              if (confirmed) {
-                showToast('🔄 Regenerando plan...', 'info', 2000);
-                window.location.reload();
-              }
-            }}
-          >
-            🔄 Regenerar
-          </button>
-        </div>
+        {/* Botones de acción - Optimizados para móvil */}
       </div>
 
       {/* Modal de Guardar Plan */}
