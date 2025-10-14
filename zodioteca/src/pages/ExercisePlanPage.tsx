@@ -5,7 +5,7 @@
  * Versión 2.0 - Con Onboarding y Estado Vacío Mejorado
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useChartsStore, type NatalChart } from '../store/useCharts';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
@@ -43,13 +43,24 @@ export default function ExercisePlanPage() {
     generatePlan,
     completeExercise,
     uncompleteExercise,
-    getProgress,
     dailyStreak
   } = useExercisePlanStore();
 
   // Estado local para modales y reflexiones
   const [showSavePlanModal, setShowSavePlanModal] = useState(false);
   const [totalReflections, setTotalReflections] = useState<number>(0);
+
+  // Memoizar progress para evitar re-renders del modal
+  // Depende de plan y completedExercises, no de getProgress
+  const progress = useMemo(() => {
+    if (!plan) {
+      return { completed: 0, total: 0, percent: 0 };
+    }
+    const total = plan.totalExercises;
+    const completed = completedExercises.size;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { completed, total, percent };
+  }, [plan, completedExercises]);
 
   // Cargar estadísticas de reflexiones
   useEffect(() => {
@@ -379,10 +390,10 @@ export default function ExercisePlanPage() {
                 </div>
               </div>
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-white">
-                {getProgress().completed}/{plan.totalExercises}
+                {progress.completed}/{plan.totalExercises}
               </div>
               <div className="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
-                {getProgress().percent}% completado
+                {progress.percent}% completado
               </div>
             </div>
 
@@ -475,7 +486,7 @@ export default function ExercisePlanPage() {
           onClose={() => setShowSavePlanModal(false)}
           plan={plan}
           chartName={currentChart?.name || charts.find(c => c.id === plan.chartId)?.name}
-          progress={getProgress()}
+          progress={progress}
         />
       )}
     </div>

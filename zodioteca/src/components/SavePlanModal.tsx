@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import type { ExercisePlan } from '../services/exercises';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -18,7 +18,7 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
   chartName,
   progress,
 }) => {
-  const [planName, setPlanName] = useState(`Plan ${chartName || 'Personal'}`);
+  const [localPlanName, setLocalPlanName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -26,14 +26,14 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
       const savedPlanKey = `saved-exercise-plan-${Date.now()}`;
       localStorage.setItem(savedPlanKey, JSON.stringify({
         planData: plan,
         chartName: chartName || 'Sin nombre',
-        customName: planName,
+        customName: localPlanName,
         progress: progress,
         savedAt: Date.now(),
       }));
@@ -50,45 +50,47 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
       alert('Error al guardar el plan. Por favor intenta nuevamente.');
       setIsSaving(false);
     }
-  }, [plan, chartName, planName, progress, onClose]);
+  };
 
+  // Solo inicializar cuando se abre el modal
   useEffect(() => {
+    if (isOpen) {
+      setLocalPlanName(`Plan ${chartName || 'Personal'}`);
+      // Enfocar el input después de un pequeño delay
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, chartName]);
+
+  // Manejar teclas
+  useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen && !isSaving) {
+      if (event.key === 'Escape' && !isSaving) {
         onClose();
       }
-      if (event.key === 'Enter' && event.ctrlKey && isOpen && !isSaving && planName.trim()) {
+      if (event.key === 'Enter' && event.ctrlKey && !isSaving && localPlanName.trim()) {
         event.preventDefault();
         handleSave();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      setTimeout(() => {
-        inputRef.current?.focus();
-        inputRef.current?.select();
-      }, 100);
-    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isSaving, localPlanName]);
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, isSaving, onClose, planName, handleSave]);
-
+  // Resetear estado cuando se cierra
   useEffect(() => {
     if (!isOpen) {
       setSaved(false);
       setIsSaving(false);
     }
   }, [isOpen]);
-
-  // Inicializar el nombre solo cuando se abre el modal
-  useEffect(() => {
-    if (isOpen) {
-      setPlanName(`Plan ${chartName || 'Personal'}`);
-    }
-  }, [isOpen, chartName]);
 
   if (!isOpen) return null;
 
@@ -116,7 +118,17 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
         <div className="p-5 sm:p-5 space-y-4 sm:space-y-4">
           <div>
             <label htmlFor="plan-name" className="block text-sm sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Nombre del plan:</label>
-            <input ref={inputRef} id="plan-name" type="text" value={planName} onChange={(e) => setPlanName(e.target.value)} className="w-full px-4 py-2.5 sm:py-2.5 rounded-lg text-sm border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500" placeholder="Ej: Plan Marzo 2025" maxLength={50} disabled={isSaving} />
+            <input 
+              ref={inputRef} 
+              id="plan-name" 
+              type="text" 
+              value={localPlanName} 
+              onChange={(e) => setLocalPlanName(e.target.value)} 
+              className="w-full px-4 py-2.5 sm:py-2.5 rounded-lg text-sm border-2 border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500" 
+              placeholder="Ej: Plan Marzo 2025" 
+              maxLength={50} 
+              disabled={isSaving} 
+            />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Máximo 50 caracteres</p>
           </div>
 
@@ -151,9 +163,19 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
         </div>
 
         <div className="p-4 sm:p-4 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl sm:rounded-b-2xl flex gap-3 sm:gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 sm:px-4 sm:py-2.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600" disabled={isSaving}>Cancelar</button>
-          <button onClick={handleSave} disabled={isSaving || !planName.trim()} className="flex-1 px-4 py-2.5 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 disabled:from-gray-400 text-white font-semibold text-sm rounded-lg sm:rounded-xl">
-            {isSaving ? <span>⏳ Guardando...</span> : <span>💾 Guardar</span>}
+          <button 
+            onClick={onClose} 
+            className="flex-1 px-4 py-2.5 sm:px-4 sm:py-2.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition-colors" 
+            disabled={isSaving}
+          >
+            Cancelar
+          </button>
+          <button 
+            onClick={handleSave} 
+            disabled={isSaving || !localPlanName.trim()} 
+            className="flex-1 px-4 py-2.5 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg sm:rounded-xl transition-all"
+          >
+            {isSaving ? '⏳ Guardando...' : '💾 Guardar'}
           </button>
         </div>
       </div>
