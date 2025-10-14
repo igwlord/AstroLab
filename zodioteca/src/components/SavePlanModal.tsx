@@ -80,6 +80,12 @@ const SavePlanModal: FC<SavePlanModalProps> = ({
     if (!isOpen) {
       setSaved(false);
       setIsSaving(false);
+    }
+  }, [isOpen]);
+
+  // Inicializar el nombre solo cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
       setPlanName(`Plan ${chartName || 'Personal'}`);
     }
   }, [isOpen, chartName]);
