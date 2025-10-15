@@ -14,7 +14,6 @@ import { useNotification } from '../hooks/useNotification';
 import PhaseSection from '../components/PhaseSection';
 import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
-import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
 import SavePlanModal from '../components/SavePlanModal';
 // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
 // import PlanGenerationLoader from '../components/PlanGenerationLoader';

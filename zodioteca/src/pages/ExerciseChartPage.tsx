@@ -43,10 +43,7 @@ import {
   getSaturnManifestationBySign,
   getUranusManifestationBySign,
   getNeptuneManifestationBySign,
-  getPlutoManifestationBySign,
-  getAspectTypeExplanation,
-  getSpecificAspectExplanation,
-  isHardAspect
+  getPlutoManifestationBySign
 } from '../utils/interpretationHelpers';
 
 export default function ExerciseChartPage() {
