@@ -513,6 +513,7 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                   onClick={() => {
                     if (result) {
                       // Crear objeto NatalChart compatible con el store
+                      // ⚠️ IMPORTANTE: Incluir TODOS los datos calculados (lunarNodes, sensitivePoints, etc.)
                       const chartForStore = {
                         id: `chart-${Date.now()}`,
                         name: personName || 'Carta sin nombre',
@@ -526,9 +527,16 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                         updatedAt: new Date().toISOString(),
                         tags: [],
                         isFavorite: false,
+                        // ✅ Incluir TODOS los datos calculados de la carta
                         planets: result.planets,
                         houses: result.houses,
                         aspects: result.aspects,
+                        lunarNodes: result.lunarNodes,
+                        sensitivePoints: result.sensitivePoints,
+                        asteroids: result.asteroids,
+                        arabicParts: result.arabicParts,
+                        hemispheres: result.hemispheres,
+                        advancedPoints: result.advancedPoints,
                         summary: []
                       };
                       setCurrentChart(chartForStore);
@@ -536,13 +544,19 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     }
                   }}
                   disabled={!result}
-                  className="relative overflow-hidden px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md sm:rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-600/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:translate-x-[-100%] hover:before:animate-[shine_1.5s_ease-in-out]"
-                  title="Plan de Ejercicios Holístico"
+                  className="group relative overflow-hidden px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md sm:rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-600/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base animate-pulse hover:animate-none before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:translate-x-[-100%] hover:before:animate-[shine_1.5s_ease-in-out]"
+                  title="Genera tu plan personalizado de 21 días basado en tu carta natal"
                 >
-                  <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
-                  <span className="hidden md:inline">Ejercicios</span>
+                  
+                  {/* Texto responsivo */}
+                  <span className="md:hidden font-semibold">🧘 Mi Plan</span>
+                  <span className="hidden md:flex md:flex-col md:items-start md:leading-tight">
+                    <span className="font-bold text-sm">🧘 Plan de Ejercicios</span>
+                    <span className="text-[10px] text-purple-100 opacity-90">Personalizado para tu carta</span>
+                  </span>
                 </button>
                 <button
                   onClick={handleSaveChart}

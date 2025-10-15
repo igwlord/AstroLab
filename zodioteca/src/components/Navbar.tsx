@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
     { path: '/natal-chart', label: t('navigation.natalChart'), icon: '🎯' },
     { path: '/saved-charts', label: t('navigation.savedCharts'), icon: '💾' },
     { path: '/favorites', label: 'Favoritos', icon: '⭐' },
-    { path: '/ejercicios', label: 'Ejercicios', icon: '📝' },
+    { path: '/ejercicios', label: 'Análisis', icon: '🔎' },
     { path: '/frequencies', label: t('navigation.frequencies'), icon: '🎵' },
     { path: '/glossary', label: t('navigation.glossary'), icon: '📚' },
     { path: '/settings', label: t('navigation.settings'), icon: '⚙️' },

@@ -5,7 +5,7 @@
  * Versión 2.0 - Con Onboarding y Estado Vacío Mejorado
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useChartsStore, type NatalChart } from '../store/useCharts';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
@@ -16,6 +16,8 @@ import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
 import ExercisePlanSkeleton from '../components/ExercisePlanSkeleton';
 import SavePlanModal from '../components/SavePlanModal';
+// 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
+// import PlanGenerationLoader from '../components/PlanGenerationLoader';
 import { getReflectionStats } from '../services/reflectionsService';
 import { logger } from '../utils/logger';
 
@@ -49,6 +51,9 @@ export default function ExercisePlanPage() {
   // Estado local para modales y reflexiones
   const [showSavePlanModal, setShowSavePlanModal] = useState(false);
   const [totalReflections, setTotalReflections] = useState<number>(0);
+  // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
+  // const [showGenerationLoader, setShowGenerationLoader] = useState(false);
+  const hasGeneratedRef = useRef(false);
 
   // Memoizar progress para evitar re-renders del modal
   // Depende de plan y completedExercises, no de getProgress
@@ -97,6 +102,11 @@ export default function ExercisePlanPage() {
 
   useEffect(() => {
     async function loadAndGeneratePlan() {
+      // Evitar generar múltiples veces
+      if (hasGeneratedRef.current) {
+        return;
+      }
+
       // 1. Obtener chart desde state, currentChart o charts
       let chart: NatalChart | null = null;
 
@@ -114,6 +124,13 @@ export default function ExercisePlanPage() {
       }
 
       logger.log('🎯 Generando plan para:', chart.name || chart.id);
+
+      // Marcar que ya estamos generando
+      hasGeneratedRef.current = true;
+
+      // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
+      // Mostrar loader
+      // setShowGenerationLoader(true);
 
       // 2. Generar plan usando el store
       await generatePlan(chart);
@@ -155,9 +172,17 @@ export default function ExercisePlanPage() {
     );
   }
 
-  if (loading) {
-    return <ExercisePlanSkeleton />;
-  }
+  // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
+  // Mostrar loader animado bonito mientras genera el plan
+  // if (loading || showGenerationLoader) {
+  //   return (
+  //     <PlanGenerationLoader
+  //       onComplete={() => {
+  //         setShowGenerationLoader(false);
+  //       }}
+  //     />
+  //   );
+  // }
 
   if (error) {
     return (

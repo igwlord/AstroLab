@@ -1,7 +1,7 @@
 /**
  * ANALIZADOR DE CARTAS NATALES MEJORADO
  * Incorpora dignidades, aspectos diferenciados y análisis matizado
- * Versión: 2.0.0
+ * Versión: 3.0.0
  */
 
 import type { NatalChart } from './planetNormalizer';
@@ -26,7 +26,7 @@ export interface ChartAnalysis {
   secondaryElement?: 'fire' | 'earth' | 'air' | 'water';
   dominantModality?: 'cardinal' | 'fixed' | 'mutable';
   
-  // Análisis de Luna (crítico para emocional)
+  // Análisis de Luna (crítico para emocional) - EXPANDIDO
   moon?: {
     house: number;
     sign: string;
@@ -34,6 +34,12 @@ export interface ChartAnalysis {
     hardAspects: number;
     softAspects: number;
     stressScore: number; // 0-10
+    aspects?: Array<{ // NUEVO: Aspectos detallados
+      planet: string;
+      type: string;
+      orb: number;
+      isHard: boolean;
+    }>;
   };
   
   // Análisis de Mercurio (comunicación/mente)
@@ -42,6 +48,114 @@ export interface ChartAnalysis {
     sign: string;
     retrograde: boolean;
     dignity: DignityInfo;
+  };
+  
+  // Venus (relaciones/valores)
+  venus?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Marte (acción/deseo)
+  mars?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Júpiter (expansión/abundancia)
+  jupiter?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Saturno (límites/estructura)
+  saturn?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Urano (cambio/innovación)
+  uranus?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Neptuno (espiritualidad/ilusión)
+  neptune?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // Plutón (transformación/poder)
+  pluto?: {
+    house: number;
+    sign: string;
+    dignity: DignityInfo;
+  };
+  
+  // NUEVO: Nodos Lunares (propósito evolutivo)
+  nodes?: {
+    north: {
+      sign: string;
+      house: number;
+      degree: number;
+    };
+    south: {
+      sign: string;
+      house: number;
+      degree: number;
+    };
+  };
+  
+  // NUEVO: Quirón (herida sanadora)
+  chiron?: {
+    sign: string;
+    house: number;
+    degree: number;
+    dignity: DignityInfo;
+    aspects?: Array<{
+      planet: string;
+      type: string;
+      orb: number;
+      isHard: boolean;
+    }>;
+  };
+  
+  // NUEVO: Lilith (sombra)
+  lilith?: {
+    sign: string;
+    house: number;
+    degree: number;
+    aspects?: Array<{
+      planet: string;
+      type: string;
+      orb: number;
+      isHard: boolean;
+    }>;
+  };
+  
+  // NUEVO: Aspectos detallados (tensos y armónicos)
+  aspectsDetailed?: {
+    hard: Array<{
+      planetA: string;
+      planetB: string;
+      type: string; // square, opposition, conjunction (if hard)
+      orb: number;
+      explanation?: string;
+    }>;
+    soft: Array<{
+      planetA: string;
+      planetB: string;
+      type: string; // trine, sextile, conjunction (if soft)
+      orb: number;
+      explanation?: string;
+    }>;
   };
   
   // Dignidades débiles y fuertes
@@ -57,11 +171,17 @@ export interface ChartAnalysis {
     dignity: DignityInfo;
   }>;
   
-  // Conteos y stelliums
+  // Conteos y stelliums - EXPANDIDO
   mutableCount: number;
   cardinalCount: number;
   fixedCount: number;
   stelliumHouses: number[]; // Casas con 3+ planetas
+  stelliumDetails?: Array<{ // NUEVO: Detalles de cada stellium
+    house: number;
+    planets: string[];
+    sign: string;
+    element: string;
+  }>;
   
   // Aspectos tensos totales
   tensionsCount: number;
@@ -361,6 +481,275 @@ function analyzeMoonStress(chart: NatalChart): number {
 }
 
 /**
+ * NUEVO: Analiza los Nodos Lunares (propósito evolutivo)
+ */
+function analyzeNodes(chart: NatalChart) {
+  // Cast to access lunarNodes property (new structure from realAstroCalculator)
+  const extendedChart = chart as NatalChart & { 
+    lunarNodes?: Array<{ type: string; name: string; sign: string; house: number; degree: number }>;
+    sensitivePoints?: Array<{ type: string; name: string; sign: string; house: number; degree: number }>;
+  };
+  console.log('🔍 [analyzeNodes] Buscando en chart.lunarNodes:', extendedChart.lunarNodes);
+  
+  // NUEVO: Buscar en chart.lunarNodes (estructura correcta)
+  if (extendedChart.lunarNodes && Array.isArray(extendedChart.lunarNodes) && extendedChart.lunarNodes.length >= 2) {
+    const northNode = extendedChart.lunarNodes.find(n => n.type === 'north' || n.name === 'Nodo Norte');
+    const southNode = extendedChart.lunarNodes.find(n => n.type === 'south' || n.name === 'Nodo Sur');
+    
+    if (northNode && southNode) {
+      console.log('✅ [analyzeNodes] Nodos encontrados en chart.lunarNodes:', { northNode, southNode });
+      return {
+        north: {
+          sign: northNode.sign,
+          house: northNode.house,
+          degree: northNode.degree
+        },
+        south: {
+          sign: southNode.sign,
+          house: southNode.house,
+          degree: southNode.degree
+        }
+      };
+    }
+  }
+  
+  // FALLBACK: Buscar en chart.planets (por compatibilidad)
+  const northNode = chart.planets?.find(p => p.name === 'Node' || p.name === 'North Node' || p.name === 'Nodo Norte');
+  
+  if (!northNode) {
+    console.log('⚠️ [analyzeNodes] Nodo Norte NO encontrado en ningún lugar');
+    return undefined;
+  }
+  
+  console.log('✅ [analyzeNodes] Nodo Norte encontrado en chart.planets:', northNode);
+  
+  // Calcular el Nodo Sur (siempre opuesto al Norte)
+  const southNodeSign = getSouthNodeSign(northNode.sign);
+  const southNodeHouse = northNode.house <= 6 ? northNode.house + 6 : northNode.house - 6;
+  
+  return {
+    north: {
+      sign: northNode.sign,
+      house: northNode.house,
+      degree: northNode.deg // Use 'deg' from planetNormalizer structure
+    },
+    south: {
+      sign: southNodeSign,
+      house: southNodeHouse,
+      degree: northNode.deg // Mismo grado pero signo opuesto
+    }
+  };
+}
+
+/**
+ * Helper: Obtiene el signo opuesto (para Nodo Sur)
+ */
+function getSouthNodeSign(northSign: string): string {
+  const opposites: Record<string, string> = {
+    'Aries': 'Libra', 'Libra': 'Aries',
+    'Taurus': 'Scorpio', 'Scorpio': 'Taurus',
+    'Gemini': 'Sagittarius', 'Sagittarius': 'Gemini',
+    'Cancer': 'Capricorn', 'Capricorn': 'Cancer',
+    'Leo': 'Aquarius', 'Aquarius': 'Leo',
+    'Virgo': 'Pisces', 'Pisces': 'Virgo'
+  };
+  return opposites[northSign] || 'Libra';
+}
+
+/**
+ * NUEVO: Analiza Quirón (herida sanadora)
+ */
+function analyzeChiron(chart: NatalChart) {
+  // Cast to access sensitivePoints property
+  const extendedChart = chart as NatalChart & { 
+    sensitivePoints?: Array<{ type: string; name: string; sign: string; house: number; degree: number }>;
+  };
+  
+  console.log('🔍 [analyzeChiron] Buscando en chart.sensitivePoints:', extendedChart.sensitivePoints);
+  console.log('🔍 [analyzeChiron] Buscando en chart.planets:', chart.planets?.map(p => p.name).join(', '));
+  
+  // NUEVO: Buscar en chart.sensitivePoints primero
+  let chiron = extendedChart.sensitivePoints?.find(p => 
+    p.type === 'chiron' || p.name === 'Chiron' || p.name === 'Quirón'
+  );
+  
+  // FALLBACK: Buscar en chart.planets
+  if (!chiron) {
+    const planetChiron = chart.planets?.find(p => p.name === 'Chiron' || p.name === 'Quirón');
+    if (planetChiron) {
+      chiron = { ...planetChiron, type: 'chiron', degree: planetChiron.deg };
+    }
+  }
+  
+  if (!chiron) {
+    console.log('⚠️ [analyzeChiron] Quirón NO encontrado');
+    return undefined;
+  }
+  console.log('✅ [analyzeChiron] Quirón encontrado:', chiron);
+  
+  const dignity = getPlanetDignity('Chiron', chiron.sign);
+  
+  // Aspectos de Quirón
+  const chironAspects = chart.aspects?.filter(a =>
+    a.a === 'Chiron' || a.b === 'Chiron' || a.a === 'Quirón' || a.b === 'Quirón'
+  ).map(a => {
+    const otherPlanet = (a.a === 'Chiron' || a.a === 'Quirón') ? a.b : a.a;
+    const typeLower = a.type.toLowerCase();
+    const isHard = ['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower);
+    
+    return {
+      planet: otherPlanet,
+      type: a.type,
+      orb: a.orb,
+      isHard
+    };
+  }) || [];
+  
+  return {
+    sign: chiron.sign,
+    house: chiron.house,
+    degree: (chiron as { degree?: number; deg?: number }).degree || (chiron as { degree?: number; deg?: number }).deg || 0,
+    dignity,
+    aspects: chironAspects
+  };
+}
+
+/**
+ * NUEVO: Analiza Lilith (sombra)
+ */
+function analyzeLilith(chart: NatalChart) {
+  // Cast to access sensitivePoints property
+  const extendedChart = chart as NatalChart & { 
+    sensitivePoints?: Array<{ type: string; name: string; sign: string; house: number; degree: number }>;
+  };
+  
+  console.log('🔍 [analyzeLilith] Buscando en chart.sensitivePoints:', extendedChart.sensitivePoints);
+  console.log('🔍 [analyzeLilith] Tipos de sensitivePoints:', extendedChart.sensitivePoints?.map(p => `${p.name} (type: ${p.type})`).join(', '));
+  console.log('🔍 [analyzeLilith] Buscando en chart.planets:', chart.planets?.map(p => p.name).join(', '));
+  
+  // NUEVO: Buscar en chart.sensitivePoints primero
+  let lilith = extendedChart.sensitivePoints?.find(p => 
+    // Buscar por type (con guiones o guiones bajos)
+    p.type === 'lilith' || 
+    p.type === 'lilith-mean' || 
+    p.type === 'lilith_mean' ||
+    p.type === 'black_moon_lilith' || 
+    p.type === 'black-moon-lilith' ||
+    p.type === 'mean_lilith' ||
+    // Buscar por name (cualquier variante que contenga "Lilith")
+    (p.name && p.name.includes('Lilith'))
+  );
+  
+  console.log('🔍 [analyzeLilith] Búsqueda por type/name:', lilith);
+  
+  // FALLBACK: Buscar en chart.planets
+  if (!lilith) {
+    const planetLilith = chart.planets?.find(p => 
+      p.name === 'Lilith' || p.name === 'Black Moon Lilith' || p.name === 'Mean Lilith'
+    );
+    if (planetLilith) {
+      lilith = { ...planetLilith, type: 'lilith', degree: planetLilith.deg };
+    }
+  }
+  
+  if (!lilith) {
+    console.log('⚠️ [analyzeLilith] Lilith NO encontrada');
+    return undefined;
+  }
+  console.log('✅ [analyzeLilith] Lilith encontrada:', lilith);
+  
+  // Aspectos de Lilith
+  const lilithAspects = chart.aspects?.filter(a =>
+    a.a === 'Lilith' || a.b === 'Lilith' || 
+    a.a === 'Black Moon Lilith' || a.b === 'Black Moon Lilith'
+  ).map(a => {
+    const otherPlanet = (a.a === 'Lilith' || a.a === 'Black Moon Lilith') ? a.b : a.a;
+    const typeLower = a.type.toLowerCase();
+    const isHard = ['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower);
+    
+    return {
+      planet: otherPlanet,
+      type: a.type,
+      orb: a.orb,
+      isHard
+    };
+  }) || [];
+  
+  return {
+    sign: lilith.sign,
+    house: lilith.house,
+    degree: (lilith as { degree?: number; deg?: number }).degree || (lilith as { degree?: number; deg?: number }).deg || 0,
+    aspects: lilithAspects
+  };
+}
+
+/**
+ * NUEVO: Analiza aspectos detallados (todos, con explicaciones)
+ */
+function analyzeDetailedAspects(chart: NatalChart) {
+  const hard: Array<{
+    planetA: string;
+    planetB: string;
+    type: string;
+    orb: number;
+    explanation?: string;
+  }> = [];
+  
+  const soft: Array<{
+    planetA: string;
+    planetB: string;
+    type: string;
+    orb: number;
+    explanation?: string;
+  }> = [];
+  
+  for (const aspect of chart.aspects || []) {
+    const typeLower = aspect.type.toLowerCase();
+    
+    if (['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower) && aspect.orb <= 8) {
+      hard.push({
+        planetA: aspect.a,
+        planetB: aspect.b,
+        type: aspect.type,
+        orb: aspect.orb
+      });
+    }
+    
+    if (['trine', 'sextile', 'trígono', 'sextil'].includes(typeLower) && aspect.orb <= 8) {
+      soft.push({
+        planetA: aspect.a,
+        planetB: aspect.b,
+        type: aspect.type,
+        orb: aspect.orb
+      });
+    }
+  }
+  
+  return { hard, soft };
+}
+
+/**
+ * NUEVO: Analiza detalles de stelliums
+ */
+function analyzeStelliumDetails(chart: NatalChart, stelliumHouses: number[]) {
+  return stelliumHouses.map(house => {
+    const planetsInHouse = chart.planets?.filter(p => p.house === house) || [];
+    const signs = planetsInHouse.map(p => p.sign);
+    const dominantSign = signs.reduce((a, b, _, arr) =>
+      arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
+    );
+    const element = SIGN_TO_ELEMENT[dominantSign] || 'air';
+    
+    return {
+      house,
+      planets: planetsInHouse.map(p => p.name),
+      sign: dominantSign,
+      element
+    };
+  });
+}
+
+/**
  * Analiza una carta natal completa
  */
 export function analyzeChart(chart: NatalChart): ChartAnalysis {
@@ -372,6 +761,13 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
   let cardinalCount = 0;
   let fixedCount = 0;
 
+  // Logging: Ver qué planetas tenemos disponibles
+  console.log('🌍 [ChartAnalyzer] TODOS LOS PLANETAS DISPONIBLES:', chart.planets?.map(p => p.name).join(', '));
+  console.log('🔍 [ChartAnalyzer] PROPIEDADES DE LA CARTA:', Object.keys(chart));
+  const extChart = chart as unknown as { lunarNodes?: unknown; sensitivePoints?: unknown };
+  console.log('🔍 [ChartAnalyzer] chart.lunarNodes existe?', 'lunarNodes' in chart, extChart.lunarNodes);
+  console.log('🔍 [ChartAnalyzer] chart.sensitivePoints existe?', 'sensitivePoints' in chart, extChart.sensitivePoints);
+  
   // Analizar planetas
   for (const p of chart.planets || []) {
     const element = SIGN_TO_ELEMENT[p.sign] || 'air';
@@ -455,6 +851,62 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     dignity: getPlanetDignity('Mercury', mercury.sign)
   } : undefined;
 
+  // Analizar Venus
+  const venus = chart.planets?.find(p => p.name === 'Venus');
+  const venusAnalysis = venus ? {
+    house: venus.house,
+    sign: venus.sign,
+    dignity: getPlanetDignity('Venus', venus.sign)
+  } : undefined;
+
+  // Analizar Marte
+  const mars = chart.planets?.find(p => p.name === 'Mars');
+  const marsAnalysis = mars ? {
+    house: mars.house,
+    sign: mars.sign,
+    dignity: getPlanetDignity('Mars', mars.sign)
+  } : undefined;
+
+  // Analizar Júpiter
+  const jupiter = chart.planets?.find(p => p.name === 'Jupiter');
+  const jupiterAnalysis = jupiter ? {
+    house: jupiter.house,
+    sign: jupiter.sign,
+    dignity: getPlanetDignity('Jupiter', jupiter.sign)
+  } : undefined;
+
+  // Analizar Saturno
+  const saturn = chart.planets?.find(p => p.name === 'Saturn');
+  const saturnAnalysis = saturn ? {
+    house: saturn.house,
+    sign: saturn.sign,
+    dignity: getPlanetDignity('Saturn', saturn.sign)
+  } : undefined;
+
+  // Analizar Urano
+  const uranus = chart.planets?.find(p => p.name === 'Uranus');
+  const uranusAnalysis = uranus ? {
+    house: uranus.house,
+    sign: uranus.sign,
+    dignity: getPlanetDignity('Uranus', uranus.sign)
+  } : undefined;
+
+  // Analizar Neptuno
+  const neptune = chart.planets?.find(p => p.name === 'Neptune');
+  const neptuneAnalysis = neptune ? {
+    house: neptune.house,
+    sign: neptune.sign,
+    dignity: getPlanetDignity('Neptune', neptune.sign)
+  } : undefined;
+
+  // Analizar Plutón
+  const pluto = chart.planets?.find(p => p.name === 'Pluto');
+  const plutoAnalysis = pluto ? {
+    house: pluto.house,
+    sign: pluto.sign,
+    dignity: getPlanetDignity('Pluto', pluto.sign)
+  } : undefined;
+
   // Dignidades débiles y fuertes
   const weakDignities = getWeakDignities(chart.planets || []);
   const strongDignities = getStrongDignities(chart.planets || []);
@@ -481,6 +933,35 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
 
   // MEJORA 8: Calcular confidence una sola vez
   const confidence = calculateConfidence(chart);
+  
+  // NUEVO: Analizar Nodos, Quirón y Lilith
+  const nodes = analyzeNodes(chart);
+  const chiron = analyzeChiron(chart);
+  const lilith = analyzeLilith(chart);
+  
+  // NUEVO: Aspectos detallados
+  const aspectsDetailed = analyzeDetailedAspects(chart);
+  
+  // NUEVO: Detalles de stelliums
+  const stelliumDetails = analyzeStelliumDetails(chart, stelliumHouses);
+  
+  // MEJORA: Agregar aspectos detallados a la Luna
+  const moonWithAspects = moonAnalysis ? {
+    ...moonAnalysis,
+    aspects: chart.aspects?.filter(a =>
+      a.a === 'Moon' || a.b === 'Moon' || a.a === 'Luna' || a.b === 'Luna'
+    ).map(a => {
+      const otherPlanet = (a.a === 'Moon' || a.a === 'Luna') ? a.b : a.a;
+      const typeLower = a.type.toLowerCase();
+      const isHard = ['square', 'opposition', 'cuadratura', 'oposición'].includes(typeLower);
+      return {
+        planet: otherPlanet,
+        type: a.type,
+        orb: a.orb,
+        isHard
+      };
+    })
+  } : undefined;
 
   return {
     confidence,
@@ -488,18 +969,30 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     dominantElement,
     secondaryElement,
     dominantModality,
-    moon: moonAnalysis,
+    moon: moonWithAspects,
     mercury: mercuryAnalysis,
+    venus: venusAnalysis,
+    mars: marsAnalysis,
+    jupiter: jupiterAnalysis,
+    saturn: saturnAnalysis,
+    uranus: uranusAnalysis,
+    neptune: neptuneAnalysis,
+    pluto: plutoAnalysis,
+    nodes,
+    chiron,
+    lilith,
+    aspectsDetailed,
     weakDignities,
     strongDignities,
     mutableCount,
     cardinalCount,
     fixedCount,
     stelliumHouses,
+    stelliumDetails,
     tensionsCount,
     harmoniesCount,
     notes,
-    version: '2.0.0',
+    version: '3.0.0', // Nueva versión con análisis profundo
     analyzedAt: new Date().toISOString()
   };
 }
