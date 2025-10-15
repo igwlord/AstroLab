@@ -5,6 +5,7 @@
  */
 
 import type { NatalChart } from './planetNormalizer';
+import { PLANET_MAP } from './planetNormalizer';
 import { getPlanetDignity, getWeakDignities, getStrongDignities, type DignityInfo } from './dignities';
 import { calculateConfidence } from './chartValidator';
 
@@ -187,12 +188,300 @@ export interface ChartAnalysis {
   tensionsCount: number;
   harmoniesCount: number;
   
+  // NUEVO: Ejes arquetípicos (top 6 aspectos clave)
+  axes?: AxisAnalysis[];
+  
   // Notas adicionales
   notes: string[];
   
   // Meta
   version: string;
   analyzedAt: string;
+}
+
+// ============================================================
+// SISTEMA DE EJES ARQUETÍPICOS
+// ============================================================
+
+export type AspectType = 'conjunction' | 'opposition' | 'square' | 'trine' | 'sextile';
+export type AxisCategory = 'core' | 'internal' | 'challenge' | 'expansion';
+
+export interface AxisAnalysis {
+  theme: string;                    // "Autoridad", "Sensibilidad", etc.
+  planets: [string, string];        // ["Sol", "Saturno"]
+  aspectType: AspectType;           // tipo de aspecto
+  orb: number;                      // exactitud en grados
+  houses: [number, number];         // casas donde están los planetas
+  score: number;                    // 0-20 (prioridad)
+  category: AxisCategory;           // tipo de eje
+}
+
+interface AxisPriority {
+  planets: [string, string];
+  theme: string;
+  category: AxisCategory;
+  baseWeight: number;               // multiplicador de importancia
+}
+
+// Prioridades de ejes (12 combinaciones más relevantes)
+const AXIS_PRIORITIES: AxisPriority[] = [
+  // Tier 1: Luminares con externos (peso x1.5)
+  { planets: ['Sun', 'Saturn'], theme: 'Autoridad', category: 'core', baseWeight: 1.5 },
+  { planets: ['Moon', 'Saturn'], theme: 'Seguridad Emocional', category: 'core', baseWeight: 1.5 },
+  { planets: ['Moon', 'Neptune'], theme: 'Sensibilidad', category: 'internal', baseWeight: 1.5 },
+  { planets: ['Moon', 'Pluto'], theme: 'Intensidad Emocional', category: 'internal', baseWeight: 1.5 },
+  { planets: ['Sun', 'Pluto'], theme: 'Poder Personal', category: 'core', baseWeight: 1.5 },
+  
+  // Tier 2: Personales con externos (peso x1.3)
+  { planets: ['Mars', 'Pluto'], theme: 'Acción y Poder', category: 'challenge', baseWeight: 1.3 },
+  { planets: ['Venus', 'Saturn'], theme: 'Amor y Límites', category: 'challenge', baseWeight: 1.3 },
+  { planets: ['Mercury', 'Chiron'], theme: 'Comunicación Herida', category: 'internal', baseWeight: 1.3 },
+  { planets: ['Mars', 'Saturn'], theme: 'Acción Contenida', category: 'challenge', baseWeight: 1.3 },
+  
+  // Tier 3: Expansivos (peso x1.0)
+  { planets: ['Venus', 'Jupiter'], theme: 'Relaciones y Abundancia', category: 'expansion', baseWeight: 1.0 },
+  { planets: ['Sun', 'Jupiter'], theme: 'Confianza', category: 'expansion', baseWeight: 1.0 },
+  { planets: ['Mercury', 'Jupiter'], theme: 'Pensamiento Expansivo', category: 'expansion', baseWeight: 1.0 },
+];
+
+// ============================================================
+// FUNCIONES AUXILIARES PARA EJES
+// ============================================================
+
+/**
+ * Obtiene el elemento de un signo
+ */
+function getElement(sign: string): 'fire' | 'earth' | 'air' | 'water' {
+  const normalized = sign.charAt(0).toUpperCase() + sign.slice(1).toLowerCase();
+  const elementMap: Record<string, 'fire' | 'earth' | 'air' | 'water'> = {
+    'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire', 'Sagittarius': 'fire',
+    'Tauro': 'earth', 'Taurus': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth', 'Capricorn': 'earth',
+    'Géminis': 'air', 'Gemini': 'air', 'Geminis': 'air', 'Libra': 'air', 'Acuario': 'air', 'Aquarius': 'air',
+    'Cáncer': 'water', 'Cancer': 'water', 'Escorpio': 'water', 'Scorpio': 'water', 'Piscis': 'water', 'Pisces': 'water'
+  };
+  return elementMap[normalized] || 'fire';
+}
+
+/**
+ * Verifica si dos elementos se oponen (Fuego-Agua, Aire-Tierra)
+ */
+function elementsOppose(e1: string, e2: string): boolean {
+  return (e1 === 'fire' && e2 === 'water') || (e1 === 'water' && e2 === 'fire') ||
+         (e1 === 'air' && e2 === 'earth') || (e1 === 'earth' && e2 === 'air');
+}
+
+/**
+ * Calcula tensión elemental para un eje (0-2 puntos)
+ */
+function calculateElementalTension(
+  axis: { planets: [string, string]; houses: [number, number] },
+  chart: NatalChart,
+  ascendantSign?: string
+): number {
+  const p1 = chart.planets?.find(p => p.name === axis.planets[0]);
+  const p2 = chart.planets?.find(p => p.name === axis.planets[1]);
+  
+  if (!p1 || !p2) return 0;
+  
+  // Usar ascendente si está disponible, sino default Aries
+  const ascSign = ascendantSign || 'Aries';
+  const ascElement = getElement(ascSign);
+  const p1Element = getElement(p1.sign);
+  const p2Element = getElement(p2.sign);
+  
+  let tension = 0;
+  
+  // +1 si algún planeta opone al Ascendente elementalmente
+  if (elementsOppose(p1Element, ascElement) || elementsOppose(p2Element, ascElement)) {
+    tension += 1;
+  }
+  
+  // +1 si los dos planetas están en elementos opuestos entre sí
+  if (elementsOppose(p1Element, p2Element)) {
+    tension += 1;
+  }
+  
+  return tension;
+}
+
+/**
+ * Calcula score de un eje (0-20 puntos)
+ */
+function scoreAxis(
+  axis: Omit<AxisAnalysis, 'score'>,
+  chart: NatalChart,
+  ascendantSign?: string
+): number {
+  let score = 0;
+  
+  // 1. Planetas clave (0-5 puntos)
+  const luminaries = ['Sun', 'Moon'];
+  const personal = ['Mercury', 'Venus', 'Mars'];
+  
+  const hasLuminaries = axis.planets.some(p => luminaries.includes(p));
+  const hasPersonal = axis.planets.some(p => personal.includes(p));
+  
+  if (hasLuminaries) {
+    score += 5;
+  } else if (hasPersonal) {
+    score += 3;
+  }
+  
+  // 2. Exactitud del orbe (0-3 puntos)
+  score += Math.max(0, 3 - Math.abs(axis.orb));
+  
+  // 3. Casas (0-4 puntos)
+  const angular = [1, 4, 7, 10];
+  const sensitive = [8, 12];
+  
+  if (axis.houses.some(h => angular.includes(h))) {
+    score += 3;
+  } else if (axis.houses.some(h => sensitive.includes(h))) {
+    score += 2;
+  }
+  
+  // 4. Aspecto tenso (0-3 puntos)
+  if (axis.aspectType === 'opposition') {
+    score += 3;
+  } else if (axis.aspectType === 'square') {
+    score += 2;
+  } else if (axis.aspectType === 'conjunction') {
+    score += 1;
+  }
+  
+  // 5. Tensión elemental (0-2 puntos)
+  score += calculateElementalTension(axis, chart, ascendantSign);
+  
+  return Math.min(20, Math.round(score * 10) / 10);
+}
+
+/**
+ * Obtiene símbolo del aspecto (exportada para uso en UI)
+ */
+export function getAspectSymbol(type: AspectType): string {
+  const symbols: Record<AspectType, string> = {
+    conjunction: '☌',
+    opposition: '☍',
+    square: '□',
+    trine: '△',
+    sextile: '✶'
+  };
+  return symbols[type] || '—';
+}
+
+/**
+ * Busca un aspecto entre dos planetas en la carta
+ */
+function findAspectBetween(
+  chart: NatalChart,
+  planet1: string,
+  planet2: string
+): { type: AspectType; orb: number } | null {
+  if (!chart.aspects) return null;
+  
+  // Normalizar nombres de planetas (soportar ES/EN)
+  const normalize = (name: string) => PLANET_MAP[name] || name;
+  const p1Normalized = normalize(planet1);
+  const p2Normalized = normalize(planet2);
+  
+  // Buscar aspecto usando los nombres correctos de propiedades
+  const aspect = chart.aspects.find(a => {
+    const p1Raw = 'planet1' in a ? a.planet1 : 'a' in a ? (a as unknown as { a: string; b: string }).a : '';
+    const p2Raw = 'planet2' in a ? a.planet2 : 'b' in a ? (a as unknown as { a: string; b: string }).b : '';
+    
+    // Normalizar nombres del aspecto también
+    const p1Norm = normalize(String(p1Raw));
+    const p2Norm = normalize(String(p2Raw));
+    
+    return (p1Norm === p1Normalized && p2Norm === p2Normalized) || 
+           (p1Norm === p2Normalized && p2Norm === p1Normalized);
+  });
+  
+  if (!aspect) return null;
+  
+  // Mapear tipo de aspecto (case-insensitive + bilingual)
+  const typeMap: Record<string, AspectType> = {
+    'conjunction': 'conjunction',
+    'conjunción': 'conjunction',
+    'opposition': 'opposition',
+    'oposición': 'opposition',
+    'square': 'square',
+    'cuadratura': 'square',
+    'trine': 'trine',
+    'trígono': 'trine',
+    'sextile': 'sextile',
+    'sextil': 'sextile'
+  };
+  
+  const aspectType = typeMap[aspect.type.toLowerCase()] || 'conjunction';
+  
+  return {
+    type: aspectType,
+    orb: aspect.orb || 0
+  };
+}
+
+/**
+ * Identifica los ejes clave de una carta (top 6)
+ */
+function identifyKeyAxes(chart: NatalChart, ascendantSign?: string): AxisAnalysis[] {
+  console.log('⚖️ [identifyKeyAxes] Iniciando análisis de ejes');
+  console.log('⚖️ [identifyKeyAxes] Ascendente:', ascendantSign);
+  console.log('⚖️ [identifyKeyAxes] Total aspectos en carta:', chart.aspects?.length || 0);
+  
+  const foundAxes: AxisAnalysis[] = [];
+  
+  // Buscar todos los ejes que existen en la carta
+  for (const priority of AXIS_PRIORITIES) {
+    const aspect = findAspectBetween(chart, priority.planets[0], priority.planets[1]);
+    
+    if (!aspect) {
+      console.log(`⚖️ [identifyKeyAxes] ❌ No se encontró aspecto para ${priority.planets[0]}-${priority.planets[1]}`);
+      continue;
+    }
+    
+    const p1 = chart.planets?.find(p => p.name === priority.planets[0]);
+    const p2 = chart.planets?.find(p => p.name === priority.planets[1]);
+    
+    if (!p1 || !p2) {
+      console.log(`⚖️ [identifyKeyAxes] ❌ Planetas no encontrados: ${priority.planets[0]}=${!!p1}, ${priority.planets[1]}=${!!p2}`);
+      continue;
+    }
+    
+    const axisBase: Omit<AxisAnalysis, 'score'> = {
+      theme: priority.theme,
+      planets: priority.planets,
+      aspectType: aspect.type,
+      orb: aspect.orb,
+      houses: [p1.house, p2.house],
+      category: priority.category
+    };
+    
+    // Calcular score y aplicar peso
+    const axisScore = scoreAxis(axisBase, chart, ascendantSign);
+    const finalScore = axisScore * priority.baseWeight;
+    
+    console.log(`⚖️ [identifyKeyAxes] ✅ ${priority.theme}: ${priority.planets[0]}-${priority.planets[1]} ${aspect.type} (orb: ${aspect.orb}°) → score: ${axisScore} × ${priority.baseWeight} = ${finalScore.toFixed(1)}`);
+    
+    foundAxes.push({
+      ...axisBase,
+      score: Math.round(finalScore * 10) / 10
+    });
+  }
+  
+  console.log(`⚖️ [identifyKeyAxes] Total ejes encontrados: ${foundAxes.length}`);
+  
+  // Retornar top 6 ordenados por score
+  const topAxes = foundAxes
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6);
+  
+  console.log('⚖️ [identifyKeyAxes] Top 6 ejes seleccionados:');
+  topAxes.forEach((axis, i) => {
+    console.log(`  ${i + 1}. ${axis.theme} (${axis.planets[0]}-${axis.planets[1]}) - Score: ${axis.score}`);
+  });
+  
+  return topAxes;
 }
 
 const SIGN_TO_ELEMENT: Record<string, string> = {
@@ -963,6 +1252,15 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     })
   } : undefined;
 
+  // NUEVO: Identificar ejes arquetípicos (top 6)
+  console.log('🎯 [analyzeChart] Preparando análisis de ejes arquetípicos...');
+  const extChartForAsc = chart as unknown as { ascendant?: { sign: string } };
+  const ascendantSign = extChartForAsc.ascendant?.sign;
+  console.log('🎯 [analyzeChart] Ascendente detectado:', ascendantSign);
+  console.log('🎯 [analyzeChart] Llamando a identifyKeyAxes...');
+  const axes = identifyKeyAxes(chart, ascendantSign);
+  console.log('🎯 [analyzeChart] Ejes identificados:', axes.length);
+
   return {
     confidence,
     dominances: { elements, modalities },
@@ -991,6 +1289,7 @@ export function analyzeChart(chart: NatalChart): ChartAnalysis {
     stelliumDetails,
     tensionsCount,
     harmoniesCount,
+    axes,
     notes,
     version: '3.0.0', // Nueva versión con análisis profundo
     analyzedAt: new Date().toISOString()

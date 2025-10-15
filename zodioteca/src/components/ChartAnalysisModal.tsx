@@ -68,21 +68,28 @@ export default function ChartAnalysisModal({
   // Prevenir scroll del body cuando modal está abierto
   useEffect(() => {
     if (isOpen) {
+      // Bloquear scroll del body Y del html
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      const originalBodyPosition = document.body.style.position;
+      
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.position = 'relative';
+      
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.body.style.position = originalBodyPosition;
+      };
     }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isOpen]);
 
   // Scroll to section
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element && contentRef.current) {
-      const offset = 80; // Offset for sticky header
+      const offset = 100; // Offset for sticky header + some breathing room
       const elementPosition = element.offsetTop;
       contentRef.current.scrollTo({
         top: elementPosition - offset,
@@ -99,20 +106,29 @@ export default function ChartAnalysisModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm pt-16 md:pt-4 pb-4 px-4"
+          style={{ 
+            zIndex: 999999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: 'hidden'
+          }}
           onClick={(e) => {
             if (e.target === modalRef.current) {
               onClose();
             }
           }}
         >
-          {/* Modal Card */}
+          {/* Modal Card - UPDATED WITH FIXES */}
           <motion.div
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.3 }}
-            className="w-full max-w-6xl h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-6xl h-full md:h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -199,13 +215,36 @@ export default function ChartAnalysisModal({
               {/* Main Content */}
               <div
                 ref={contentRef}
-                className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8"
+                className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 md:pb-8"
               >
                 <div className="max-w-4xl mx-auto">
                   {content}
                 </div>
               </div>
             </div>
+
+            {/* Mobile Section Menu - Fixed Bottom */}
+            {sidebarSections.length > 0 && (
+              <div 
+                className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg overflow-x-auto"
+                style={{ zIndex: 9999999 }}
+              >
+                <div className="flex gap-2 p-3 min-w-max">
+                  {sidebarSections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors whitespace-nowrap"
+                    >
+                      {section.icon && (
+                        <span className="text-base">{section.icon}</span>
+                      )}
+                      <span>{section.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Footer Navigation */}
             {navigation && (navigation.prev || navigation.next) && (

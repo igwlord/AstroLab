@@ -584,6 +584,135 @@ export function getMercuryRetrogradeImpact(isRetro: boolean): string {
 }
 
 /**
+ * Cómo te comunicas en conflictos según Mercurio
+ */
+export function getMercuryConflictStyle(sign: string): string {
+  const styles: Record<string, string> = {
+    'Aries': 'Confrontas directamente y sin miedo. Dices lo que piensas en el momento, lo que puede escalar tensiones. Respetas a quien te debate de frente. Peligro: herir sin querer por franqueza excesiva.',
+    'Taurus': 'Te cierras y te vuelves terco. Prefieres el silencio a la discusión acalorada. Cuando hablas, es con calma pero inflexible. Peligro: resentimiento acumulado por no expresarte a tiempo.',
+    'Gemini': 'Intelectualizas el conflicto y argumentas con lógica. Puedes ser sarcástico o evasivo. Prefieres debatir ideas que emociones. Peligro: parecer frío o no tomarte en serio el problema.',
+    'Cancer': 'Te vuelves indirecto y te refugias en tu caparazón. Hablas con rodeos o guardas silencio pasivo-agresivo. Necesitas sentirte seguro para abrirte. Peligro: comunicación poco clara que confunde al otro.',
+    'Leo': 'Te expresas con drama y exiges ser escuchado. Puedes hacer el conflicto "sobre ti". Necesitas que reconozcan tu punto antes de ceder. Peligro: orgullo que impide disculparse.',
+    'Virgo': 'Analizas cada detalle y señalas errores lógicos. Puedes ser excesivamente crítico. Tu mente busca "soluciones" más que empatía. Peligro: que el otro se sienta atacado o juzgado.',
+    'Libra': 'Evitas el conflicto directo y buscas mediación. Hablas con diplomacia excesiva o guardas tu verdad por "mantener la paz". Peligro: acumular resentimientos o que no te tomen en serio.',
+    'Scorpio': 'Guardas silencio estratégico o hablas con intensidad penetrante. Puedes usar información sensible como arma. Necesitas tiempo para procesar antes de confrontar. Peligro: resentimiento profundo o venganza verbal.',
+    'Sagittarius': 'Eres brutalmente honesto y filosófico. Puedes minimizar el conflicto con humor o exagerar para hacer un punto. Prefieres "hablar las cosas" abiertamente. Peligro: herir sin intención por franqueza.',
+    'Capricorn': 'Te vuelves frío, distante y autoritario. Hablas con control y seriedad. Puedes cerrar la conversación si la ves "improductiva". Peligro: parecer insensible o demasiado racional.',
+    'Aquarius': 'Te desapegas emocionalmente y debates con lógica fría. Puedes "congelar" al otro con distancia mental. Prefieres resolver con razón, no con sentimientos. Peligro: que el otro sienta que no te importa.',
+    'Pisces': 'Te confundes, evades o te victimizas. Puedes llorar o retirarte. Necesitas espacio para sentir antes de hablar. Tu comunicación es difusa y emocional. Peligro: no ser claro o manipular con culpa.'
+  };
+  
+  return styles[sign] || 'Tu estilo de comunicación en conflictos es único y requiere conciencia.';
+}
+
+/**
+ * Estilo de escritura natural según Mercurio
+ */
+export function getMercuryWritingStyle(sign: string): string {
+  const styles: Record<string, string> = {
+    'Aries': 'Frases cortas y directas. Escribes rápido y sin editar mucho. Estilo urgente, imperativos, signos de exclamación. Vas al grano sin rodeos.',
+    'Taurus': 'Prosa sensorial y descriptiva. Escribes despacio pero con belleza. Usas metáforas físicas, textura en las palabras. Estilo sólido y concreto.',
+    'Gemini': 'Ligero, ingenioso y conversacional. Escribes como hablas: rápido, con variedad de temas. Excelente para redes sociales, artículos cortos, diálogos.',
+    'Cancer': 'Emotivo y nostálgico. Escribes desde el sentir. Tus palabras evocan recuerdos y emociones. Estilo íntimo, como un diario o carta personal.',
+    'Leo': 'Dramático y expresivo. Escribes para impactar y ser memorable. Usas palabras grandes, metáforas brillantes. Estilo que pide atención y aplauso.',
+    'Virgo': 'Preciso, detallado y pulido. Editas compulsivamente. Tu escritura es clara, organizada, útil. Excelente para manuales, instructivos, análisis.',
+    'Libra': 'Elegante y equilibrado. Escribes con ritmo armónico. Usas lenguaje cortés, considerado. Excelente para mediación, relaciones públicas, poesía lírica.',
+    'Scorpio': 'Intenso y penetrante. Escribes con profundidad psicológica. Tus palabras tienen peso y subtexto. Excelente para misterio, thriller, psicología.',
+    'Sagittarius': 'Filosófico y expansivo. Escribes sobre grandes ideas con humor. Tus textos inspiran y amplían perspectivas. Estilo aventurero y optimista.',
+    'Capricorn': 'Formal, estructurado y autoritario. Escribes con seriedad y propósito. Tu estilo es profesional, jerárquico. Excelente para negocios, academia.',
+    'Aquarius': 'Original y conceptual. Escribes ideas vanguardistas con desapego. Tu estilo es único, a veces críptico. Excelente para ciencia ficción, manifiestos.',
+    'Pisces': 'Poético y simbólico. Escribes en imágenes y metáforas fluidas. Tu prosa es onírica, difusa. Excelente para poesía, fantasía, espiritualidad.'
+  };
+  
+  return styles[sign] || 'Tu estilo de escritura refleja tu proceso mental único.';
+}
+
+/**
+ * Errores comunes de comunicación según Mercurio
+ */
+export function getMercuryCommonMistakes(sign: string): string[] {
+  const mistakes: Record<string, string[]> = {
+    'Aries': [
+      'Interrumpir antes de que el otro termine',
+      'Ser demasiado directo y herir sin querer',
+      'No escuchar por estar pensando tu respuesta',
+      'Imponer tu punto sin considerar otras perspectivas'
+    ],
+    'Taurus': [
+      'Cerrarte y no comunicar lo que sientes',
+      'Ser terco y no cambiar de opinión aunque tengas razón contraria',
+      'Demorar demasiado en responder o tomar decisiones',
+      'Aferrarte a ideas obsoletas por resistencia al cambio'
+    ],
+    'Gemini': [
+      'Hablar demasiado y no profundizar',
+      'Ser inconsistente en tus opiniones',
+      'Dispersarte y no terminar ideas',
+      'Usar sarcasmo cuando deberías ser serio'
+    ],
+    'Cancer': [
+      'Comunicar con indirectas en vez de ser claro',
+      'Tomar todo personal y ofenderte fácilmente',
+      'Guardar silencios pasivo-agresivos',
+      'Evadir confrontación necesaria'
+    ],
+    'Leo': [
+      'Monopolizar conversaciones hablando de ti',
+      'No admitir errores por orgullo',
+      'Exagerar para llamar la atención',
+      'Ofenderte si no te elogian al hablar'
+    ],
+    'Virgo': [
+      'Ser excesivamente crítico y señalar cada error',
+      'Perderte en detalles sin ver el panorama',
+      'Corregir a otros incluso cuando no te piden opinión',
+      'Paralizar decisiones por sobrepensar'
+    ],
+    'Libra': [
+      'Evitar decir tu verdadera opinión por quedar bien',
+      'Ser indeciso y cambiar de postura constantemente',
+      'No poner límites claros',
+      'Acumular resentimientos por no confrontar'
+    ],
+    'Scorpio': [
+      'Guardar secretos y no compartir información importante',
+      'Usar el silencio como castigo',
+      'Manipular conversaciones para obtener poder',
+      'Ser vengativo verbalmente cuando te sientes herido'
+    ],
+    'Sagittarius': [
+      'Ser brutalmente honesto sin considerar sensibilidades',
+      'Exagerar o prometer demasiado',
+      'Imponer tu filosofía sin escuchar otras visiones',
+      'Minimizar problemas reales con optimismo excesivo'
+    ],
+    'Capricorn': [
+      'Ser demasiado serio y no mostrar emociones',
+      'Cerrar conversaciones que consideras "improductivas"',
+      'Hablar con autoridad incluso cuando no la tienes',
+      'Pesimismo que aplasta el entusiasmo ajeno'
+    ],
+    'Aquarius': [
+      'Desapegarte emocionalmente cuando deberías conectar',
+      'Ser tan racional que ignoras sentimientos',
+      'Rebelarte automáticamente contra toda opinión convencional',
+      'Parecer frío o distante en temas emocionales'
+    ],
+    'Pisces': [
+      'Ser vago y poco claro en tu comunicación',
+      'Victimizarte en vez de expresar límites',
+      'Absorber la energía del otro y perder tu punto',
+      'Evadir confrontación con confusión o lágrimas'
+    ]
+  };
+  
+  return mistakes[sign] || [
+    'Cada Mercurio tiene sus desafíos comunicativos',
+    'La clave es reconocerlos y trabajarlos conscientemente'
+  ];
+}
+
+/**
  * Explica cómo Venus se manifiesta en relaciones según signo
  */
 export function getVenusRelationshipStyle(sign: string): string {
@@ -602,6 +731,135 @@ export function getVenusRelationshipStyle(sign: string): string {
     'Pisces': 'Amas con devoción y compasión. Te entregas completamente. Necesitas conexión espiritual y te cuesta con límites.'
   };
   return styles[sign] || 'Tu forma de amar es única y especial.';
+}
+
+/**
+ * Red flags en relaciones según Venus
+ */
+export function getVenusRedFlags(sign: string): string[] {
+  const flags: Record<string, string[]> = {
+    'Aries': [
+      'Pierde interés rápido si no hay emoción constante',
+      'Puede ser egoísta o pensar solo en sus necesidades',
+      'Busca conquista más que relación estable',
+      'Puede ser demasiado directo/a y herir sin querer'
+    ],
+    'Taurus': [
+      'Posesivo/a y celoso/a de forma obsesiva',
+      'Terco/a hasta el punto de no escuchar razones',
+      'Puede aferrarse a relaciones muertas por comodidad',
+      'Materialista: valora demasiado lo tangible'
+    ],
+    'Gemini': [
+      'Inconsistente emocionalmente (hoy sí, mañana no)',
+      'Puede tener múltiples intereses amorosos simultáneos',
+      'Evade compromiso profundo con charla superficial',
+      'Aburre fácilmente y busca novedad constante'
+    ],
+    'Cancer': [
+      'Dependiente emocional y necesitado/a de validación',
+      'Manipula con culpa o victimización',
+      'Sobreprotector hasta asfixiar al otro',
+      'Guarda rencores y saca temas del pasado'
+    ],
+    'Leo': [
+      'Necesita atención constante o se siente rechazado/a',
+      'Ego herido fácilmente, drama por cosas pequeñas',
+      'Puede ser controlador/a disfrazado de "cuidado"',
+      'Competitivo en la relación en vez de colaborativo'
+    ],
+    'Virgo': [
+      'Excesivamente crítico/a con la pareja',
+      'Perfeccionista imposible de complacer',
+      'Puede ser frío/a emocionalmente (todo es mental)',
+      'Sirve hasta resentirse y luego explota'
+    ],
+    'Libra': [
+      'Evita conflictos necesarios hasta que explotan',
+      'Indeciso/a crónico/a, no sabe lo que quiere',
+      'Puede ser infiel por no saber decir "no"',
+      'Dependiente de estar en pareja (no tolera soledad)'
+    ],
+    'Scorpio': [
+      'Celos obsesivos y necesidad de control total',
+      'Manipulador/a emocional y vengativo/a',
+      'Desconfía constantemente (interroga, revisa)',
+      'Intensidad que asfixia: todo o nada, sin término medio'
+    ],
+    'Sagittarius': [
+      'Compromiso-fóbico, huye ante profundidad',
+      'Brutalmente honesto/a sin considerar sensibilidades',
+      'Puede ser infiel justificándolo con "libertad"',
+      'Minimiza problemas reales con optimismo vacío'
+    ],
+    'Capricorn': [
+      'Frío/a emocionalmente, prioriza trabajo sobre amor',
+      'Controlador/a y autoritario/a en la relación',
+      'Puede usar el amor como transacción o estatus',
+      'Le cuesta expresar afecto y vulnerabilidad'
+    ],
+    'Aquarius': [
+      'Desapegado/a emocionalmente hasta parecer insensible',
+      'Puede intelectualizar todo sin sentir',
+      'Necesita tanta libertad que no hay "relación"',
+      'Rebelde: hace lo opuesto por principio'
+    ],
+    'Pisces': [
+      'Víctima crónica que manipula con culpa',
+      'Límites difusos: absorbe todo del otro',
+      'Puede escapar con fantasías, mentiras o adicciones',
+      'Se sacrifica esperando que el otro "adivine" y retribuya'
+    ]
+  };
+  
+  return flags[sign] || [
+    'Cada Venus tiene sus desafíos relacionales',
+    'La clave es reconocerlos y trabajarlos conscientemente'
+  ];
+}
+
+/**
+ * Lenguaje de amor predominante según Venus
+ */
+export function getVenusLoveLanguage(sign: string): string {
+  const languages: Record<string, string> = {
+    'Aries': '**Tiempo de calidad en acción**: Aventuras juntos, deportes, actividades emocionantes. Amas haciendo cosas, no hablando de ellas. Te sientes amado/a cuando alguien se aventura contigo.',
+    'Taurus': '**Toque físico + Regalos**: Necesitas afecto tangible: abrazos, masajes, comida rica. Te sientes amado/a con gestos concretos que puedes ver, tocar, saborear. La sensualidad es tu idioma.',
+    'Gemini': '**Palabras de afirmación + Comunicación**: Necesitas conversación constante, textos, compartir ideas. Te sientes amado/a cuando alguien te escucha, te hace reír, te estimula mentalmente.',
+    'Cancer': '**Actos de servicio + Tiempo de calidad**: Necesitas que te cuiden y nutran. Te sientes amado/a cuando alguien te prepara comida, te da seguridad, te hace sentir en casa.',
+    'Leo': '**Palabras de afirmación + Regalos**: Necesitas elogios, reconocimiento, celebración. Te sientes amado/a cuando alguien te hace sentir especial, te admira públicamente, te sorprende.',
+    'Virgo': '**Actos de servicio**: Te sientes amado/a cuando alguien te ayuda, te facilita la vida, te demuestra amor con acciones útiles. Para ti amor = servicio mutuo y apoyo práctico.',
+    'Libra': '**Tiempo de calidad + Regalos**: Necesitas experiencias hermosas juntos, belleza compartida. Te sientes amado/a con salidas románticas, detalles estéticos, armonía relacional.',
+    'Scorpio': '**Toque físico + Intimidad emocional**: Necesitas fusión total: sexo profundo + vulnerabilidad psicológica. Te sientes amado/a cuando alguien se desnuda emocionalmente contigo.',
+    'Sagittarius': '**Tiempo de calidad + Libertad**: Necesitas aventuras, viajes, experiencias nuevas juntos. Te sientes amado/a cuando alguien te da espacio pero también te acompaña a explorar.',
+    'Capricorn': '**Actos de servicio + Compromiso**: Necesitas estabilidad, acciones que demuestren seriedad. Te sientes amado/a cuando alguien construye futuro contigo con hechos, no palabras.',
+    'Aquarius': '**Tiempo de calidad intelectual + Libertad**: Necesitas amistad profunda con independencia mutua. Te sientes amado/a cuando alguien respeta tu espacio y te desafía mentalmente.',
+    'Pisces': '**Toque físico + Palabras de afirmación**: Necesitas ternura, romanticismo, conexión espiritual. Te sientes amado/a con gestos poéticos, empatía profunda, fusión emocional.'
+  };
+  
+  return languages[sign] || 'Tu lenguaje de amor es único y merece ser reconocido.';
+}
+
+/**
+ * Características de pareja ideal según Venus
+ */
+export function getVenusIdealPartner(sign: string): string {
+  const ideals: Record<string, string> = {
+    'Aries': 'Alguien **valiente, directo/a y apasionado/a**. Que te desafíe, te siga el ritmo y no se asuste de tu intensidad. Que sea independiente pero presente. Que te haga sentir vivo/a.',
+    'Taurus': 'Alguien **estable, sensual y leal**. Que valore el placer físico, la belleza y la seguridad. Que sea paciente, constante y demuestre amor con hechos tangibles. Que construya contigo.',
+    'Gemini': 'Alguien **inteligente, versátil y comunicativo/a**. Que te haga reír, te estimule mentalmente y no sea aburrido/a. Que acepte tu necesidad de variedad y conversación constante.',
+    'Cancer': 'Alguien **nutritivo/a, emocional y protector/a**. Que te haga sentir seguro/a, que valore la familia y la intimidad. Que sea empático/a y recíproco/a en cuidados mutuos.',
+    'Leo': 'Alguien **admirador/a, generoso/a y brillante**. Que te celebre, te haga sentir especial y comparta tu amor por la vida. Que sea leal, orgulloso/a de ti y te dé romance dramático.',
+    'Virgo': 'Alguien **útil, ordenado/a y confiable**. Que aprecie tu atención al detalle, que mejore contigo mutuamente. Que sea inteligente, humilde y demuestre amor con acciones prácticas.',
+    'Libra': 'Alguien **armonioso/a, elegante y diplomático/a**. Que valore la belleza, la justicia y el equilibrio. Que sea sociable, romántico/a y busque crear una relación estética y balanceada.',
+    'Scorpio': 'Alguien **intenso/a, leal y profundo/a**. Que no tenga miedo de tu oscuridad, que se fusione totalmente contigo. Que sea apasionado/a sexual y emocionalmente, sin superficialidades.',
+    'Sagittarius': 'Alguien **libre, aventurero/a y filosófico/a**. Que viaje contigo (literal y metafóricamente), que ría, que busque significado. Que no te ate pero tampoco te abandone.',
+    'Capricorn': 'Alguien **ambicioso/a, maduro/a y responsable**. Que construya futuro sólido, que respete tu carrera. Que sea serio/a en compromiso pero también te ayude a soltar el control.',
+    'Aquarius': 'Alguien **original, independiente y mental**. Que sea tu amigo/a primero, que respete tu libertad radical. Que comparta tu visión de futuro y no te agobie con demandas emocionales.',
+    'Pisces': 'Alguien **compasivo/a, espiritual y artístico/a**. Que entienda tu sensibilidad, que te ancle sin limitarte. Que comparta tu mundo de fantasía pero también te traiga a tierra.'
+  };
+  
+  return ideals[sign] || 'Tu pareja ideal es única y específica a tu Venus.';
 }
 
 /**
@@ -626,6 +884,135 @@ export function getMarsActionStyle(sign: string): string {
 }
 
 /**
+ * Cómo expresa la rabia según Marte
+ */
+export function getMarsAngerStyle(sign: string): string {
+  const styles: Record<string, string> = {
+    'Aries': '**Rabia explosiva e inmediata**. Estallas al instante sin filtro. Tu rabia es honesta, directa, ruidosa. Gritas, confrontas, puede haber agresión física. **Positivo**: Pasa rápido, no guardas rencor. **Peligro**: Herir sin intención, violencia impulsiva.',
+    'Taurus': '**Rabia acumulada que explota**. Aguantas, aguantas... hasta que no puedes más. Tu rabia es lenta pero devastadora. **Positivo**: Das muchas oportunidades. **Peligro**: Cuando explotas, destruyes todo, y luego te cuesta perdonar.',
+    'Gemini': '**Rabia verbal y sarcástica**. No golpeas, atacas con palabras hirientes. Debates agresivamente, usas el intelecto como arma. **Positivo**: No hay violencia física. **Peligro**: Tus palabras pueden destruir psicológicamente al otro.',
+    'Cancer': '**Rabia pasivo-agresiva**. No confrontas directamente. Guardas silencio, te retiras, manipulas con culpa. Lloras o explotas emocionalmente. **Positivo**: Evitas violencia directa. **Peligro**: Confusión, resentimiento prolongado, manipulación emocional.',
+    'Leo': '**Rabia dramática y orgullosa**. Cuando te enojas, es un show. Gritas, demandas respeto, tu ego herido ruge. **Positivo**: Es claro que estás enojado/a. **Peligro**: Orgullo que impide disculparte, drama que agota a los demás.',
+    'Virgo': '**Rabia crítica y contenida**. No explotas, pero tu crítica constante destruye. Señalas cada error con precisión quirúrgica. **Positivo**: Control, no hay violencia. **Peligro**: Tu crítica hiere profundamente y acumulas resentimiento interno.',
+    'Scorpio': '**Rabia silenciosa y vengativa**. Guardas tu rabia en lo profundo, planeas tu venganza. Cuando atacas, es letal y estratégico. **Positivo**: Control total. **Peligro**: Resentimiento crónico, venganza desproporcionada, autodestrucción.',
+    'Sagittarius': '**Rabia filosófica y exagerada**. Te enojas con franqueza brutal, dices verdades hirientes, luego lo minimizas con humor. **Positivo**: No guardas rencor. **Peligro**: Herir sin considerar consecuencias, exagerar todo.',
+    'Capricorn': '**Rabia fría y calculada**. No gritas, te vuelves de hielo. Cortas comunicación, castigas con distancia. **Positivo**: Control absoluto, no hay escándalo. **Peligro**: Crueldad fría, rencor duradero, usar autoridad para castigar.',
+    'Aquarius': '**Rabia desapegada y racional**. Te enojas con argumentos lógicos fríos. Desconectas emocionalmente. **Positivo**: No hay drama emocional. **Peligro**: Parecer insensible, deshumanizar al otro, rebelarte sin empatía.',
+    'Libra': '**Rabia reprimida que acumula**. Evitas conflicto hasta que explotas desproporcionadamente. **Positivo**: Das muchas oportunidades. **Peligro**: Explosión inesperada, no poner límites a tiempo, resentimiento oculto.',
+    'Pisces': '**Rabia confusa y victimizada**. Lloras, te confundes, te retiras. Manipulas con culpa o te autosaboteas. **Positivo**: No eres agresivo/a. **Peligro**: No expresar límites claros, victimización, adicciones como escape.'
+  };
+  
+  return styles[sign] || 'Tu forma de expresar rabia es única y necesita ser reconocida.';
+}
+
+/**
+ * Estilo sexual según Marte
+ */
+export function getMarsSexualStyle(sign: string): string {
+  const styles: Record<string, string> = {
+    'Aries': '**Directo, rápido, intenso**. Eres el iniciador/a. Te gusta la conquista, la espontaneidad, la pasión física directa. Prefieres sexo enérgico y sin muchos preliminares. Riesgo: ir demasiado rápido, no conectar emocionalmente.',
+    'Taurus': '**Sensual, lento, placentero**. Valoras los cinco sentidos: tacto, aroma, sabor. Necesitas tiempo, comodidad, belleza. El sexo es arte sensorial. Riesgo: rutina, posesividad, priorizar placer sobre conexión.',
+    'Gemini': '**Mental, versátil, juguetón**. Te excita la conversación, el ingenio, la variedad. Necesitas estimulación mental antes que física. Riesgo: dispersión, no conectar profundamente, sexo superficial.',
+    'Cancer': '**Emocional, protector, íntimo**. Necesitas seguridad emocional para abrirte sexualmente. El sexo es fusión emocional. Valoras la ternura. Riesgo: dependencia emocional, dificultad para separar sexo de amor.',
+    'Leo': '**Dramático, generoso, performativo**. El sexo es teatro: quieres ser admirado/a, dar placer generosamente. Necesitas romance y pasión. Riesgo: ego, necesitar validación constante, hacer el sexo sobre ti.',
+    'Virgo': '**Técnico, atento, servicial**. Quieres hacerlo "bien". Eres detallista, quieres satisfacer al otro. Riesgo: sobrepensar, no relajarte, crítica interna excesiva, inhibición.',
+    'Libra': '**Romántico, estético, equilibrado**. El sexo debe ser bello, armonioso. Valoras el placer mutuo, la seducción elegante. Riesgo: evitar lo "sucio", no expresar deseos reales, complacer en exceso.',
+    'Scorpio': '**Intenso, transformador, total**. El sexo es fusión psicológica-física completa. Necesitas profundidad, tabúes, control/entrega. Riesgo: obsesión, celos, no separar sexo de poder.',
+    'Sagittarius': '**Libre, aventurero, espontáneo**. Te gusta la exploración, nuevas experiencias, risas. El sexo es juego y aventura. Riesgo: compromiso-fobia, sexualizar sin conectar, exceso de franqueza.',
+    'Capricorn': '**Controlado, ambicioso, duradero**. El sexo mejora con el tiempo. Eres resistente, disciplinado/a. Riesgo: demasiado serio/a, inhibición, usar sexo como estatus o control.',
+    'Aquarius': '**Experimental, mental, desapegado**. Te interesan las ideas sexuales, lo no convencional. Necesitas libertad. Riesgo: desconexión emocional, intelectualizar el sexo, frialdad.',
+    'Pisces': '**Místico, entregado, fusional**. El sexo es conexión espiritual. Te entregas totalmente, valoras la fantasía. Riesgo: límites difusos, confusión, idealización, escapismo.'
+  };
+  
+  return styles[sign] || 'Tu sexualidad marciana es única y merece ser honrada.';
+}
+
+/**
+ * Actividades que energizan según Marte
+ */
+export function getMarsEnergizingActivities(sign: string): string[] {
+  const activities: Record<string, string[]> = {
+    'Aries': [
+      'Deportes competitivos (artes marciales, running, crossfit)',
+      'Actividades de riesgo o adrenalina',
+      'Liderar proyectos o iniciar cosas nuevas',
+      'Cualquier actividad física intensa y rápida'
+    ],
+    'Taurus': [
+      'Jardinería, cocinar, trabajar con las manos',
+      'Caminatas en naturaleza, senderismo lento',
+      'Masajes, yoga, ejercicio sensorial',
+      'Construir o crear algo tangible y duradero'
+    ],
+    'Gemini': [
+      'Deportes que requieren coordinación (tenis, ping-pong)',
+      'Debates, juegos mentales, aprender habilidades nuevas',
+      'Actividades sociales variadas',
+      'Escribir, comunicarte, enseñar'
+    ],
+    'Cancer': [
+      'Natación, deportes acuáticos',
+      'Cocinar para otros, cuidar de alguien/algo',
+      'Actividades en familia o grupo cercano',
+      'Decorar, crear espacios de refugio'
+    ],
+    'Leo': [
+      'Teatro, danza, performance, cualquier escenario',
+      'Deportes donde brilles (golf, atletismo)',
+      'Crear arte, proyectos creativos',
+      'Organizar eventos, liderar con carisma'
+    ],
+    'Virgo': [
+      'Yoga, pilates, ejercicio preciso',
+      'Organizar, limpiar, optimizar sistemas',
+      'Voluntariado, servir de forma útil',
+      'Aprender técnicas que perfeccionen habilidades'
+    ],
+    'Libra': [
+      'Danza, deportes estéticos (patinaje, gimnasia)',
+      'Actividades sociales, networking',
+      'Arte colaborativo, mediación',
+      'Cualquier actividad que busque balance'
+    ],
+    'Scorpio': [
+      'Deportes intensos (buceo, escalada, artes marciales)',
+      'Investigación profunda, terapia',
+      'Transformar situaciones o espacios',
+      'Sexo consciente, prácticas de poder personal'
+    ],
+    'Sagittarius': [
+      'Viajes, aventuras, exploración',
+      'Deportes al aire libre (trekking, equitación)',
+      'Estudiar filosofía, enseñar',
+      'Cualquier actividad que expanda horizontes'
+    ],
+    'Capricorn': [
+      'Montañismo, ejercicio estructurado (gym)',
+      'Trabajo productivo con metas claras',
+      'Construir carrera, alcanzar logros',
+      'Cualquier actividad con disciplina y resultados medibles'
+    ],
+    'Aquarius': [
+      'Deportes innovadores o grupales',
+      'Activismo, causas sociales',
+      'Tecnología, inventar, experimentar',
+      'Cualquier actividad que rompa moldes'
+    ],
+    'Pisces': [
+      'Natación, yoga, danza libre',
+      'Meditación, arte, música',
+      'Ayudar a otros, trabajo espiritual',
+      'Cualquier actividad que conecte con lo invisible'
+    ]
+  };
+  
+  return activities[sign] || [
+    'Actividades únicas que canalizan tu energía marciana',
+    'Explora lo que te hace sentir vivo/a y poderoso/a'
+  ];
+}
+
+/**
  * Explica cómo Júpiter expande la conciencia según signo
  */
 export function getJupiterManifestationBySign(sign: string): string {
@@ -644,6 +1031,176 @@ export function getJupiterManifestationBySign(sign: string): string {
     'Pisces': 'Júpiter en Piscis expande tu compasión y espiritualidad (Júpiter en domicilio). Optimismo místico y fe en lo invisible. Riesgo: escapismo espiritual, victimización, confusión entre compasión y martirización, adicciones.'
   };
   return manifestations[sign] || 'Júpiter expande tu conciencia de forma única.';
+}
+
+/**
+ * Áreas de suerte natural según Júpiter
+ */
+export function getJupiterLuckAreas(sign: string): string[] {
+  const areas: Record<string, string[]> = {
+    'Aries': [
+      'Iniciativas audaces que otros temen intentar',
+      'Deportes, competencias, liderazgo pionero',
+      'Emprendimientos rápidos e innovadores',
+      'Situaciones que requieren valentía instantánea'
+    ],
+    'Taurus': [
+      'Negocios, inversiones, acumulación de riqueza',
+      'Arte, belleza, diseño, gastronomía',
+      'Bienes raíces, trabajo con la tierra',
+      'Placeres sensoriales y estabilidad material'
+    ],
+    'Gemini': [
+      'Comunicación, escritura, enseñanza',
+      'Networking, conexiones múltiples',
+      'Aprendizaje rápido de múltiples temas',
+      'Comercio, ventas, medios de comunicación'
+    ],
+    'Cancer': [
+      'Familia, hogar, bienes raíces residenciales',
+      'Cuidado, nutrición, maternidad/paternidad',
+      'Negocios familiares o de alimentación',
+      'Conexión emocional, empatía natural'
+    ],
+    'Leo': [
+      'Creatividad, artes, entretenimiento',
+      'Liderazgo carismático, performance',
+      'Niños, educación, juego',
+      'Situaciones donde puedes brillar y ser reconocido'
+    ],
+    'Virgo': [
+      'Salud, bienestar, medicina alternativa',
+      'Organización, optimización de sistemas',
+      'Servicio útil, trabajo detallado',
+      'Análisis, investigación, perfeccionamiento'
+    ],
+    'Libra': [
+      'Relaciones, matrimonio, asociaciones',
+      'Justicia, mediación, diplomacia',
+      'Arte, diseño, belleza relacional',
+      'Situaciones que requieren equilibrio y fairness'
+    ],
+    'Scorpio': [
+      'Investigación profunda, psicología, terapia',
+      'Finanzas compartidas, herencias, inversiones',
+      'Transformación, crisis como oportunidad',
+      'Sexualidad, ocultismo, poder oculto'
+    ],
+    'Sagittarius': [
+      'Viajes, extranjero, culturas lejanas',
+      'Educación superior, filosofía, espiritualidad',
+      'Aventuras, deportes de riesgo',
+      'Enseñanza de sabiduría y expansión de conciencia'
+    ],
+    'Capricorn': [
+      'Carrera, autoridad, logros profesionales',
+      'Estructuras duraderas, legacy',
+      'Gobierno, organizaciones grandes',
+      'Éxito por disciplina y paciencia'
+    ],
+    'Aquarius': [
+      'Tecnología, innovación, futurismo',
+      'Grupos, comunidades, causas sociales',
+      'Amistad, networking horizontal',
+      'Reformas, revoluciones pacíficas'
+    ],
+    'Pisces': [
+      'Espiritualidad, misticismo, arte visionario',
+      'Compasión, servicio desinteresado',
+      'Música, danza, poesía, sanación',
+      'Conexión con lo invisible y trascendente'
+    ]
+  };
+  
+  return areas[sign] || [
+    'Explora áreas que naturalmente expanden tu conciencia',
+    'Tu suerte jupiteriana es única'
+  ];
+}
+
+/**
+ * Errores de exceso jupiteriano según signo
+ */
+export function getJupiterExcessWarnings(sign: string): string[] {
+  const warnings: Record<string, string[]> = {
+    'Aries': [
+      'Impulsividad extrema: saltar sin red de seguridad',
+      'Arrogancia y falta de humildad',
+      'Iniciar 10 proyectos y no terminar ninguno',
+      'Agresividad justificada como "autenticidad"'
+    ],
+    'Taurus': [
+      'Gula y exceso de placeres (comida, lujo)',
+      'Acumulación material sin sentido o propósito',
+      'Pereza disfrazada de "disfrutar la vida"',
+      'Apego tóxico a posesiones y comodidad'
+    ],
+    'Gemini': [
+      'Dispersión mental: sabes de todo, maestro de nada',
+      'Hablar sin parar sin profundizar nunca',
+      'Relativismo moral extremo (todo es válido)',
+      'Superficialidad justificada como "versatilidad"'
+    ],
+    'Cancer': [
+      'Sobreprotección que asfixia a otros',
+      'Dependencia emocional extrema',
+      'Exceso de empatía que te agota completamente',
+      'Infantilización de personas adultas'
+    ],
+    'Leo': [
+      'Ego inflado y narcisismo desmedido',
+      'Necesidad compulsiva de atención constante',
+      'Generosidad para ser admirado (no genuina)',
+      'Drama excesivo que agota a los demás'
+    ],
+    'Virgo': [
+      'Crítica disfrazada de "ayuda constructiva"',
+      'Perfeccionismo paralizante en todo',
+      'Servir hasta el martirio y resentimiento',
+      'Análisis excesivo que mata la espontaneidad'
+    ],
+    'Libra': [
+      'Dependencia de pareja para sentirte completo',
+      'Evitar todo conflicto hasta que explota',
+      'Indecisión crónica paralizante',
+      'Justicia obsesiva sin compasión'
+    ],
+    'Scorpio': [
+      'Control obsesivo de todo y todos',
+      'Manipulación justificada como "estrategia"',
+      'Obsesión con poder que destruye relaciones',
+      'Tocar fondos innecesariamente por drama'
+    ],
+    'Sagittarius': [
+      'Escapismo constante (nunca estar presente)',
+      'Dogmatismo filosófico o religioso',
+      'Prometer demasiado y cumplir poco',
+      'Idealismo que ignora realidades prácticas'
+    ],
+    'Capricorn': [
+      'Ambición que aplasta todo (incluida tu humanidad)',
+      'Rigidez moral extrema y juicio constante',
+      'Pesimismo disfrazado de "realismo"',
+      'Trabajar hasta la autodestrucción'
+    ],
+    'Aquarius': [
+      'Desapego emocional extremo (parecer robot)',
+      'Idealismo frío sin empatía real',
+      'Rebeldía por rebeldía sin propósito',
+      'Superioridad intelectual que aliena'
+    ],
+    'Pisces': [
+      'Escapismo espiritual (evitar responsabilidades)',
+      'Victimización crónica y martirización',
+      'Adicciones justificadas como "sensibilidad"',
+      'Confusión entre compasión y permitir abusos'
+    ]
+  };
+  
+  return warnings[sign] || [
+    'Júpiter puede expandir tanto lo positivo como lo negativo',
+    'Mantén consciencia de tus excesos'
+  ];
 }
 
 /**
@@ -668,6 +1225,113 @@ export function getSaturnManifestationBySign(sign: string): string {
 }
 
 /**
+ * Lecciones de madurez según Saturno
+ */
+export function getSaturnLifeLessons(sign: string): string {
+  const lessons: Record<string, string> = {
+    'Aries': '**Autorizar tu acción sin culpa**. Aprendes que actuar con decisión no es egoísmo. La lección es encontrar disciplina en tu impulso sin matarlo. Madurez = acción consciente sin impulsividad destructiva.',
+    'Taurus': '**Confiar en tu capacidad de generar valor**. Aprendes que la seguridad viene de ti, no de lo externo. La lección es construir abundancia sostenible sin apego tóxico. Madurez = valorarte sin depender de posesiones.',
+    'Gemini': '**Autorizar tu voz y tu mente**. Aprendes que tu curiosidad es válida. La lección es comunicar con precisión sin miedo a no saber todo. Madurez = hablar con autoridad ganada, no prestada.',
+    'Cancer': '**Vulnerabilidad con límites sanos**. Aprendes que necesitar no es debilidad. La lección es nutrir sin sacrificarte. Madurez = cuidar desde la fortaleza, no desde el vacío que busca llenar.',
+    'Leo': '**Brillar con humildad genuina**. Aprendes que tu creatividad no necesita validación externa. La lección es crear por el amor al arte, no por el aplauso. Madurez = autoridad creativa sin ego.',
+    'Virgo': '**Aceptar la imperfección como parte del proceso**. Aprendes que el perfeccionismo paraliza. La lección es servir sin resentimiento. Madurez = excelencia sin crítica destructiva.',
+    'Libra': '**Relacionarte desde la plenitud, no desde la necesidad**. Aprendes que el compromiso sano incluye límites. La lección es ser justo sin evitar conflictos necesarios. Madurez = relaciones maduras y equitativas.',
+    'Scorpio': '**Soltar control y confiar en los ciclos**. Aprendes que el poder real es interno. La lección es transformarte sin manipular. Madurez = muerte-renacimiento consciente sin venganza.',
+    'Sagittarius': '**Fe estructurada sin dogmatismo**. Aprendes que la libertad incluye responsabilidad. La lección es expandirte con raíces. Madurez = sabiduría ganada, no idealismo ingenuo.',
+    'Capricorn': '**Éxito que incluye humanidad**. Aprendes que la ambición sin emociones es vacía. La lección es liderar con compasión. Madurez = autoridad genuina sin dureza innecesaria.',
+    'Aquarius': '**Reformar con estrategia y empatía**. Aprendes que la innovación sostenible requiere estructura. La lección es ser visionario sin desapego frío. Madurez = revolucionar con humanidad.',
+    'Pisces': '**Compasión con límites claros**. Aprendes que ayudar sin estructura te agota. La lección es espiritualidad disciplinada. Madurez = servir sin martirización, confiar sin escapismo.'
+  };
+  
+  return lessons[sign] || 'Saturno te enseña a madurar de forma única.';
+}
+
+/**
+ * Miedos saturnianos a trabajar según signo
+ */
+export function getSaturnFears(sign: string): string[] {
+  const fears: Record<string, string[]> = {
+    'Aries': [
+      'Miedo a actuar (parálisis por sobrepensar)',
+      'Miedo a liderar (no sentirte suficiente)',
+      'Miedo al conflicto o la confrontación',
+      'Miedo a ser egoísta si priorizas tus necesidades'
+    ],
+    'Taurus': [
+      'Miedo a la escasez material extrema',
+      'Miedo al cambio (apego a lo conocido)',
+      'Miedo a perder seguridad o comodidad',
+      'Miedo al placer (culpa por disfrutar)'
+    ],
+    'Gemini': [
+      'Miedo a hablar o expresar ideas',
+      'Miedo a no saber suficiente',
+      'Miedo a ser juzgado por tu curiosidad',
+      'Miedo a comprometerte con una sola cosa'
+    ],
+    'Cancer': [
+      'Miedo a necesitar (parecer débil)',
+      'Miedo al abandono emocional',
+      'Miedo a no ser suficientemente nutritivo',
+      'Miedo a la vulnerabilidad genuina'
+    ],
+    'Leo': [
+      'Miedo a brillar (ser juzgado o envidiado)',
+      'Miedo a no ser especial o reconocido',
+      'Miedo al ridículo público',
+      'Miedo a no ser amado si no impresionas'
+    ],
+    'Virgo': [
+      'Miedo a no ser perfecto o útil',
+      'Miedo al caos o la falta de control',
+      'Miedo a ser criticado o juzgado',
+      'Miedo a ser una carga para otros'
+    ],
+    'Libra': [
+      'Miedo a la soledad o estar sin pareja',
+      'Miedo al conflicto y al rechazo',
+      'Miedo a tomar decisiones incorrectas',
+      'Miedo a la injusticia dirigida hacia ti'
+    ],
+    'Scorpio': [
+      'Miedo a perder control de tu vida',
+      'Miedo a la traición o la vulnerabilidad',
+      'Miedo a no tener poder o influencia',
+      'Miedo a la transformación (morir internamente)'
+    ],
+    'Sagittarius': [
+      'Miedo a la limitación o al encierro',
+      'Miedo a perder la fe o el significado',
+      'Miedo al compromiso duradero',
+      'Miedo a que la vida sea aburrida o sin sentido'
+    ],
+    'Capricorn': [
+      'Miedo al fracaso profesional o social',
+      'Miedo a la irresponsabilidad (tuya o ajena)',
+      'Miedo a no ser respetado o tomado en serio',
+      'Miedo a la vulnerabilidad emocional'
+    ],
+    'Aquarius': [
+      'Miedo a perder tu libertad o individualidad',
+      'Miedo a la dependencia emocional',
+      'Miedo a ser "normal" o convencional',
+      'Miedo a la intimidad profunda'
+    ],
+    'Pisces': [
+      'Miedo a la realidad dura sin escapes',
+      'Miedo a poner límites (parecer cruel)',
+      'Miedo a perder la conexión espiritual',
+      'Miedo a la responsabilidad material'
+    ]
+  };
+  
+  return fears[sign] || [
+    'Saturno te muestra tus miedos para que los enfrentes',
+    'La madurez viene de trabajar conscientemente con ellos'
+  ];
+}
+
+/**
  * Explica cómo Urano revoluciona según signo
  */
 export function getUranusManifestationBySign(sign: string): string {
@@ -686,6 +1350,91 @@ export function getUranusManifestationBySign(sign: string): string {
     'Pisces': 'Urano en Piscis revoluciona la espiritualidad y la compasión. Misticismo futurista, arte visionario. Cambios súbitos en tu fe. Aprendes a disolver fronteras y conectar con lo cósmico sin perderte.'
   };
   return manifestations[sign] || 'Urano te revoluciona de forma única.';
+}
+
+/**
+ * Áreas de ruptura y liberación según Urano
+ */
+export function getUranusBreakthroughAreas(sign: string): string[] {
+  const areas: Record<string, string[]> = {
+    'Aries': [
+      'Revolucionar tu identidad y forma de actuar',
+      'Liberar tu valentía de condicionamientos',
+      'Innovar en liderazgo y emprendimiento',
+      'Romper con roles tradicionales de género'
+    ],
+    'Taurus': [
+      'Revolucionar tu relación con el dinero',
+      'Liberar apegos materiales tóxicos',
+      'Innovar en finanzas o tecnología de la tierra',
+      'Romper con seguridad que limita crecimiento'
+    ],
+    'Gemini': [
+      'Revolucionar tu forma de pensar y comunicar',
+      'Liberar tu mente de dogmas y límites',
+      'Innovar en medios, redes o educación',
+      'Romper con formas convencionales de aprender'
+    ],
+    'Cancer': [
+      'Revolucionar tus estructuras familiares',
+      'Liberar patrones emocionales heredados',
+      'Innovar en hogar y conceptos de familia',
+      'Romper con dependencias emocionales'
+    ],
+    'Leo': [
+      'Revolucionar tu expresión creativa',
+      'Liberar tu brillo de necesidad de aprobación',
+      'Innovar en arte, performance o liderazgo',
+      'Romper con ego y crear desde autenticidad'
+    ],
+    'Virgo': [
+      'Revolucionar tu trabajo y servicio',
+      'Liberar perfeccionismo paralizante',
+      'Innovar en salud, tecnología o sistemas',
+      'Romper con rutinas que no te sirven'
+    ],
+    'Libra': [
+      'Revolucionar tus relaciones y asociaciones',
+      'Liberar dependencia de pareja',
+      'Innovar en justicia, arte o diplomacia',
+      'Romper con necesidad de agradar'
+    ],
+    'Scorpio': [
+      'Revolucionar tu relación con el poder',
+      'Liberar control obsesivo',
+      'Innovar en psicología, sexualidad o finanzas',
+      'Romper con miedos profundos y traumas'
+    ],
+    'Sagittarius': [
+      'Revolucionar tus creencias y filosofías',
+      'Liberar dogmas religiosos o ideológicos',
+      'Innovar en educación, viajes o espiritualidad',
+      'Romper con limitaciones geográficas o mentales'
+    ],
+    'Capricorn': [
+      'Revolucionar estructuras de autoridad',
+      'Liberar rigidez y control excesivo',
+      'Innovar en carrera, gobierno o sistemas',
+      'Romper con ambición que aplasta humanidad'
+    ],
+    'Aquarius': [
+      'Revolucionar tu visión colectiva',
+      'Liberar desapego emocional extremo',
+      'Innovar en tecnología o causas sociales',
+      'Romper con rebeldía sin propósito'
+    ],
+    'Pisces': [
+      'Revolucionar tu espiritualidad',
+      'Liberar escapismo y victimización',
+      'Innovar en arte místico o sanación',
+      'Romper con confusión y encontrar claridad espiritual'
+    ]
+  };
+  
+  return areas[sign] || [
+    'Urano te llama a revolucionar áreas específicas de tu vida',
+    'La liberación es el camino'
+  ];
 }
 
 /**
@@ -710,6 +1459,176 @@ export function getNeptuneManifestationBySign(sign: string): string {
 }
 
 /**
+ * Dones espirituales según Neptuno
+ */
+export function getNeptuneSpiritualGifts(sign: string): string[] {
+  const gifts: Record<string, string[]> = {
+    'Aries': [
+      'Guerrero espiritual: actuar desde la rendición',
+      'Liderazgo inspirado divinamente',
+      'Valentía mística sin ego',
+      'Canalizar acción desde la gracia'
+    ],
+    'Taurus': [
+      'Abundancia espiritual manifestada',
+      'Sensualidad sagrada y belleza divina',
+      'Crear valor desde la inspiración',
+      'Encarnar lo celestial en lo material'
+    ],
+    'Gemini': [
+      'Comunicar lo invisible con palabras',
+      'Poeta, canal literario divino',
+      'Mente que conecta cielo y tierra',
+      'Traducir misterios a lenguaje humano'
+    ],
+    'Cancer': [
+      'Empatía profunda y sanación emocional',
+      'Médium natural, intuición extrema',
+      'Nutrir desde la compasión infinita',
+      'Crear hogar sagrado para todos'
+    ],
+    'Leo': [
+      'Artista inspirado divinamente',
+      'Performance como ritual sagrado',
+      'Creatividad sin apego personal',
+      'Brillar siendo canal de lo divino'
+    ],
+    'Virgo': [
+      'Sanación holística y medicina sagrada',
+      'Servicio como acto de devoción',
+      'Perfección sin crítica (solo amor)',
+      'Trabajar con propósito espiritual'
+    ],
+    'Libra': [
+      'Amor incondicional en relaciones',
+      'Arte como oración visual',
+      'Diplomacia inspirada por paz divina',
+      'Belleza que refleja lo celestial'
+    ],
+    'Scorpio': [
+      'Místico de las sombras profundas',
+      'Alquimista: transformar dolor en oro',
+      'Poder espiritual sin manipulación',
+      'Morir y renacer conscientemente'
+    ],
+    'Sagittarius': [
+      'Maestro espiritual y filósofo místico',
+      'Fe que trasciende todas las religiones',
+      'Viajar entre mundos y dimensiones',
+      'Enseñar sabiduría canalizada'
+    ],
+    'Capricorn': [
+      'Construir templos en el mundo material',
+      'Liderazgo compasivo y autoridad espiritual',
+      'Manifestar visiones divinas en estructuras',
+      'CEO espiritual que sirve al todo'
+    ],
+    'Aquarius': [
+      'Visionar el futuro espiritual de la humanidad',
+      'Canal de tecnología sagrada',
+      'Amor universal sin fronteras',
+      'Revolucionar desde la consciencia crística'
+    ],
+    'Pisces': [
+      'Místico puro: disolver en lo divino',
+      'Artista visionario de otros reinos',
+      'Compasión infinita y sanación universal',
+      'Ser puente entre cielo y tierra'
+    ]
+  };
+  
+  return gifts[sign] || [
+    'Neptuno te otorga dones espirituales únicos',
+    'Cultívalos con práctica y discernimiento'
+  ];
+}
+
+/**
+ * Riesgos de ilusión neptuniana según signo
+ */
+export function getNeptuneIllusionRisks(sign: string): string[] {
+  const risks: Record<string, string[]> = {
+    'Aries': [
+      'Idealizar tu valentía (creerte invencible)',
+      'Confusión sobre tu identidad real',
+      'Martirización guerrera (sacrificio sin sentido)',
+      'Adicción a la adrenalina espiritual'
+    ],
+    'Taurus': [
+      'Ilusión sobre abundancia (comprar sin tener)',
+      'Adicciones materiales (comida, lujo, compras)',
+      'Confusión sobre tu valor real',
+      'Idealizar seguridad que no existe'
+    ],
+    'Gemini': [
+      'Mentiras que crees como verdad',
+      'Confusión mental crónica',
+      'Dispersión espiritual (probar todo, dominar nada)',
+      'Comunicar desde ilusión, no desde verdad'
+    ],
+    'Cancer': [
+      'Absorber emociones ajenas hasta enfermarte',
+      'Víctima emocional crónica',
+      'Confusión: ¿qué siento yo vs los demás?',
+      'Idealizar familia o personas nutritivas'
+    ],
+    'Leo': [
+      'Ego espiritual ("soy especial elegido")',
+      'Confusión sobre tu grandeza real',
+      'Adicción a ser admirado como gurú',
+      'Performance sin sustancia espiritual'
+    ],
+    'Virgo': [
+      'Servir hasta la victimización y agotamiento',
+      'Confusión sobre límites de tu servicio',
+      'Adicción a ser "el sanador perfecto"',
+      'Hipocondría o enfermedades psicosomáticas'
+    ],
+    'Libra': [
+      'Idealizar parejas (ver ángeles donde hay humanos)',
+      'Perderte completamente en relaciones',
+      'Confusión sobre quién eres sin el otro',
+      'Adicción a estar enamorado (no a la persona)'
+    ],
+    'Scorpio': [
+      'Manipulación sutil disfrazada de espiritualidad',
+      'Confusión entre poder espiritual y control',
+      'Adicciones profundas (sexo, drogas, drama)',
+      'Tocar fondos innecesarios "para transformarte"'
+    ],
+    'Sagittarius': [
+      'Dogmatismo espiritual ("mi verdad es LA verdad")',
+      'Escapismo constante (nunca estar presente)',
+      'Confusión entre fe y negación de realidad',
+      'Adicción a experiencias místicas sin integrar'
+    ],
+    'Capricorn': [
+      'Desilusión total con sistemas (cinismo)',
+      'Confusión sobre tu autoridad real',
+      'Adicción al trabajo "espiritual"',
+      'Idealizar logros sin disfrutar el camino'
+    ],
+    'Aquarius': [
+      'Idealismo utópico sin acción real',
+      'Confusión: ¿estoy desapegado o huyendo?',
+      'Adicción a ser "diferente" o especial',
+      'Rebeldía espiritual sin discernimiento'
+    ],
+    'Pisces': [
+      'Escapismo total de la realidad',
+      'Adicciones severas de todo tipo',
+      'Confusión completa (no saber qué es real)',
+      'Victimización extrema y martirización'
+    ]
+  };
+  
+  return risks[sign] || [
+    'Neptuno puede confundir tanto como iluminar',
+    'Mantén discernimiento y pies en la tierra'
+  ];
+}
+
+/**
  * Explica cómo Plutón transforma según signo
  */
 export function getPlutoManifestationBySign(sign: string): string {
@@ -728,4 +1647,304 @@ export function getPlutoManifestationBySign(sign: string): string {
     'Pisces': 'Plutón en Piscis transforma la espiritualidad y la compasión. Místico oscuro, sanador de lo invisible. Poder espiritual intenso. Aprendes que la verdadera rendición es muerte del ego separado.'
   };
   return manifestations[sign] || 'Plutón te transforma de forma única.';
+}
+
+/**
+ * Poder personal y transformación según Plutón
+ */
+export function getPlutoPowerAreas(sign: string): string[] {
+  const areas: Record<string, string[]> = {
+    'Aries': [
+      'Poder de iniciar cambios radicales',
+      'Transformar tu identidad completamente',
+      'Liderazgo que regenera sistemas',
+      'Fuerza para enfrentar miedos directamente'
+    ],
+    'Taurus': [
+      'Poder de crear valor duradero',
+      'Transformar recursos y finanzas',
+      'Alquimia material: hacer oro de nada',
+      'Fuerza para soltar apegos y renacer'
+    ],
+    'Gemini': [
+      'Poder de comunicar verdades ocultas',
+      'Transformar ideas en movimientos',
+      'Investigación profunda que revela secretos',
+      'Fuerza mental para penetrar misterios'
+    ],
+    'Cancer': [
+      'Poder emocional profundo',
+      'Transformar dolor familiar en sanación',
+      'Nutrir regeneración en otros',
+      'Fuerza para proteger lo vulnerable'
+    ],
+    'Leo': [
+      'Poder creativo transformador',
+      'Transformar ego en servicio',
+      'Liderazgo que regenera comunidades',
+      'Fuerza para brillar desde la sombra integrada'
+    ],
+    'Virgo': [
+      'Poder de sanación profunda',
+      'Transformar crisis en oportunidades',
+      'Perfeccionar sistemas con intensidad',
+      'Fuerza para servir sin victimización'
+    ],
+    'Libra': [
+      'Poder relacional transformador',
+      'Transformar dinámicas de poder en parejas',
+      'Justicia implacable pero compasiva',
+      'Fuerza para equilibrar sin evitar sombras'
+    ],
+    'Scorpio': [
+      'Poder total de muerte-renacimiento',
+      'Transformar todo lo que tocas',
+      'Alquimista maestro de sombras',
+      'Fuerza para enfrentar lo tabú'
+    ],
+    'Sagittarius': [
+      'Poder de expandir consciencia colectiva',
+      'Transformar creencias limitantes',
+      'Enseñar verdades que liberan',
+      'Fuerza para explorar lo desconocido'
+    ],
+    'Capricorn': [
+      'Poder de destruir y construir imperios',
+      'Transformar estructuras obsoletas',
+      'Autoridad regenerativa',
+      'Fuerza para liderar cambios sistémicos'
+    ],
+    'Aquarius': [
+      'Poder de revolucionar masas',
+      'Transformar paradigmas colectivos',
+      'Tecnología que regenera sociedad',
+      'Fuerza para romper cadenas invisibles'
+    ],
+    'Pisces': [
+      'Poder de sanación universal',
+      'Transformar sufrimiento en compasión',
+      'Disolver ego completamente',
+      'Fuerza para rendirse y renacer espiritualmente'
+    ]
+  };
+  
+  return areas[sign] || [
+    'Plutón te otorga poder transformador único',
+    'Úsalo con consciencia y responsabilidad'
+  ];
+}
+
+// ============================================
+// EJES ARQUETÍPICOS - ANÁLISIS INTEGRADO
+// ============================================
+
+import type { AspectType, AxisCategory } from '../services/exercises/chartAnalyzer';
+
+/**
+ * Explica la importancia de un eje de forma contextual
+ */
+export function getAxisImportance(
+  theme: string,
+  aspectType: AspectType,
+  houses: [number, number]
+): string[] {
+  // Base según tema del eje
+  const baseImportance: Record<string, string[]> = {
+    'Autoridad': [
+      'Integra tu identidad personal (Sol) con estructura y límites (Saturno)',
+      'Define criterios de responsabilidad sin caer en autoexigencia destructiva'
+    ],
+    'Seguridad Emocional': [
+      'Equilibra necesidades emocionales (Luna) con disciplina y madurez (Saturno)',
+      'Construye seguridad interna sin depender de validación externa'
+    ],
+    'Sensibilidad': [
+      'Regula tu sensibilidad emocional (Luna) y límites energéticos (Neptuno)',
+      'Evita la fuga emocional o disolución en contextos demandantes'
+    ],
+    'Intensidad Emocional': [
+      'Gestiona emociones intensas (Luna-Plutón) sin reprimir ni explotar',
+      'Transforma patrones emocionales profundos heredados de tu linaje'
+    ],
+    'Poder Personal': [
+      'Integra tu identidad consciente (Sol) con tu poder transformador (Plutón)',
+      'Evita la oscilación entre ego inflado y sensación de impotencia'
+    ],
+    'Acción y Poder': [
+      'Canaliza tu energía de acción (Marte) con poder transformador (Plutón)',
+      'Evita la frustración crónica o la agresividad descontrolada'
+    ],
+    'Amor y Límites': [
+      'Equilibra tu capacidad de amar (Venus) con límites realistas (Saturno)',
+      'Aprende a recibir amor sin sentirte indigno/a o bloqueado/a'
+    ],
+    'Comunicación Herida': [
+      'Sana tu forma de comunicar (Mercurio) integrando tu herida (Quirón)',
+      'Tu forma de pensar y hablar puede convertirse en tu mayor don sanador'
+    ],
+    'Acción Contenida': [
+      'Integra tu impulso de acción (Marte) con disciplina y timing (Saturno)',
+      'Aprende a actuar con estrategia sin caer en frustración o pasividad'
+    ],
+    'Relaciones y Abundancia': [
+      'Expande tu capacidad de amar (Venus) y recibir abundancia (Júpiter)',
+      'Disfruta relaciones generosas sin caer en exceso o idealización'
+    ],
+    'Confianza': [
+      'Desarrolla confianza en ti mismo/a (Sol) con optimismo realista (Júpiter)',
+      'Evita el ego inflado o la falta de fe en tus capacidades'
+    ],
+    'Pensamiento Expansivo': [
+      'Amplía tu forma de pensar (Mercurio) con visión filosófica (Júpiter)',
+      'Conecta ideas prácticas con significado más amplio'
+    ]
+  };
+
+  const base = baseImportance[theme] || [
+    'Este eje integra dos fuerzas arquetípicas en tu psique',
+    'Trabajarlo conscientemente transforma tu vida cotidiana'
+  ];
+
+  // Modificador según tipo de aspecto
+  let aspectMod = '';
+  if (aspectType === 'opposition') {
+    aspectMod = 'Tensión entre dos polos opuestos que piden integración consciente. El desafío es no identificarte con un extremo y proyectar el otro.';
+  } else if (aspectType === 'square') {
+    aspectMod = 'Fricción interna que genera crecimiento a través del conflicto. El desafío es usar la tensión como motor, no como bloqueo.';
+  } else if (aspectType === 'conjunction') {
+    aspectMod = 'Fusión de energías que pueden potenciarse o interferirse. El desafío es integrarlas sin que una anule a la otra.';
+  } else if (aspectType === 'trine') {
+    aspectMod = 'Flujo natural que facilita la integración pero puede volverse pasivo. El desafío es activar conscientemente este don.';
+  } else {
+    aspectMod = 'Oportunidad de conexión que requiere intención consciente para activarse.';
+  }
+
+  // Modificador según casas
+  const angular = [1, 4, 7, 10];
+  const sensitive = [8, 12];
+  let houseMod = '';
+  
+  if (houses.some(h => angular.includes(h))) {
+    houseMod = 'Este eje se manifiesta en áreas visibles y estructurantes de tu vida. Su impacto es directo y evidente en tu realidad cotidiana.';
+  } else if (houses.some(h => sensitive.includes(h))) {
+    houseMod = 'Este eje opera en áreas profundas e internas de tu psique. Su trabajo es menos visible externamente pero transformador a nivel del alma.';
+  } else {
+    houseMod = 'Este eje se manifiesta en tu día a día de forma sutil pero constante. Observarlo te da pistas sobre patrones recurrentes.';
+  }
+
+  return [...base, aspectMod, houseMod];
+}
+
+/**
+ * Sugiere ejercicios prácticos según el eje y su categoría
+ */
+export function getAxisExercises(theme: string, category: AxisCategory): string[] {
+  const exercises: Record<string, string[]> = {
+    'Autoridad': [
+      'Agenda 10 minutos diarios de planificación realista (máximo 3 tareas viables)',
+      'Ejercicio "No-Sí": Di NO a una demanda menor y SÍ a una prioridad personal cada día',
+      'Bitácora de logros semanales con evidencia observable (qué hiciste, no qué "deberías" hacer)'
+    ],
+    'Seguridad Emocional': [
+      'Ritual de check-in emocional: 3 minutos al despertar identificando tu estado sin juzgarlo',
+      'Ejercicio "Ancla": Identifica 3 recursos internos que nadie puede quitarte (habilidad, cualidad, memoria)',
+      'Práctica de límites: Una vez por semana, di "no" a algo que drene tu energía emocional'
+    ],
+    'Sensibilidad': [
+      'Respiración 4-7-8 por 3 ciclos ante sobrecarga emocional (inhala 4, retén 7, exhala 8)',
+      'Higiene sensorial: 15 minutos sin pantallas antes de dormir + música o silencio',
+      'Diario emocional: 3 etiquetas de emoción + 1 acción concreta de autocuidado'
+    ],
+    'Intensidad Emocional': [
+      'Técnica de "contenedor emocional": Visualiza un lugar seguro donde depositar emociones intensas temporalmente',
+      'Ejercicio de rastreo corporal: Identifica dónde sientes la emoción en tu cuerpo y respírala',
+      'Ritual de liberación semanal: Escribe lo que necesitas soltar y quémalo o entiérralo simbólicamente'
+    ],
+    'Poder Personal': [
+      'Afirmación diaria frente al espejo: "Tengo el poder de elegir mis respuestas"',
+      'Ejercicio de decisiones menores: Toma 3 decisiones pequeñas al día sin consultar a nadie',
+      'Registro de momentos de poder: Anota 1 situación semanal donde ejerciste tu poder con integridad'
+    ],
+    'Acción y Poder': [
+      'Entrenamiento físico consciente: 20 minutos de ejercicio sintiendo tu fuerza (no por estética)',
+      'Visualización de poder: 5 minutos imaginando tu energía fluyendo sin obstáculos',
+      'Ritual de cierre: Al terminar el día, nombra una acción concreta que completaste'
+    ],
+    'Amor y Límites': [
+      'Práctica de recepción: Acepta 1 cumplido sin minimizarlo o devolverlo inmediatamente',
+      'Ejercicio de límites amorosos: Comunica 1 necesidad tuya en una relación sin disculparte',
+      'Ritual de auto-amor: 10 minutos semanales haciendo algo que te dé placer sin "productividad"'
+    ],
+    'Comunicación Herida': [
+      'Escritura terapéutica: 15 minutos de escritura libre sin censura sobre lo que "no puedes decir"',
+      'Práctica de escucha profunda: Escucha a alguien 5 minutos sin interrumpir ni aconsejar',
+      'Ejercicio de voz: Lee en voz alta un texto que te emocione, sintiendo tu voz resonar'
+    ],
+    'Acción Contenida': [
+      'Planificación estratégica: Antes de actuar, pregúntate "¿Es el momento adecuado?"',
+      'Ejercicio de pausa consciente: 3 respiraciones antes de responder en situaciones tensas',
+      'Ritual de acción: Elige 1 meta semanal y da 1 paso concreto sin auto-sabotaje'
+    ],
+    'Relaciones y Abundancia': [
+      'Diario de gratitud relacional: Anota 3 cosas que aprecias de alguien cercano',
+      'Ejercicio de generosidad: Ofrece algo (tiempo, atención, regalo) sin esperar retorno',
+      'Ritual de abundancia: Celebra 1 "ganancia" semanal (material, emocional, relacional)'
+    ],
+    'Confianza': [
+      'Afirmación diaria: "Confío en mi proceso y en mi capacidad de aprender"',
+      'Ejercicio de riesgo menor: Haz algo nuevo que te de un poco de miedo cada semana',
+      'Registro de éxitos: Anota 3 cosas que lograste esta semana, por pequeñas que sean'
+    ],
+    'Pensamiento Expansivo': [
+      'Lectura expansiva: Lee sobre un tema completamente fuera de tu área de confort',
+      'Ejercicio de perspectiva: Mira un problema desde 3 ángulos distintos (lógico, emocional, filosófico)',
+      'Ritual de conexión: Escribe cómo tus acciones cotidianas se conectan con un propósito mayor'
+    ]
+  };
+
+  const baseExercises = exercises[theme] || [
+    'Define un ritual breve de anclaje para este eje (5-10 minutos diarios)',
+    'Realiza una acción observable relacionada al eje cada día',
+    'Revisión semanal: ¿Qué patrón relacionado al eje observaste esta semana?'
+  ];
+
+  // Agregar nota según categoría
+  const categoryNotes: Record<AxisCategory, string> = {
+    core: '💎 Eje fundamental: Trabájalo de forma consistente, es estructurante para tu vida.',
+    internal: '🌊 Eje interno: Requiere introspección honesta y paciencia con tu proceso.',
+    challenge: '⚡ Eje de desafío: La fricción es el motor. No evites la tensión, úsala para crecer.',
+    expansion: '✨ Eje de expansión: Disfruta el proceso. El crecimiento aquí puede ser más fluido.'
+  };
+
+  return [...baseExercises, '', categoryNotes[category]];
+}
+
+/**
+ * Determina urgencia según score del eje
+ */
+export function getAxisUrgency(score: number): 'Alta' | 'Media' | 'Baja' {
+  if (score >= 15) return 'Alta';
+  if (score >= 10) return 'Media';
+  return 'Baja';
+}
+
+/**
+ * Descripción breve del eje para UI
+ */
+export function getAxisDescription(theme: string): string {
+  const descriptions: Record<string, string> = {
+    'Autoridad': 'Identidad y estructura — Quién eres vs. qué debes ser',
+    'Seguridad Emocional': 'Emociones y límites — Sentir profundo con madurez',
+    'Sensibilidad': 'Sentir y disolver — Regular tu porosidad emocional',
+    'Intensidad Emocional': 'Profundidad transformadora — Emociones que mueven todo',
+    'Poder Personal': 'Ser y transformar — Tu fuerza vital consciente',
+    'Acción y Poder': 'Deseo y fuerza — Canalizar energía con propósito',
+    'Amor y Límites': 'Afecto y realismo — Amar sin perder tus fronteras',
+    'Comunicación Herida': 'Palabra sanadora — Tu voz como medicina',
+    'Acción Contenida': 'Impulso y estrategia — Actuar en el momento justo',
+    'Relaciones y Abundancia': 'Amor y generosidad — Expandir tu capacidad de dar y recibir',
+    'Confianza': 'Fe en ti mismo/a — Creer en tu proceso de crecimiento',
+    'Pensamiento Expansivo': 'Ideas y significado — Conectar lo cotidiano con lo trascendente'
+  };
+  return descriptions[theme] || 'Eje de integración personal';
 }
