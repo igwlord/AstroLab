@@ -27,7 +27,6 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NatalChartPage = lazy(() => import('./pages/NatalChartPage'));
 const ExercisePlanPage = lazy(() => import('./pages/ExercisePlanPage'));
 const ExerciseChartPage = lazy(() => import('./pages/ExerciseChartPage'));
-const ExerciseChartPageDemo = lazy(() => import('./pages/ExerciseChartPage.DEMO'));
 const ExerciseChartPageReal = lazy(() => import('./pages/ExerciseChartPage.REAL'));
 const ExerciseGuidePage = lazy(() => import('./pages/ExerciseGuidePage'));
 const SavedPlansPage = lazy(() => import('./pages/SavedPlansPage'));
@@ -142,15 +141,6 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <ExerciseChartPageReal />
-          </Layout>
-        </ProtectedRoute>
-      } />
-      
-      {/* Ejercicios - Tu Carta - DEMO (static data) */}
-      <Route path="/ejercicios/tu-carta-demo" element={
-        <ProtectedRoute>
-          <Layout>
-            <ExerciseChartPageDemo />
           </Layout>
         </ProtectedRoute>
       } />
