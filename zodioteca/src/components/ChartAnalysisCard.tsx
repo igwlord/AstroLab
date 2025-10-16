@@ -21,6 +21,7 @@ export interface ChartAnalysisCardProps {
   onClick: () => void;
   isNew?: boolean;
   isImportant?: boolean;
+  isRead?: boolean; // 🆕 Track if this card has been read
 }
 
 export default function ChartAnalysisCard({
@@ -33,14 +34,15 @@ export default function ChartAnalysisCard({
   onClick,
   isNew,
   isImportant,
+  isRead,
 }: ChartAnalysisCardProps) {
   
-  // Colores según categoría
+  // 🎨 Colores cósmicos sutiles según categoría
   const categoryColors = {
-    planet: 'from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700',
-    point: 'from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 border-pink-200 dark:border-pink-700',
-    aspect: 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700',
-    concentration: 'from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-700',
+    planet: 'from-blue-50/80 to-cyan-50/80 dark:from-blue-900/15 dark:to-cyan-900/15 border-blue-300/40 dark:border-blue-700/30',
+    point: 'from-pink-50/80 to-fuchsia-50/80 dark:from-pink-900/15 dark:to-fuchsia-900/15 border-pink-300/40 dark:border-pink-700/30',
+    aspect: 'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/15 dark:to-teal-900/15 border-emerald-300/40 dark:border-emerald-700/30',
+    concentration: 'from-amber-50/80 to-orange-50/80 dark:from-amber-900/15 dark:to-orange-900/15 border-amber-300/40 dark:border-amber-700/30',
   };
 
   // Colores de dignidad
@@ -60,6 +62,11 @@ export default function ChartAnalysisCard({
     >
       {/* Badges superiores */}
       <div className="absolute -top-2 -right-2 z-10 flex gap-2">
+        {isRead && (
+          <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
+            ✓ Leída
+          </span>
+        )}
         {isNew && (
           <span className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
             Nuevo
@@ -83,6 +90,7 @@ export default function ChartAnalysisCard({
           hover:shadow-xl hover:border-opacity-80
           active:scale-95
           group
+          min-h-[280px] sm:min-h-[300px] flex flex-col
         `}
       >
         {/* Header con icono y título */}
@@ -117,12 +125,12 @@ export default function ChartAnalysisCard({
         )}
 
         {/* Preview del contenido */}
-        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-4">
+        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 mb-4 flex-1">
           {preview}
         </p>
 
         {/* Footer con botón */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-auto">
           <span className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
             {category === 'planet' ? 'Planeta' : 
              category === 'point' ? 'Punto Sensible' :

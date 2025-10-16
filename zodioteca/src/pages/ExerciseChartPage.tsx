@@ -12,9 +12,10 @@
  * Lenguaje: Terapéutico, educativo, para usuarios normales
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
+import { useReadProgress } from '../hooks/useReadProgress';
 import AccordionSection from '../components/AccordionSection';
 import { 
   getMoonStressExplanation,
@@ -49,6 +50,45 @@ import {
 export default function ExerciseChartPage() {
   const navigate = useNavigate();
   const { currentPlan: plan } = useExercisePlanStore();
+
+  // Hook de progreso de lectura
+  const {
+    markAsRead,
+    isRead,
+    resetProgress,
+    getStats,
+    isLoaded
+  } = useReadProgress(plan?.chartId);
+
+  // Contar total de secciones (acordeones) en la página
+  const totalSections = useMemo(() => {
+    if (!plan) return 0;
+    const {chartAnalysis} = plan;
+    let count = 2; // Configuración Base + Análisis de Planetas
+    
+    // Agregar planetas que tienen datos
+    if (chartAnalysis.mercury) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Venus')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Mars' || d.planet === 'Marte')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Jupiter')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Saturn')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Uranus')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Neptune')) count++;
+    if (chartAnalysis.weakDignities.find(d => d.planet === 'Pluto')) count++;
+    
+    // Agregar secciones especiales
+    if (chartAnalysis.nodes) count++; // Nodos Lunares
+    if (chartAnalysis.chiron) count++; // Quirón
+    if (chartAnalysis.lilith) count++; // Lilith
+    
+    return count;
+  }, [plan]);
+
+  // Obtener estadísticas de progreso
+  const stats = useMemo(() => {
+    if (!isLoaded) return { readCount: 0, totalSections: 0, percentage: 0, isComplete: false, remaining: 0 };
+    return getStats(totalSections);
+  }, [getStats, totalSections, isLoaded]);
 
   // Si no hay plan, redirigir a ejercicios
   useEffect(() => {
@@ -181,7 +221,7 @@ export default function ExerciseChartPage() {
     : '#A855F7';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 p-3 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 p-3 sm:p-6 lg:p-8 pt-24 sm:pt-28 md:pt-32 lg:pt-36">
       <div className="max-w-4xl mx-auto">
         {/* Header - Optimizado para móvil */}
         <div className="mb-4 sm:mb-6">
@@ -203,9 +243,42 @@ export default function ExerciseChartPage() {
               <h1 className="text-xl sm:text-2xl font-bold mb-1">
                 Tu Carta Natal Analizada
               </h1>
-              <p className="text-white/90 text-xs sm:text-sm">
+              <p className="text-white/90 text-xs sm:text-sm mb-3">
                 Configuración astrológica única de tu plan
               </p>
+              
+              {/* Barra de progreso */}
+              {isLoaded && stats.totalSections > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs sm:text-sm text-white/80">
+                      {stats.readCount} de {stats.totalSections} secciones leídas
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-white">
+                      {stats.percentage}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-white h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${stats.percentage}%` }}
+                    />
+                  </div>
+                  {stats.isComplete && (
+                    <p className="text-xs sm:text-sm text-white/90 mt-2 font-medium">
+                      🎉 ¡Has completado todas las secciones!
+                    </p>
+                  )}
+                  {stats.remaining > 0 && (
+                    <button
+                      onClick={resetProgress}
+                      className="text-xs text-white/70 hover:text-white underline mt-2"
+                    >
+                      Marcar todas como no leídas
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -217,6 +290,9 @@ export default function ExerciseChartPage() {
             title="Tu Configuración Base" 
             icon="⭐" 
             defaultOpen={true}
+            sectionId="configuracion-base"
+            onRead={(id) => markAsRead(id, totalSections)}
+            isRead={isRead("configuracion-base")}
           >
             {/* Interpretación Holística Elementos - Móvil optimizado */}
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border-l-4 border-purple-500">
@@ -342,6 +418,9 @@ export default function ExerciseChartPage() {
             title="Análisis de Planetas" 
             icon="📊" 
             defaultOpen={false}
+            sectionId="analisis-planetas"
+            onRead={(id) => markAsRead(id, totalSections)}
+            isRead={isRead("analisis-planetas")}
           >
 
             <div className="space-y-4">
@@ -493,7 +572,14 @@ export default function ExerciseChartPage() {
 
               {/* Mercurio EXPANDIDO */}
               {chartAnalysis.mercury && (
-                <AccordionSection title="Mercurio - Tu Mente y Comunicación" icon="☿" defaultOpen={false}>
+                <AccordionSection 
+                  title="Mercurio - Tu Mente y Comunicación" 
+                  icon="☿" 
+                  defaultOpen={false}
+                  sectionId="mercurio-analisis"
+                  onRead={(id) => markAsRead(id, totalSections)}
+                  isRead={isRead("mercurio-analisis")}
+                >
                   <div className="space-y-6">
                     {/* CONFIGURACIÓN */}
                     <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
@@ -615,7 +701,14 @@ export default function ExerciseChartPage() {
                 if (!venusData) return null;
                 
                 return (
-                  <AccordionSection title="Venus - Tu Corazón y Valores" icon="♀" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Venus - Tu Corazón y Valores" 
+                    icon="♀" 
+                    defaultOpen={false}
+                    sectionId="venus-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("venus-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* CONFIGURACIÓN */}
                       <div className="bg-pink-50 dark:bg-pink-900/20 p-4 rounded-lg">
@@ -723,7 +816,14 @@ export default function ExerciseChartPage() {
                 if (!marsData) return null;
                 
                 return (
-                  <AccordionSection title="Marte - Tu Acción y Deseo" icon="♂" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Marte - Tu Acción y Deseo" 
+                    icon="♂" 
+                    defaultOpen={false}
+                    sectionId="marte-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("marte-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* CONFIGURACIÓN */}
                       <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
@@ -858,7 +958,14 @@ export default function ExerciseChartPage() {
                 if (!jupiterData) return null;
 
                 return (
-                  <AccordionSection title="Júpiter - Tu Expansión y Fe" icon="♃" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Júpiter - Tu Expansión y Fe" 
+                    icon="♃" 
+                    defaultOpen={false}
+                    sectionId="jupiter-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("jupiter-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* Configuración */}
                       <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg p-4 border-l-4 border-yellow-500">
@@ -952,7 +1059,14 @@ export default function ExerciseChartPage() {
                 if (!saturnData) return null;
 
                 return (
-                  <AccordionSection title="Saturno - Tus Límites y Disciplina" icon="♄" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Saturno - Tus Límites y Disciplina" 
+                    icon="♄" 
+                    defaultOpen={false}
+                    sectionId="saturno-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("saturno-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* Configuración */}
                       <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 rounded-lg p-4 border-l-4 border-gray-600">
@@ -1046,7 +1160,14 @@ export default function ExerciseChartPage() {
                 if (!uranusData) return null;
 
                 return (
-                  <AccordionSection title="Urano - Tu Revolución Interior" icon="♅" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Urano - Tu Revolución Interior" 
+                    icon="♅" 
+                    defaultOpen={false}
+                    sectionId="urano-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("urano-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* Configuración */}
                       <div className="bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/20 dark:to-sky-900/20 rounded-lg p-4 border-l-4 border-cyan-500">
@@ -1121,7 +1242,14 @@ export default function ExerciseChartPage() {
                 if (!neptuneData) return null;
 
                 return (
-                  <AccordionSection title="Neptuno - Tu Disolución y Mística" icon="♆" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Neptuno - Tu Disolución y Mística" 
+                    icon="♆" 
+                    defaultOpen={false}
+                    sectionId="neptuno-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("neptuno-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* Configuración */}
                       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-4 border-l-4 border-purple-500">
@@ -1199,7 +1327,14 @@ export default function ExerciseChartPage() {
                 if (!plutoData) return null;
 
                 return (
-                  <AccordionSection title="Plutón - Tu Transformación Profunda" icon="♇" defaultOpen={false}>
+                  <AccordionSection 
+                    title="Plutón - Tu Transformación Profunda" 
+                    icon="♇" 
+                    defaultOpen={false}
+                    sectionId="pluton-analisis"
+                    onRead={(id) => markAsRead(id, totalSections)}
+                    isRead={isRead("pluton-analisis")}
+                  >
                     <div className="space-y-6">
                       {/* Configuración */}
                       <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg p-4 border-l-4 border-red-600">
@@ -1303,6 +1438,9 @@ export default function ExerciseChartPage() {
               title="Nodos Lunares - Tu Camino Evolutivo"
               icon="🧭"
               defaultOpen={false}
+              sectionId="nodos-lunares"
+              onRead={(id) => markAsRead(id, totalSections)}
+              isRead={isRead("nodos-lunares")}
             >
               <div className="space-y-5">
                 {/* Introducción */}
@@ -1435,6 +1573,9 @@ export default function ExerciseChartPage() {
               title="Quirón - Tu Herida Sanadora"
               icon="⚕️"
               defaultOpen={false}
+              sectionId="quiron-analisis"
+              onRead={(id) => markAsRead(id, totalSections)}
+              isRead={isRead("quiron-analisis")}
             >
               <div className="space-y-5">
                 {/* Introducción */}
@@ -1527,6 +1668,9 @@ export default function ExerciseChartPage() {
               title="Lilith Negra - Tu Poder Salvaje"
               icon="🌑"
               defaultOpen={false}
+              sectionId="lilith-analisis"
+              onRead={(id) => markAsRead(id, totalSections)}
+              isRead={isRead("lilith-analisis")}
             >
               <div className="space-y-5">
                 {/* Introducción */}

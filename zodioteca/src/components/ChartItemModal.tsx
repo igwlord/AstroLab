@@ -248,7 +248,7 @@ export default function ChartItemModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 pt-24 sm:pt-28 md:pt-32"
           >
             {/* Modal */}
             <motion.div
@@ -256,7 +256,7 @@ export default function ChartItemModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-3xl max-h-[calc(100vh-2rem)]
+              className="w-full max-w-3xl max-h-[calc(100vh-7rem)] sm:max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-9rem)]
                          bg-white dark:bg-gray-800 rounded-2xl shadow-2xl 
                          overflow-hidden flex flex-col"
             >

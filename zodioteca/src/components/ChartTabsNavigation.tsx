@@ -11,6 +11,7 @@ export interface ChartTab {
   label: string;
   icon: string;
   count?: number;
+  readCount?: number; // 🆕 Number of read items
   color: string; // Tailwind color class (e.g., 'purple', 'pink', 'blue')
 }
 

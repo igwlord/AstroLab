@@ -106,7 +106,7 @@ export default function ChartAnalysisModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm pt-16 md:pt-4 pb-4 px-4"
+          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm pt-24 sm:pt-28 md:pt-32 pb-4 px-4"
           style={{ 
             zIndex: 999999,
             position: 'fixed',
@@ -128,7 +128,7 @@ export default function ChartAnalysisModal({
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.3 }}
-            className="w-full max-w-6xl h-full md:h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-6xl max-h-[calc(100vh-7rem)] sm:max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-9rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

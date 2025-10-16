@@ -12,17 +12,16 @@ import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExercisePlanStore } from '../store/useExercisePlanStore';
+import { useReadProgress } from '../hooks/useReadProgress';
 import ChartAnalysisCard from '../components/ChartAnalysisCard';
 import ChartSearchBar from '../components/ChartSearchBar';
 import ChartTabsNavigation from '../components/ChartTabsNavigation';
 import ChartAnalysisModal from '../components/ChartAnalysisModal';
-import ChartItemModal from '../components/ChartItemModal';
 import AxisAnalysisCard from '../components/AxisAnalysisCard';
 import AxisAnalysisModal from '../components/AxisAnalysisModal';
 import type { SearchableItem } from '../components/ChartSearchBar';
 import type { ChartTab } from '../components/ChartTabsNavigation';
 import type { AxisAnalysis } from '../services/exercises/chartAnalyzer';
-import { buildLilithSections } from '../utils/modalSectionBuilder';
 
 // Helper functions
 import {
@@ -90,6 +89,7 @@ interface ChartItem {
   preview: string;
   isNew?: boolean;
   isImportant?: boolean;
+  isRead?: boolean; // 🆕 Track if user has read this item
   content?: ReactElement; // Ahora opcional si usamos modalData
   sidebarSections?: Array<{ id: string; label: string }>; // Ahora opcional
   keywords: string[];
@@ -110,6 +110,10 @@ export default function ExerciseChartPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'planet' | 'point' | 'axis'>('all');
   const [selectedItem, setSelectedItem] = useState<ChartItem | null>(null);
   const [selectedAxis, setSelectedAxis] = useState<AxisAnalysis | null>(null);
+  
+  // Read progress tracking
+  const chartId = plan?.id || 'default';
+  const { markAsRead, isRead, resetProgress, getStats } = useReadProgress(chartId);
   
   // Build chart items - ONLY if plan exists, otherwise return empty array
   const chartItems: ChartItem[] = useMemo(() => {
@@ -457,7 +461,6 @@ export default function ExerciseChartPage() {
         subtitle: `Casa ${north.house}`,
         category: 'point',
         preview: northExplanation,
-        isNew: true,
         keywords: ['nodo norte', 'propósito', translateSign(north.sign).toLowerCase()],
         sidebarSections: [
           { id: 'proposito', label: '🎯 Propósito' },
@@ -673,7 +676,7 @@ export default function ExerciseChartPage() {
       });
     }
 
-    // 5. LILITH (usando nuevo sistema de modal)
+    // 5. LILITH (adaptado al sistema unificado de modales)
     if (chartAnalysis.lilith) {
       const lilith = chartAnalysis.lilith;
       const repression = getLilithRepressionBySign(lilith.sign);
@@ -683,16 +686,106 @@ export default function ExerciseChartPage() {
         id: 'lilith',
         icon: '⚸',
         title: `Lilith en ${translateSign(lilith.sign)}`,
-        subtitle: `Casa ${lilith.house}`,
+        subtitle: `Casa ${lilith.house} • Luna Negra`,
         category: 'point',
         preview: repression,
         keywords: ['lilith', 'sombra', 'poder', translateSign(lilith.sign).toLowerCase()],
-        modalData: {
-          sign: translateSign(lilith.sign),
-          house: lilith.house,
-          repression,
-          power
-        }
+        sidebarSections: [
+          { id: 'config', label: '⚸ Configuración' },
+          { id: 'represion', label: '🌑 Represión' },
+          { id: 'poder', label: '✨ Expresión de Poder' },
+          { id: 'integracion', label: '🔥 Integración' }
+        ],
+        content: (
+          <div className="space-y-6">
+            <div id="config" className="scroll-mt-20">
+              <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-200 mb-3">
+                ⚸ Configuración de Lilith
+              </h3>
+              <div className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-4 space-y-2">
+                <p><span className="font-semibold text-purple-700 dark:text-purple-300">Signo:</span> {translateSign(lilith.sign)}</p>
+                <p><span className="font-semibold text-purple-700 dark:text-purple-300">Casa:</span> {lilith.house}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  Lilith representa tu poder salvaje reprimido, tu sexualidad auténtica y las áreas donde has sido silenciado/a o rechazado/a.
+                </p>
+              </div>
+            </div>
+
+            <div id="represion" className="scroll-mt-20">
+              <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-200 mb-4 flex items-center gap-2">
+                <span>🌑</span>
+                <span>Represión y Sombra</span>
+              </h3>
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 
+                             border border-purple-200/50 dark:border-purple-700/30 rounded-xl p-6 
+                             hover:shadow-lg transition-all duration-200">
+                <div className="flex items-start gap-4">
+                  <span className="text-4xl">🌙</span>
+                  <p className="text-gray-800 dark:text-gray-200 leading-relaxed flex-1">
+                    {repression}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="poder" className="scroll-mt-20">
+              <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-200 mb-4 flex items-center gap-2">
+                <span>✨</span>
+                <span>Expresión de Poder</span>
+              </h3>
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 
+                             border border-pink-200/50 dark:border-pink-700/30 rounded-xl p-6 
+                             hover:shadow-lg transition-all duration-200">
+                <div className="flex items-start gap-4">
+                  <span className="text-4xl">🔥</span>
+                  <p className="text-gray-800 dark:text-gray-200 leading-relaxed flex-1">
+                    {power}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="integracion" className="scroll-mt-20">
+              <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-200 mb-4 flex items-center gap-2">
+                <span>🔥</span>
+                <span>Integración de Lilith</span>
+              </h3>
+              <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 
+                             border border-red-200/50 dark:border-red-700/30 rounded-xl p-6 
+                             hover:shadow-lg transition-all duration-200">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">💪</span>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Reclama tu poder</p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        Acepta las partes de ti que fueron juzgadas o rechazadas. Tu Lilith en {translateSign(lilith.sign)} te pide que dejes de disculparte por ser quien eres.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🔓</span>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Libera la represión</p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        Observa dónde te has silenciado a ti mismo/a. La integración de Lilith requiere expresar lo que has mantenido oculto.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">⚡</span>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Canaliza la energía</p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        Usa esta energía salvaje de forma creativa. Lilith no es para reprimir, es para transformar en fuerza vital auténtica.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
       });
     }
 
@@ -1384,8 +1477,12 @@ export default function ExerciseChartPage() {
       });
     }
 
-    return items;
-  }, [plan]);
+    // 🆕 Agregar isRead a todos los items
+    return items.map(item => ({
+      ...item,
+      isRead: isRead(item.id)
+    }));
+  }, [plan, isRead]);
 
   // Convert to searchable items
   // Get axes from chartAnalysis
@@ -1425,6 +1522,21 @@ export default function ExerciseChartPage() {
     setFilteredAxes(axes);
   }, [chartItems, axes]);
 
+  // 🆕 Calculate total sections count
+  const totalSections = chartItems.length + axes.length;
+
+  // 🆕 Handle item click - mark as read and open modal
+  const handleItemClick = useCallback((item: ChartItem) => {
+    markAsRead(item.id, totalSections);
+    setSelectedItem(item);
+  }, [markAsRead, totalSections]);
+
+  // 🆕 Handle axis click - mark as read and open modal
+  const handleAxisClick = useCallback((axis: AxisAnalysis, index: number) => {
+    markAsRead(`axis-${index}`, totalSections);
+    setSelectedAxis(axis);
+  }, [markAsRead, totalSections]);
+
   // Handle search results
   const handleSearch = useCallback((results: SearchableItem[]) => {
     const resultIds = new Set(results.map(r => r.id));
@@ -1443,13 +1555,56 @@ export default function ExerciseChartPage() {
     return [];
   }, [filteredAxes, activeTab]);
 
-  // Tabs configuration
+  // 🆕 Calculate read stats for tabs
+  const readStats = useMemo(() => {
+    const stats = getStats(totalSections);
+    const planetItems = chartItems.filter(i => i.category === 'planet');
+    const pointItems = chartItems.filter(i => i.category === 'point');
+    
+    const planetsRead = planetItems.filter(i => i.isRead).length;
+    const pointsRead = pointItems.filter(i => i.isRead).length;
+    const axesRead = axes.filter((_, index) => isRead(`axis-${index}`)).length;
+    
+    // 🔄 Cambiar a "pendientes" (unread) en lugar de "leídas"
+    return {
+      total: { unread: totalSections - stats.readCount, total: totalSections },
+      planets: { unread: planetItems.length - planetsRead, total: planetItems.length },
+      points: { unread: pointItems.length - pointsRead, total: pointItems.length },
+      axes: { unread: axes.length - axesRead, total: axes.length }
+    };
+  }, [chartItems, axes, getStats, totalSections, isRead]);
+
+  // Tabs configuration with read/unread counts
   const tabs: ChartTab[] = useMemo(() => [
-    { id: 'all', label: 'Todos', icon: '✨', count: chartItems.length + axes.length, color: 'purple' },
-    { id: 'planet', label: 'Planetas', icon: '🪐', count: chartItems.filter(i => i.category === 'planet').length, color: 'blue' },
-    { id: 'point', label: 'Puntos', icon: '⚡', count: chartItems.filter(i => i.category === 'point').length, color: 'pink' },
-    { id: 'axis', label: 'Ejes', icon: '⚖️', count: axes.length, color: 'amber' }
-  ], [chartItems, axes]);
+    { 
+      id: 'all', 
+      label: 'Todos', 
+      icon: '✨', 
+      count: readStats.total.unread, // 🔄 Mostrar solo pendientes
+      color: 'purple' 
+    },
+    { 
+      id: 'planet', 
+      label: 'Planetas', 
+      icon: '🪐', 
+      count: readStats.planets.unread, // 🔄 Mostrar solo pendientes
+      color: 'blue' 
+    },
+    { 
+      id: 'point', 
+      label: 'Asteroides', 
+      icon: '⚡', 
+      count: readStats.points.unread, // 🔄 Mostrar solo pendientes
+      color: 'pink' 
+    },
+    { 
+      id: 'axis', 
+      label: 'Aspectos', 
+      icon: '⚖️', 
+      count: readStats.axes.unread, // 🔄 Mostrar solo pendientes
+      color: 'amber' 
+    }
+  ], [readStats]);
 
   // NOW check for plan after all hooks
   if (!plan) {
@@ -1491,9 +1646,37 @@ export default function ExerciseChartPage() {
             <h1 className="text-3xl md:text-4xl font-bold text-purple-900 dark:text-white mb-2">
               Tu Carta Natal - Análisis Completo
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               Análisis personalizado basado en tu configuración astral única
             </p>
+            
+            {/* 🆕 Progress Bar */}
+            <div className="max-w-md mx-auto">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-gray-600 dark:text-gray-400">
+                  {readStats.total.total - readStats.total.unread} de {readStats.total.total} secciones leídas
+                </span>
+                {readStats.total.unread < readStats.total.total && (
+                  <button
+                    onClick={resetProgress}
+                    className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 text-xs font-medium"
+                  >
+                    Resetear progreso
+                  </button>
+                )}
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${((readStats.total.total - readStats.total.unread) / readStats.total.total) * 100}%` }}
+                />
+              </div>
+              {readStats.total.unread === 0 && readStats.total.total > 0 && (
+                <p className="text-green-600 dark:text-green-400 text-sm mt-2 font-semibold">
+                  ✅ ¡Has completado todo el análisis!
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -1535,9 +1718,10 @@ export default function ExerciseChartPage() {
                   dignityBadge={item.dignityBadge}
                   preview={item.preview}
                   category={item.category}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => handleItemClick(item)}
                   isNew={item.isNew}
                   isImportant={item.isImportant}
+                  isRead={item.isRead}
                 />
               </motion.div>
             ))}
@@ -1554,7 +1738,8 @@ export default function ExerciseChartPage() {
               >
                 <AxisAnalysisCard
                   axis={axis}
-                  onClick={() => setSelectedAxis(axis)}
+                  onClick={() => handleAxisClick(axis, index)}
+                  isRead={isRead(`axis-${index}`)}
                 />
               </motion.div>
             ))}
@@ -1598,53 +1783,33 @@ export default function ExerciseChartPage() {
 
       {/* Modal for chart items */}
       {selectedItem && (
-        <>
-          {/* Nuevo modal para Lilith */}
-          {selectedItem.id === 'lilith' && selectedItem.modalData ? (
-            <ChartItemModal
-              isOpen={!!selectedItem}
-              onClose={() => setSelectedItem(null)}
-              title={selectedItem.title}
-              subtitle={selectedItem.subtitle}
-              icon={selectedItem.icon}
-              sections={buildLilithSections(
-                selectedItem.modalData.sign,
-                selectedItem.modalData.house,
-                selectedItem.modalData.repression,
-                selectedItem.modalData.power
-              )}
-            />
-          ) : (
-            /* Modal antiguo para el resto */
-            <ChartAnalysisModal
-              isOpen={!!selectedItem}
-              onClose={() => setSelectedItem(null)}
-              title={selectedItem.title}
-              icon={selectedItem.icon}
-              subtitle={selectedItem.subtitle}
-              content={selectedItem.content}
-              sidebarSections={selectedItem.sidebarSections}
-              navigation={{
-                prev: (() => {
-                  const currentIndex = displayedItems.findIndex(i => i.id === selectedItem.id);
-                  const prevIndex = currentIndex > 0 ? currentIndex - 1 : displayedItems.length - 1;
-                  const prevItem = displayedItems[prevIndex];
-                  return prevItem ? { id: prevItem.id, title: prevItem.title, icon: prevItem.icon } : undefined;
-                })(),
-                next: (() => {
-                  const currentIndex = displayedItems.findIndex(i => i.id === selectedItem.id);
-                  const nextIndex = currentIndex < displayedItems.length - 1 ? currentIndex + 1 : 0;
-                  const nextItem = displayedItems[nextIndex];
-                  return nextItem ? { id: nextItem.id, title: nextItem.title, icon: nextItem.icon } : undefined;
-                })()
-              }}
-              onNavigate={(id) => {
-                const item = displayedItems.find(i => i.id === id);
-                if (item) setSelectedItem(item);
-              }}
-            />
-          )}
-        </>
+        <ChartAnalysisModal
+          isOpen={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          title={selectedItem.title}
+          icon={selectedItem.icon}
+          subtitle={selectedItem.subtitle}
+          content={selectedItem.content}
+          sidebarSections={selectedItem.sidebarSections}
+          navigation={{
+            prev: (() => {
+              const currentIndex = displayedItems.findIndex(i => i.id === selectedItem.id);
+              const prevIndex = currentIndex > 0 ? currentIndex - 1 : displayedItems.length - 1;
+              const prevItem = displayedItems[prevIndex];
+              return prevItem ? { id: prevItem.id, title: prevItem.title, icon: prevItem.icon } : undefined;
+            })(),
+            next: (() => {
+              const currentIndex = displayedItems.findIndex(i => i.id === selectedItem.id);
+              const nextIndex = currentIndex < displayedItems.length - 1 ? currentIndex + 1 : 0;
+              const nextItem = displayedItems[nextIndex];
+              return nextItem ? { id: nextItem.id, title: nextItem.title, icon: nextItem.icon } : undefined;
+            })()
+          }}
+          onNavigate={(id) => {
+            const item = displayedItems.find(i => i.id === id);
+            if (item) setSelectedItem(item);
+          }}
+        />
       )}
       
       {/* Modal for axes */}

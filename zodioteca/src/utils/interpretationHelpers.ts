@@ -464,12 +464,89 @@ export function getMoonStressExplanation(aspects: Array<{ planet: string; type: 
     explanation = 'Tu Luna está mayormente apoyada por aspectos armoniosos. Tus necesidades emocionales fluyen con relativa facilidad.';
   }
   
-  // Agregar factores específicos
+  // Agregar factores específicos con descripciones detalladas
   hardAspects.forEach(aspect => {
-    factors.push(`${aspectNames[aspect.type] || 'Aspecto tenso'} con ${aspect.planet}: genera tensión específica`);
+    const aspectName = aspectNames[aspect.type] || 'Aspecto tenso';
+    const description = getMoonStressDescription(aspect.type, aspect.planet);
+    factors.push(`${aspectName} con ${aspect.planet}: ${description}`);
   });
   
   return { level, explanation, factors };
+}
+
+/**
+ * Obtiene descripción específica de estrés lunar según planeta y aspecto
+ */
+function getMoonStressDescription(aspectType: string, planet: string): string {
+  const descriptions: Record<string, Record<string, string>> = {
+    'Sun': {
+      'square': 'conflicto entre necesidades emocionales y ego. Te cuesta equilibrar lo que quieres ser con lo que necesitas sentir',
+      'opposition': 'tensión entre identidad consciente y necesidades inconscientes. Otros reflejan tus carencias emocionales',
+      'conjunction': 'fusión intensa de ego y emociones. Dificultad para separar lo que sientes de quién eres',
+      'default': 'tu identidad solar desafía tu seguridad emocional creando tensión interna'
+    },
+    'Mercury': {
+      'square': 'tu mente y tus emociones chocan. Lo que piensas contradice lo que sientes',
+      'opposition': 'dificultad para comunicar necesidades emocionales. Tus palabras no expresan lo que sientes',
+      'conjunction': 'pensamientos dominados por emociones. Racionalizas tus sentimientos en lugar de procesarlos',
+      'default': 'tensión entre tu lógica y tus necesidades emocionales'
+    },
+    'Venus': {
+      'square': 'conflicto entre lo que necesitas emocionalmente y lo que encuentras placentero o valioso',
+      'opposition': 'tus relaciones desafían tu seguridad emocional. Buscas afuera lo que falta adentro',
+      'conjunction': 'amor y necesidad se confunden. Dependencia emocional en vínculos afectivos',
+      'default': 'tus valores y afectos desafían tu estabilidad emocional'
+    },
+    'Mars': {
+      'square': 'impulsos de acción chocan con necesidades de seguridad. Agresividad cuando te sientes vulnerable',
+      'opposition': 'otros provocan tus reacciones emocionales. Ira como defensa ante inseguridad',
+      'conjunction': 'reacciones emocionales explosivas. Actúas impulsivamente desde la herida emocional',
+      'default': 'tu impulso de acción desafía tu necesidad de estabilidad emocional'
+    },
+    'Jupiter': {
+      'square': 'excesos para compensar vacíos emocionales. Optimismo que niega necesidades reales',
+      'opposition': 'expectativas exageradas en relaciones. Buscas salvadores externos para tu bienestar',
+      'conjunction': 'emocionalidad amplificada. Todo se siente más grande de lo que es',
+      'default': 'tu búsqueda de expansión desafía tu necesidad de seguridad'
+    },
+    'Saturn': {
+      'square': 'restricción emocional severa. Dificultad para expresar o validar necesidades',
+      'opposition': 'otros o circunstancias limitan tu expresión emocional. Frialdad como defensa',
+      'conjunction': 'emociones reprimidas o congeladas. Miedo a mostrar vulnerabilidad',
+      'default': 'límites y responsabilidades pesan sobre tu bienestar emocional'
+    },
+    'Uranus': {
+      'square': 'cambios abruptos desestabilizan tu seguridad. Rebeldía contra necesidades de apego',
+      'opposition': 'otros traen caos a tu estabilidad emocional. Desapego como protección',
+      'conjunction': 'emocionalidad errática e impredecible. Necesidad de libertad vs. necesidad de cercanía',
+      'default': 'necesidad de libertad y cambio desafía tu estabilidad emocional'
+    },
+    'Neptune': {
+      'square': 'confusión sobre necesidades reales. Escapismo cuando te sientes vulnerable',
+      'opposition': 'idealización o decepción en vínculos. Otros encarnan tus fantasías o desilusiones',
+      'conjunction': 'límites emocionales difusos. Absorbes emociones ajenas como propias',
+      'default': 'ilusiones y confusión nublan tu claridad emocional'
+    },
+    'Pluto': {
+      'square': 'necesidad de control emocional absoluto. Miedo a ser vulnerable o manipulado',
+      'opposition': 'luchas de poder en vínculos íntimos. Otros activan tus miedos más profundos',
+      'conjunction': 'intensidad emocional extrema. Transformaciones dolorosas a nivel afectivo',
+      'default': 'dinámicas de poder y control afectan tu seguridad emocional'
+    },
+    'Chiron': {
+      'square': 'herida profunda en capacidad de nutrirte. Repites patrones de carencia emocional',
+      'opposition': 'otros activan tu herida primaria de desamparo o rechazo',
+      'conjunction': 'herida existencial en sentir que mereces amor y cuidado',
+      'default': 'herida antigua afecta tu capacidad de sentirte seguro y nutrido'
+    }
+  };
+
+  const planetDescriptions = descriptions[planet];
+  if (!planetDescriptions) {
+    return 'genera tensión en tu bienestar emocional y necesidades de seguridad';
+  }
+
+  return planetDescriptions[aspectType] || planetDescriptions['default'] || 'crea desafíos en tu estabilidad emocional';
 }
 
 // ============================================
