@@ -4,6 +4,7 @@ import { useI18n } from '../i18n';
 import { useSupabase } from '../context/SupabaseContext';
 import { supabase } from '../services/supabaseService';
 import { logger } from '../utils/logger';
+import { useNotification } from '../hooks/useNotification';
 import AuthModal from '../components/AuthModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -32,6 +33,7 @@ import {
 const SavedChartsPage: FC = () => {
   const { t } = useI18n();
   const { user, isAuthenticated, showAuthModal, setShowAuthModal } = useSupabase();
+  const { showToast, showConfirm } = useNotification();
   const userEmail = user?.email || null;
   
   const [charts, setCharts] = useState<ChartWithStatus[]>([]);
@@ -90,10 +92,10 @@ const SavedChartsPage: FC = () => {
       }
       setSelectedCharts(new Set());
       await loadCharts();
-      alert('✅ Cartas sincronizadas');
+      showToast('Cartas sincronizadas', 'success');
     } catch (error) {
       logger.error('Error syncing selected:', error);
-      alert('Error al sincronizar cartas seleccionadas');
+      showToast('Error al sincronizar cartas seleccionadas', 'error');
     } finally {
       setSyncing(false);
     }
@@ -106,7 +108,16 @@ const SavedChartsPage: FC = () => {
 
   // Eliminar carta
   const handleDelete = async (chartId: string) => {
-    if (!confirm('¿Eliminar esta carta? Esta acción no se puede deshacer.')) return;
+    const confirmed = await showConfirm({
+      title: 'Confirmar eliminación',
+      message: '¿Eliminar esta carta? Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: '🗑️'
+    });
+
+    if (!confirmed) return;
 
     try {
       // Si está autenticado, eliminar también de Supabase
@@ -119,9 +130,12 @@ const SavedChartsPage: FC = () => {
 
       // Recargar cartas
       await loadCharts();
+
+      // Mostrar toast de éxito
+      showToast('Carta eliminada exitosamente', 'success');
     } catch (error) {
       logger.error('Error eliminando carta:', error);
-      alert('Error al eliminar la carta. Inténtalo de nuevo.');
+      showToast('Error al eliminar la carta. Inténtalo de nuevo.', 'error');
     }
   };
 
@@ -157,11 +171,11 @@ const SavedChartsPage: FC = () => {
 
     try {
       const count = await importChartsFromJSON(file);
-      alert(`✅ ${count} cartas importadas exitosamente`);
+      showToast(`${count} cartas importadas exitosamente`, 'success');
       await loadCharts();
     } catch (error) {
       logger.error('Error importing:', error);
-      alert('❌ Error al importar cartas');
+      showToast('Error al importar cartas', 'error');
     }
 
     if (fileInputRef.current) {

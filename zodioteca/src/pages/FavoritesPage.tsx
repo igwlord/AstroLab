@@ -19,6 +19,7 @@ import { useState, useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 // import { useNavigate } from 'react-router-dom'; // Reservado para navegación con hash
 import { useFavorites } from '../store/useFavorites';
+import { useNotification } from '../hooks/useNotification';
 import FavoriteCard from '../components/FavoriteCard';
 import type { FavoriteType } from '../types/favorites';
 
@@ -56,9 +57,9 @@ const FavoritesPage: FC = () => {
   // Hook para navegación (reservado para futuras mejoras: scroll con hash)
   // const navigate = useNavigate();
   const { list, remove, exportToJSON, importFromJSON } = useFavorites();
+  const { showToast, showConfirm } = useNotification();
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   const [showStats, setShowStats] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // =========== FILTRADO ===========
   
@@ -67,7 +68,7 @@ const FavoritesPage: FC = () => {
       return list();
     }
     return list({ type: selectedFilter as FavoriteType });
-  }, [selectedFilter, list, refreshTrigger]);
+  }, [selectedFilter, list]);
   
   // =========== ESTADÍSTICAS CALCULADAS ===========
   
@@ -89,11 +90,19 @@ const FavoritesPage: FC = () => {
   
   // =========== ACCIONES ===========
   
-  const handleDeleteFavorite = (id: string) => {
-    if (confirm('¿Eliminar este favorito?')) {
+  const handleDeleteFavorite = async (id: string) => {
+    const confirmed = await showConfirm({
+      title: 'Confirmar eliminación',
+      message: '¿Eliminar este favorito?',
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: '🗑️'
+    });
+
+    if (confirmed) {
       remove(id);
-      // Forzar re-render actualizando el trigger
-      setRefreshTrigger(prev => prev + 1);
+      showToast('Favorito eliminado exitosamente', 'success');
     }
   };
   
@@ -124,15 +133,15 @@ const FavoritesPage: FC = () => {
         const result = importFromJSON(content);
         
         if (result.success) {
-          alert(`✅ Importados ${result.imported} favoritos`);
+          showToast(`Importados ${result.imported} favoritos`, 'success');
         } else {
-          alert(`❌ Error: ${result.errors.join(', ')}`);
+          showToast(`Error: ${result.errors.join(', ')}`, 'error');
         }
       };
       reader.readAsText(file);
     };
     input.click();
-  }, [importFromJSON]);
+  }, [importFromJSON, showToast]);
   
   // =========== ESTADO VACÍO ===========
   
