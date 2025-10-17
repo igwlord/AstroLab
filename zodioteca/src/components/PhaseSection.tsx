@@ -1,29 +1,35 @@
 /**
  * PHASE SECTION - Sección de fase con lista de ejercicios
+ * Versión 2.0: Sistema de días (1-7) en lugar de checkboxes por ejercicio
  */
 
-import { useState } from 'react';
-import { ChevronDown, ChevronRight } from '../utils/icons';
 import ExerciseCard from './ExerciseCard';
 import type { ExercisePhase } from '../services/exercises/planGenerator';
 
 interface PhaseSectionProps {
   phase: ExercisePhase;
-  completedExercises: Set<string>;
-  onExerciseComplete: (exerciseId: string) => void;
-  onExerciseUncomplete: (exerciseId: string) => void;
+  completedDays: Record<string, number[]>; // NUEVO: { exerciseId: [1, 3, 5] }
+  onDayComplete: (exerciseId: string, day: number) => void; // NUEVO
+  onDayUncomplete: (exerciseId: string, day: number) => void; // NUEVO
+  weekNumber: number; // NUEVO: 1, 2 o 3
 }
 
 export default function PhaseSection({ 
   phase, 
-  completedExercises,
-  onExerciseComplete,
-  onExerciseUncomplete
+  completedDays,
+  onDayComplete,
+  onDayUncomplete,
+  weekNumber
 }: PhaseSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(phase.phaseNumber === 1); // Primera fase expandida por defecto
-
-  const completedCount = phase.exercises.filter(ex => completedExercises.has(ex.id)).length;
-  const totalCount = phase.exercises.length;
+  // Calcular progreso basado en días únicos completados
+  const uniqueDaysCompleted = new Set<number>();
+  phase.exercises.forEach(ex => {
+    const days = completedDays[ex.id] || [];
+    days.forEach(day => uniqueDaysCompleted.add(day));
+  });
+  
+  const completedCount = uniqueDaysCompleted.size;
+  const totalCount = 7; // Siempre 7 días
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const levelColors: Record<string, string> = {
@@ -32,42 +38,42 @@ export default function PhaseSection({
     'varied': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
   };
 
-  const levelLabels: Record<string, string> = {
-    'easy': 'Fácil',
-    'medium': 'Medio',
-    'varied': 'Variado'
+  const weekTitles: Record<number, string> = {
+    1: '🔥 TU SEMANA ACTUAL (Días 1-7)',
+    2: '📅 SEMANA 2 (Días 8-14)',
+    3: '🎯 SEMANA 3 (Días 15-21)'
+  };
+
+  const phaseNames: Record<number, string> = {
+    1: 'Fundación',
+    2: 'Integración',
+    3: 'Expansión'
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-purple-200 dark:border-purple-700">
-      {/* Header colapsable - Optimizado para móvil */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 sm:p-4 md:p-6 text-left hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors active:bg-purple-100 dark:active:bg-purple-900/30 touch-manipulation"
-      >
+      {/* Header - Optimizado para móvil */}
+      <div className="w-full p-4 sm:p-4 md:p-6">
         <div className="flex items-start justify-between gap-3 sm:gap-3 md:gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 sm:gap-2 md:gap-3 mb-2 sm:mb-2 flex-wrap">
-              <h3 className="text-xl sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-white">
-                Fase {phase.phaseNumber}
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 dark:text-white">
+                {weekTitles[weekNumber] || `Semana ${weekNumber}`}
               </h3>
               <span className={`text-xs sm:text-xs px-2.5 sm:px-2.5 md:px-3 py-1 sm:py-1 rounded-full font-medium ${levelColors[phase.level]}`}>
-                {levelLabels[phase.level]}
-              </span>
-              <span className="text-sm sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
-                {phase.days} días
+                Fase {phase.phaseNumber}: {phaseNames[phase.phaseNumber]}
               </span>
             </div>
 
-            <p className="text-sm sm:text-sm md:text-base text-gray-700 dark:text-gray-300 mb-3 line-clamp-2 leading-relaxed">
+            <p className="text-sm sm:text-sm md:text-base text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
               {phase.instructions}
             </p>
 
-            {/* Barra de progreso - Más visual en móvil */}
+            {/* Barra de progreso - Basada en días únicos completados */}
             <div className="space-y-2 sm:space-y-1.5 md:space-y-2">
               <div className="flex items-center justify-between text-sm sm:text-sm">
                 <span className="text-purple-700 dark:text-purple-300 font-semibold">
-                  {completedCount} de {totalCount} ejercicios
+                  {completedCount} de {totalCount} días completados
                 </span>
                 <span className="text-purple-600 dark:text-purple-400 font-bold text-lg">
                   {progressPercent}%
@@ -81,21 +87,11 @@ export default function PhaseSection({
               </div>
             </div>
           </div>
-
-          {/* Icono de expansión - Más grande en móvil */}
-          <div className="flex-shrink-0 text-purple-600 dark:text-purple-400 self-center">
-            {isExpanded ? (
-              <ChevronDown className="w-6 h-6 sm:w-6 sm:h-6" />
-            ) : (
-              <ChevronRight className="w-6 h-6 sm:w-6 sm:h-6" />
-            )}
-          </div>
         </div>
-      </button>
+      </div>
 
-      {/* Contenido expandible - Optimizado para móvil */}
-      {isExpanded && (
-        <div className="px-4 sm:px-4 md:px-6 pb-4 sm:pb-4 md:pb-6 pt-0 space-y-4 sm:space-y-3 md:space-y-4 animate-fadeIn">
+      {/* Contenido - Siempre expandido */}
+      <div className="px-4 sm:px-4 md:px-6 pb-4 sm:pb-4 md:pb-6 pt-0 space-y-4 sm:space-y-3 md:space-y-4">
           {/* Geometría Sagrada y Chakras - Mejor organización en móvil */}
           {phase.sacredGeometry && phase.chakras && (
             <div className="grid grid-cols-1 gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -186,9 +182,9 @@ export default function PhaseSection({
               <ExerciseCard
                 key={exercise.id}
                 exercise={exercise}
-                isCompleted={completedExercises.has(exercise.id)}
-                onComplete={onExerciseComplete}
-                onUncomplete={onExerciseUncomplete}
+                completedDays={completedDays[exercise.id] || []}
+                onDayComplete={onDayComplete}
+                onDayUncomplete={onDayUncomplete}
               />
             ))}
           </div>
@@ -206,7 +202,6 @@ export default function PhaseSection({
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }

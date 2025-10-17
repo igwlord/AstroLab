@@ -1,23 +1,24 @@
 /**
- * EXERCISE CARD - Card individual de ejercicio con expansión
+ * EXERCISE CARD - Card individual de ejercicio con checkboxes de días
+ * Versión 2.0: Sistema de 7 días por ejercicio
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Check, Clock, Calendar } from '../utils/icons';
+import { ChevronDown, ChevronUp, Clock } from '../utils/icons';
 import type { ExerciseTemplate } from '../services/exercises/exerciseDatabase';
 
 interface ExerciseCardProps {
   exercise: ExerciseTemplate;
-  isCompleted?: boolean;
-  onComplete?: (exerciseId: string) => void;
-  onUncomplete?: (exerciseId: string) => void;
+  completedDays: number[]; // Array de días completados [1, 3, 5]
+  onDayComplete?: (exerciseId: string, day: number) => void;
+  onDayUncomplete?: (exerciseId: string, day: number) => void;
 }
 
 export default function ExerciseCard({ 
   exercise, 
-  isCompleted = false,
-  onComplete,
-  onUncomplete 
+  completedDays = [],
+  onDayComplete,
+  onDayUncomplete 
 }: ExerciseCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -36,118 +37,96 @@ export default function ExerciseCard({
     'Social': 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
   };
 
-  const energyLevelEmoji: Record<string, string> = {
-    'low': '🌙',
-    'medium': '☀️',
-    'high': '⚡'
-  };
-
-  const timingEmoji: Record<string, string> = {
-    'morning': '🌅',
-    'evening': '🌙',
-    'anytime': '⏰'
-  };
-
-  const handleToggleComplete = () => {
-    if (isCompleted && onUncomplete) {
-      onUncomplete(exercise.id);
-    } else if (!isCompleted && onComplete) {
-      onComplete(exercise.id);
+  const handleDayToggle = (day: number) => {
+    if (completedDays.includes(day)) {
+      onDayUncomplete?.(exercise.id, day);
+    } else {
+      onDayComplete?.(exercise.id, day);
     }
   };
 
-  return (
-    <div className={`
-      border rounded-lg p-2.5 sm:p-3 md:p-4 transition-all duration-200 
-      ${isCompleted 
-        ? 'bg-green-50 dark:bg-green-900/10 border-green-300 dark:border-green-700 opacity-75' 
-        : 'bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-700 hover:shadow-md'
-      }
-    `}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2 sm:gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-            <h4 className={`font-semibold text-sm sm:text-base md:text-lg truncate ${isCompleted ? 'line-through text-gray-600 dark:text-gray-400' : 'text-purple-900 dark:text-white'}`}>
-              {exercise.title}
-            </h4>
-            {isCompleted && (
-              <span className="text-green-600 dark:text-green-400 flex-shrink-0">
-                <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-              </span>
-            )}
-          </div>
+  const completedCount = completedDays.length;
 
-          <div className="flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 mb-1.5 sm:mb-2">
-            <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium ${categoryColors[exercise.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
+  return (
+    <div className="border border-purple-200 dark:border-purple-700 rounded-lg p-3 sm:p-4 bg-white dark:bg-gray-800 hover:shadow-md transition-all">
+      {/* Header del ejercicio */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-base sm:text-lg text-purple-900 dark:text-white mb-1">
+            {exercise.title}
+          </h4>
+          
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${categoryColors[exercise.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
               {exercise.category}
             </span>
             
             {exercise.duration && (
-              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 flex items-center gap-0.5 sm:gap-1">
-                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                {exercise.duration}min
-              </span>
-            )}
-            
-            {exercise.energyLevel && (
-              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300">
-                {energyLevelEmoji[exercise.energyLevel]}
-              </span>
-            )}
-            
-            {exercise.timing && (
-              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300">
-                {timingEmoji[exercise.timing]}
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {exercise.duration} min/día
               </span>
             )}
           </div>
 
-          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-3 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {exercise.description}
           </p>
-
-          {exercise.frequency && (
-            <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 flex items-center gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
-              <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              {exercise.frequency}
-            </div>
-          )}
         </div>
 
-        {/* Botones */}
-        <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 flex-shrink-0">
-          <button
-            onClick={handleToggleComplete}
-            className={`
-              px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs md:text-sm font-medium transition-all flex items-center gap-0.5 sm:gap-1
-              ${isCompleted 
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-600 ring-2 ring-emerald-300 dark:ring-emerald-700' 
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:shadow-md'
-              }
-            `}
-          >
-            <Check className={`w-3 h-3 sm:w-4 sm:h-4 ${isCompleted ? 'animate-pulse' : ''}`} />
-            <span className="hidden sm:inline">{isCompleted ? '✓ Completado' : 'Completar'}</span>
-            <span className="sm:hidden">{isCompleted ? '✓' : '○'}</span>
-          </button>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-shrink-0 p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+        >
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          )}
+        </button>
+      </div>
 
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs md:text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors flex items-center gap-0.5 sm:gap-1 justify-center"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Menos</span>
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Ver</span>
-              </>
-            )}
-          </button>
+      {/* Checkboxes de días - Versión compacta */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-700 dark:text-gray-300 font-medium">
+            Progreso esta semana:
+          </span>
+          <span className="text-purple-600 dark:text-purple-400 font-bold">
+            {completedCount}/7 días
+          </span>
+        </div>
+
+        {/* Grid de checkboxes */}
+        <div className="flex gap-1.5 sm:gap-2">
+          {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+            const isCompleted = completedDays.includes(day);
+            return (
+              <button
+                key={day}
+                onClick={() => handleDayToggle(day)}
+                className={`
+                  flex-1 aspect-square rounded-lg border-2 transition-all
+                  flex items-center justify-center text-xs sm:text-sm font-bold
+                  ${isCompleted
+                    ? 'bg-green-500 border-green-600 text-white shadow-md scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                  }
+                `}
+                title={isCompleted ? `Día ${day} completado` : `Marcar día ${day}`}
+              >
+                {isCompleted ? '✓' : day}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Barra de progreso visual */}
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+            style={{ width: `${(completedCount / 7) * 100}%` }}
+          />
         </div>
       </div>
 

@@ -12,7 +12,8 @@ import { logger } from '../utils/logger';
 interface ExercisePlanState {
   // Estado
   currentPlan: ExercisePlan | null;
-  completedExercises: Set<string>;
+  completedExercises: Set<string>; // Legacy - mantener por compatibilidad
+  completedDays: Record<string, number[]>; // NUEVO: { exerciseId: [1, 3, 5] }
   isGenerating: boolean;
   error: string | null;
   
@@ -25,14 +26,19 @@ interface ExercisePlanState {
   // Actions
   generatePlan: (chart: NatalChart) => Promise<void>;
   setCurrentPlan: (plan: ExercisePlan | null) => void;
-  completeExercise: (exerciseId: string) => void;
-  uncompleteExercise: (exerciseId: string) => void;
+  completeExercise: (exerciseId: string) => void; // Legacy
+  uncompleteExercise: (exerciseId: string) => void; // Legacy
+  completeDayForExercise: (exerciseId: string, day: number) => void; // NUEVO
+  uncompleteDayForExercise: (exerciseId: string, day: number) => void; // NUEVO
   clearPlan: () => void;
   resetProgress: () => void;
   
   // Calculados
   getProgress: () => { completed: number; total: number; percent: number };
   getPhaseProgress: (phaseNumber: number) => { completed: number; total: number; percent: number };
+  getWeekProgress: (weekNumber: number) => { completed: number; total: number; percent: number }; // NUEVO
+  isWeekUnlocked: (weekNumber: number) => boolean; // NUEVO
+  getCurrentWeek: () => number; // NUEVO: retorna 1, 2 o 3
 }
 
 export const useExercisePlanStore = create<ExercisePlanState>()(
@@ -41,6 +47,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
       // Estado inicial
       currentPlan: null,
       completedExercises: new Set(),
+      completedDays: {}, // NUEVO
       isGenerating: false,
       error: null,
       lastGeneratedAt: null,
@@ -65,6 +72,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
             isGenerating: false,
             lastGeneratedAt: new Date().toISOString(),
             completedExercises: new Set(), // Reset progreso al generar nuevo plan
+            completedDays: {}, // NUEVO: Reset también los días
             error: null
           });
 
@@ -135,11 +143,62 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
         logger.log(`↩️  Ejercicio desmarcado: ${exerciseId}`);
       },
 
+      // NUEVO: Completar un día específico de un ejercicio
+      completeDayForExercise: (exerciseId: string, day: number) => {
+        const { completedDays } = get();
+        const currentDays = completedDays[exerciseId] || [];
+        
+        if (!currentDays.includes(day)) {
+          const newCompletedDays = {
+            ...completedDays,
+            [exerciseId]: [...currentDays, day].sort((a, b) => a - b)
+          };
+
+          // Actualizar racha si completó hoy
+          const today = new Date().toISOString().split('T')[0];
+          const lastDate = get().lastCompletedDate;
+          let newStreak = get().dailyStreak;
+
+          if (!lastDate || lastDate.split('T')[0] !== today) {
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            newStreak = lastDate?.split('T')[0] === yesterday ? newStreak + 1 : 1;
+          }
+
+          set({
+            completedDays: newCompletedDays,
+            lastCompletedDate: new Date().toISOString(),
+            dailyStreak: newStreak,
+            totalExercisesCompleted: get().totalExercisesCompleted + 1
+          });
+
+          logger.log(`✅ Día ${day} completado para ejercicio: ${exerciseId}`);
+        }
+      },
+
+      // NUEVO: Desmarcar un día específico de un ejercicio
+      uncompleteDayForExercise: (exerciseId: string, day: number) => {
+        const { completedDays } = get();
+        const currentDays = completedDays[exerciseId] || [];
+        
+        const newCompletedDays = {
+          ...completedDays,
+          [exerciseId]: currentDays.filter(d => d !== day)
+        };
+
+        set({
+          completedDays: newCompletedDays,
+          totalExercisesCompleted: Math.max(0, get().totalExercisesCompleted - 1)
+        });
+
+        logger.log(`↩️  Día ${day} desmarcado para ejercicio: ${exerciseId}`);
+      },
+
       // Limpiar plan actual
       clearPlan: () => {
         set({
           currentPlan: null,
           completedExercises: new Set(),
+          completedDays: {}, // NUEVO
           error: null
         });
       },
@@ -148,22 +207,30 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
       resetProgress: () => {
         set({
           completedExercises: new Set(),
+          completedDays: {}, // NUEVO
           dailyStreak: 0,
           lastCompletedDate: null
         });
         logger.log('🔄 Progreso reseteado');
       },
 
-      // Obtener progreso global
+      // Obtener progreso global (basado en días únicos completados de las 3 fases)
       getProgress: () => {
-        const { currentPlan, completedExercises } = get();
+        const { currentPlan } = get();
         
         if (!currentPlan) {
           return { completed: 0, total: 0, percent: 0 };
         }
 
-        const total = currentPlan.totalExercises;
-        const completed = completedExercises.size;
+        // Total = 21 días únicos (7 días × 3 fases)
+        const total = 21;
+        
+        // Completados = suma de días únicos de cada fase
+        const phase1Progress = get().getWeekProgress(1);
+        const phase2Progress = get().getWeekProgress(2);
+        const phase3Progress = get().getWeekProgress(3);
+        
+        const completed = phase1Progress.completed + phase2Progress.completed + phase3Progress.completed;
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         return { completed, total, percent };
@@ -189,6 +256,72 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         return { completed, total, percent };
+      },
+
+      // NUEVO: Obtener progreso de una semana específica (basado en días completados)
+      getWeekProgress: (weekNumber: number) => {
+        const { currentPlan, completedDays } = get();
+        
+        if (!currentPlan) {
+          return { completed: 0, total: 0, percent: 0 };
+        }
+
+        const phaseKey = `phase${weekNumber}` as 'phase1' | 'phase2' | 'phase3';
+        const phase = currentPlan.phases[phaseKey];
+        
+        if (!phase) {
+          return { completed: 0, total: 0, percent: 0 };
+        }
+
+        // Total = 7 días únicos (del 1 al 7)
+        const total = 7;
+        
+        // Completados = días únicos marcados (sin importar en qué ejercicio)
+        // Crear un Set de todos los días marcados en cualquier ejercicio de esta fase
+        const uniqueDays = new Set<number>();
+        phase.exercises.forEach(ex => {
+          const days = completedDays[ex.id] || [];
+          days.forEach(day => uniqueDays.add(day));
+        });
+        
+        const completed = uniqueDays.size;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        return { completed, total, percent };
+      },
+
+      // NUEVO: Verificar si una fase está desbloqueada
+      // Usuario tiene 21 días flexibles, desbloquea fases al completar TODOS los días de la fase anterior
+      isWeekUnlocked: (weekNumber: number) => {
+        // Fase 1 siempre está desbloqueada
+        if (weekNumber === 1) return true;
+
+        // Para Fase 2: necesitas completar LOS 7 DÍAS de Fase 1
+        // Para Fase 3: necesitas completar LOS 7 DÍAS de Fase 2
+        const previousWeek = weekNumber - 1;
+        const previousProgress = get().getWeekProgress(previousWeek);
+        
+        // Desbloqueo cuando completas los 7 días (puede ser marcando en cualquier ejercicio)
+        return previousProgress.completed >= 7;
+      },
+
+      // NUEVO: Obtener la semana actual (la última desbloqueada con progreso < 100%)
+      getCurrentWeek: () => {
+        const week2Progress = get().getWeekProgress(2);
+        const week3Progress = get().getWeekProgress(3);
+
+        // Si semana 3 está desbloqueada y no terminada, es la actual
+        if (get().isWeekUnlocked(3) && week3Progress.percent < 100) {
+          return 3;
+        }
+
+        // Si semana 2 está desbloqueada y no terminada, es la actual
+        if (get().isWeekUnlocked(2) && week2Progress.percent < 100) {
+          return 2;
+        }
+
+        // Por defecto, semana 1 (o si todo está completo)
+        return 1;
       }
     }),
     {
@@ -197,6 +330,7 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
       partialize: (state) => ({
         currentPlan: state.currentPlan,
         completedExercises: Array.from(state.completedExercises),
+        completedDays: state.completedDays, // NUEVO: ya es serializable
         lastGeneratedAt: state.lastGeneratedAt,
         dailyStreak: state.dailyStreak,
         lastCompletedDate: state.lastCompletedDate,
@@ -206,6 +340,10 @@ export const useExercisePlanStore = create<ExercisePlanState>()(
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.completedExercises)) {
           state.completedExercises = new Set(state.completedExercises as string[]);
+        }
+        // Asegurar que completedDays existe
+        if (state && !state.completedDays) {
+          state.completedDays = {};
         }
       }
     }

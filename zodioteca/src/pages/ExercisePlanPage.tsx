@@ -15,9 +15,7 @@ import PhaseSection from '../components/PhaseSection';
 import WelcomeExercisesModal from '../components/WelcomeExercisesModal';
 import EmptyExercisesState from '../components/EmptyExercisesState';
 import SavePlanModal from '../components/SavePlanModal';
-// 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
-// import PlanGenerationLoader from '../components/PlanGenerationLoader';
-import { getReflectionStats } from '../services/reflectionsService';
+import { ChartInfoCard } from '../components/ChartInfoCard';
 import { logger } from '../utils/logger';
 
 export default function ExercisePlanPage() {
@@ -40,44 +38,43 @@ export default function ExercisePlanPage() {
     currentPlan: plan,
     isGenerating: loading,
     error,
-    completedExercises,
+    completedDays,
     generatePlan,
-    completeExercise,
-    uncompleteExercise,
-    dailyStreak
+    completeDayForExercise,
+    uncompleteDayForExercise,
+    getCurrentWeek,
+    isWeekUnlocked,
+    getWeekProgress
   } = useExercisePlanStore();
 
-  // Estado local para modales y reflexiones
+  // Estado local para modales y navegación
   const [showSavePlanModal, setShowSavePlanModal] = useState(false);
-  const [totalReflections, setTotalReflections] = useState<number>(0);
+  const [selectedWeek, setSelectedWeek] = useState<number>(1);
   // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
   // const [showGenerationLoader, setShowGenerationLoader] = useState(false);
   const hasGeneratedRef = useRef(false);
 
   // Memoizar progress para evitar re-renders del modal
-  // Depende de plan y completedExercises, no de getProgress
+  // Ahora basado en días completados en lugar de ejercicios
   const progress = useMemo(() => {
     if (!plan) {
       return { completed: 0, total: 0, percent: 0 };
     }
-    const total = plan.totalExercises;
-    const completed = completedExercises.size;
+    
+    // Total = 21 días (7 días × 3 fases)
+    const total = 21;
+    
+    // Contar días únicos completados en todas las fases
+    const uniqueDays = new Set<number>();
+    Object.values(completedDays).forEach(days => {
+      days.forEach(day => uniqueDays.add(day));
+    });
+    
+    const completed = uniqueDays.size;
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
     return { completed, total, percent };
-  }, [plan, completedExercises]);
-
-  // Cargar estadísticas de reflexiones
-  useEffect(() => {
-    async function loadReflectionStats() {
-      try {
-        const stats = await getReflectionStats();
-        setTotalReflections(stats.total);
-      } catch (error) {
-        logger.error('Error loading reflection stats:', error);
-      }
-    }
-    loadReflectionStats();
-  }, []);
+  }, [plan, completedDays]);
 
   // Modo DEBUG: cargar mock charts desde query params (solo en desarrollo)
   useEffect(() => {
@@ -127,10 +124,6 @@ export default function ExercisePlanPage() {
       // Marcar que ya estamos generando
       hasGeneratedRef.current = true;
 
-      // 🚫 LOADER DESACTIVADO TEMPORALMENTE PARA PRUEBAS
-      // Mostrar loader
-      // setShowGenerationLoader(true);
-
       // 2. Generar plan usando el store
       await generatePlan(chart);
     }
@@ -138,12 +131,20 @@ export default function ExercisePlanPage() {
     loadAndGeneratePlan();
   }, [chartId, location.state, currentChart, charts, generatePlan]);
 
-  const handleExerciseComplete = (exerciseId: string) => {
-    completeExercise(exerciseId);
+  // Establecer semana actual cuando cargue el plan
+  useEffect(() => {
+    if (plan) {
+      const currentWeek = getCurrentWeek();
+      setSelectedWeek(currentWeek);
+    }
+  }, [plan, getCurrentWeek]);
+
+  const handleDayComplete = (exerciseId: string, day: number) => {
+    completeDayForExercise(exerciseId, day);
   };
 
-  const handleExerciseUncomplete = (exerciseId: string) => {
-    uncompleteExercise(exerciseId);
+  const handleDayUncomplete = (exerciseId: string, day: number) => {
+    uncompleteDayForExercise(exerciseId, day);
   };
 
   const handleLoadChart = () => {
@@ -349,155 +350,111 @@ export default function ExercisePlanPage() {
             </div>
         </div>
 
-        {/* Resumen del plan - Más compacto */}
+        {/* Resumen del plan */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-3 sm:p-4 md:p-6 mb-3 md:mb-4">
-          <div className="mb-2 md:mb-3">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-800 dark:text-purple-300">
-                Resumen del Análisis
-              </h2>
+          {currentChart && (
+            <ChartInfoCard
+              chart={currentChart}
+              onSave={() => setShowSavePlanModal(true)}
+              onRegenerate={async () => {
+                const confirmed = await showConfirm({
+                  title: '¿Regenerar plan?',
+                  message: 'Se perderá el progreso actual.',
+                  confirmText: 'Regenerar',
+                  cancelText: 'Cancelar',
+                  type: 'warning',
+                  icon: '🔄'
+                });
+
+                if (confirmed) {
+                  showToast('🔄 Regenerando...', 'info', 1500);
+                  window.location.reload();
+                }
+              }}
+            />
+          )}
+        </div>
+
+        {/* Navegación de Semanas */}
+        <div className="mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {[1, 2, 3].map((week) => {
+              const weekProgress = getWeekProgress(week);
+              const unlocked = isWeekUnlocked(week);
+              const isCurrent = week === selectedWeek;
               
-              {/* Botones de acción integrados */}
-              <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
+              return (
                 <button
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2 sm:px-3 rounded-lg transition-colors text-xs sm:text-sm shadow-md hover:shadow-lg"
-                  onClick={() => setShowSavePlanModal(true)}
-                  title="Guardar Plan"
-                >
-                  <span className="hidden sm:inline">💾 Guardar</span>
-                  <span className="sm:hidden">💾</span>
-                </button>
-                <button
-                  className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-1.5 px-2 sm:px-3 rounded-lg transition-colors text-xs sm:text-sm"
-                  onClick={async () => {
-                    const confirmed = await showConfirm({
-                      title: '¿Regenerar plan?',
-                      message: 'Se perderá el progreso actual.',
-                      confirmText: 'Regenerar',
-                      cancelText: 'Cancelar',
-                      type: 'warning',
-                      icon: '🔄'
-                    });
-
-                    if (confirmed) {
-                      showToast('🔄 Regenerando...', 'info', 1500);
-                      window.location.reload();
+                  key={week}
+                  onClick={() => unlocked && setSelectedWeek(week)}
+                  disabled={!unlocked}
+                  className={`
+                    flex-shrink-0 px-4 py-3 rounded-lg border-2 transition-all
+                    ${isCurrent 
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' 
+                      : unlocked
+                        ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-600'
+                        : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 opacity-50 cursor-not-allowed'
                     }
-                  }}
-                  title="Regenerar Plan"
+                  `}
                 >
-                  <span className="hidden sm:inline">🔄 Regenerar</span>
-                  <span className="sm:hidden">🔄</span>
+                  <div className="text-left min-w-[140px]">
+                    <div className={`text-sm font-semibold mb-1 ${isCurrent ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {week === getCurrentWeek() && unlocked ? '🔥 ' : unlocked ? '✓ ' : '🔒 '}
+                      Semana {week}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Días {(week - 1) * 7 + 1}-{week * 7}
+                    </div>
+                    {unlocked && (
+                      <div className="mt-1">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div 
+                            className={`h-1.5 rounded-full ${isCurrent ? 'bg-purple-500' : 'bg-green-500'}`}
+                            style={{ width: `${weekProgress.percent}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {weekProgress.completed}/7 días
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </button>
-              </div>
-            </div>
-            
-            {currentChart && (
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {currentChart.name || 'Carta Natal'}
-                {currentChart.birthDate && (() => {
-                  const dateStr = currentChart.birthDate.split(',')[0];
-                  return ` • 📅 ${dateStr}`;
-                })()}
-                {currentChart.birthTime ? ` • 🕐 ${currentChart.birthTime}` : ' • 🕐 Hora no especificada'}
-                {currentChart.birthPlace ? ` • 📍 ${currentChart.birthPlace}` : ' • 📍 Ubicación no especificada'}
-              </p>
-            )}
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-3 md:gap-4 mb-3 md:mb-4">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-purple-200 dark:border-purple-700">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">📊</span>
-                <div className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-medium">
-                  Progreso
-                </div>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-900 dark:text-white">
-                {progress.completed}/{plan.totalExercises}
-              </div>
-              <div className="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
-                {progress.percent}% completado
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-pink-200 dark:border-pink-700">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">📝</span>
-                <div className="text-xs sm:text-sm text-pink-600 dark:text-pink-400 font-medium">
-                  Reflexiones
-                </div>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-pink-900 dark:text-white">
-                {totalReflections}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-blue-200 dark:border-blue-700">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">🌙</span>
-                <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium">
-                  Luna Estrés
-                </div>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-900 dark:text-white">
-                {plan.chartAnalysis.moon?.stressScore || 0}/10
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-3 sm:p-3 md:p-4 border border-green-200 dark:border-green-700">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">🔥</span>
-                <div className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-medium">
-                  Racha
-                </div>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-900 dark:text-white">
-                {dailyStreak}
-              </div>
-              <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
-                días
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm sm:text-base font-semibold text-purple-800 dark:text-purple-300 mb-2">
-              Áreas Prioritarias:
-            </h3>
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {plan.topAreas.map((area, i) => (
-                <span
-                  key={i}
-                  className="bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium"
-                >
-                  {area}
-                </span>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Fases */}
-        <div className="space-y-3 sm:space-y-4 md:space-y-6 pb-20 md:pb-0">
-          <PhaseSection 
-            phase={plan.phases.phase1} 
-            completedExercises={completedExercises}
-            onExerciseComplete={handleExerciseComplete}
-            onExerciseUncomplete={handleExerciseUncomplete}
-          />
-          <PhaseSection 
-            phase={plan.phases.phase2} 
-            completedExercises={completedExercises}
-            onExerciseComplete={handleExerciseComplete}
-            onExerciseUncomplete={handleExerciseUncomplete}
-          />
-          <PhaseSection 
-            phase={plan.phases.phase3} 
-            completedExercises={completedExercises}
-            onExerciseComplete={handleExerciseComplete}
-            onExerciseUncomplete={handleExerciseUncomplete}
-          />
+        {/* Semana Actual */}
+        <div className="pb-20 md:pb-0">
+          {selectedWeek === 1 && (
+            <PhaseSection 
+              phase={plan.phases.phase1} 
+              completedDays={completedDays}
+              onDayComplete={handleDayComplete}
+              onDayUncomplete={handleDayUncomplete}
+              weekNumber={1}
+            />
+          )}
+          {selectedWeek === 2 && isWeekUnlocked(2) && (
+            <PhaseSection 
+              phase={plan.phases.phase2} 
+              completedDays={completedDays}
+              onDayComplete={handleDayComplete}
+              onDayUncomplete={handleDayUncomplete}
+              weekNumber={2}
+            />
+          )}
+          {selectedWeek === 3 && isWeekUnlocked(3) && (
+            <PhaseSection 
+              phase={plan.phases.phase3} 
+              completedDays={completedDays}
+              onDayComplete={handleDayComplete}
+              onDayUncomplete={handleDayUncomplete}
+              weekNumber={3}
+            />
+          )}
         </div>
 
         {/* Espaciador para bottom navigation bar en móvil */}

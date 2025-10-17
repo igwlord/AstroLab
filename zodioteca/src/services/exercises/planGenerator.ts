@@ -726,7 +726,7 @@ function distributeIntoPhases(
     level: 'easy',
     exercises: phase1Exercises,
     dailyRoutine: generateDailyRoutine(phase1Exercises),
-    instructions: `📅 Días 1-7: Adaptación suave. Realiza estos 2 ejercicios diariamente para familiarizarte con las prácticas. Enfócate en ${topPriority}.`,
+    instructions: `📅 Fase 1 (Días 1-7): Adaptación suave. Elige estos 2 ejercicios y practícalos cuando puedas durante tus primeros 7 días. Enfócate en ${topPriority}.`,
     sacredGeometry: phase1GeometryChakras.sacredGeometry,
     chakras: phase1GeometryChakras.chakras
   };
@@ -737,7 +737,7 @@ function distributeIntoPhases(
     level: 'medium',
     exercises: phase2Exercises,
     dailyRoutine: generateDailyRoutine(phase2Exercises),
-    instructions: `📅 Días 8-14: Profundización. Estos 2 ejercicios tienen mayor intensidad. Continúa trabajando en ${topPriority} con más compromiso.`,
+    instructions: `📅 Fase 2 (Días 8-14): Profundización. Estos 2 ejercicios tienen mayor intensidad. Practica cuando estés listo, a tu propio ritmo. Trabaja en ${topPriority} con más compromiso.`,
     sacredGeometry: phase2GeometryChakras.sacredGeometry,
     chakras: phase2GeometryChakras.chakras
   };
@@ -748,7 +748,7 @@ function distributeIntoPhases(
     level: 'varied',
     exercises: phase3Exercises,
     dailyRoutine: generateDailyRoutine(phase3Exercises),
-    instructions: `📅 Días 15-21: Integración y consolidación. Completa el ciclo con estos 2 ejercicios desafiantes que integran todo lo aprendido.`,
+    instructions: `📅 Fase 3 (Días 15-21): Integración final. Completa tu programa de 21 días con estos 2 ejercicios que integran todo lo aprendido. Avanza cuando te sientas preparado.`,
     sacredGeometry: phase3GeometryChakras.sacredGeometry,
     chakras: phase3GeometryChakras.chakras
   };
