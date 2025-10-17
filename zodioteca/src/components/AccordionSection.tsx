@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface AccordionSectionProps {
@@ -64,37 +64,9 @@ export default function AccordionSection({
     }
   };
 
-  // Scroll lock cuando está abierto - optimizado para móviles
-  useEffect(() => {
-    if (isOpen) {
-      // Usar requestAnimationFrame para sincronizar con el render
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.width = '100%';
-        // Prevenir el bounce en iOS
-        document.body.style.touchAction = 'none';
-      });
-      
-      return () => {
-        requestAnimationFrame(() => {
-          const scrollY = parseInt(document.body.style.top || '0') * -1;
-          document.body.style.overflow = '';
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.left = '';
-          document.body.style.right = '';
-          document.body.style.width = '';
-          document.body.style.touchAction = '';
-          window.scrollTo(0, scrollY);
-        });
-      };
-    }
-  }, [isOpen]);
+  // ⚠️ ELIMINADO: Scroll lock que causaba problemas
+  // El acordeón ahora se expande inline sin bloquear el scroll de la página
+  // Esto permite una mejor experiencia de usuario y navegación fluida
 
   return (
     <div 
@@ -146,12 +118,7 @@ export default function AccordionSection({
       </button>
       {isOpen && (
         <div 
-          className="p-3 sm:p-4 md:p-6 border-t border-purple-100 dark:border-purple-700 bg-white dark:bg-gray-900 max-h-[calc(100vh-200px)] overflow-y-auto overscroll-contain"
-          style={{
-            willChange: 'opacity, transform',
-            transform: 'translate3d(0, 0, 0)', // GPU acceleration
-            WebkitOverflowScrolling: 'touch' // Smooth scroll en iOS
-          }}
+          className="p-3 sm:p-4 md:p-6 border-t border-purple-100 dark:border-purple-700 bg-white dark:bg-gray-900"
         >
           {children}
         </div>

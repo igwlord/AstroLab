@@ -21,6 +21,8 @@ import { adaptChartData } from '../utils/chartAdapter';
 import ChartSectionFilter from '../components/ChartSectionFilter';
 import AccordionSection from '../components/AccordionSection';
 import StatCard from '../components/StatCard';
+import { CELESTIAL_BODIES } from '../types/celestialBody';
+import { ASTEROIDS } from '../types/asteroid';
 import type { FormValue } from '../types/natalForm';
 import { DEFAULT_SETTINGS } from '../types/natalForm';
 import { calculateNatalChart, type NatalChart } from '../services/realAstroCalculator';
@@ -62,6 +64,10 @@ export default function NatalChartPage() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  
+  // Estados para expandir/colapsar información detallada (acordeón inline)
+  const [expandedAsteroid, setExpandedAsteroid] = useState<string | null>(null);
+  const [expandedSensitivePoint, setExpandedSensitivePoint] = useState<string | null>(null);
   
   // Supabase auth
   const { isAuthenticated } = useSupabase();
@@ -1302,17 +1308,37 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     orbitalPeriod: 'Variable'
                   };
 
+                  const isExpanded = expandedAsteroid === asteroid.name;
+                  const asteroidInfo = ASTEROIDS.find(a => a.name === asteroid.name || (a.name === 'Palas Atenea' && asteroid.name === 'Pallas'));
+
                   return (
                     <div 
-                      key={idx} 
-                      className={`p-5 bg-gradient-to-br ${data.gradient} rounded-xl border-2 ${data.border} hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] relative`}
+                      key={idx}
+                      id={`asteroid-${asteroid.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      className={`bg-gradient-to-br ${data.gradient} rounded-xl border-2 ${data.border} transition-all duration-300 relative ${isExpanded ? 'shadow-2xl' : 'hover:shadow-xl hover:scale-[1.02]'}`}
                     >
-                      {/* Badge retrógrado */}
-                      {asteroid.retrograde && (
-                        <div className="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg animate-pulse">
-                          ℞
-                        </div>
-                      )}
+                      {/* Tarjeta clickeable para expandir/contraer */}
+                      <div
+                        onClick={(e) => {
+                          if (!isExpanded) {
+                            setExpandedAsteroid(asteroid.name);
+                            // Hacer scroll suave hacia la tarjeta después de expandir
+                            setTimeout(() => {
+                              const element = e.currentTarget.closest(`#asteroid-${asteroid.name.toLowerCase().replace(/\s+/g, '-')}`);
+                              element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                            }, 150);
+                          } else {
+                            setExpandedAsteroid(null);
+                          }
+                        }}
+                        className="p-5 cursor-pointer"
+                      >
+                        {/* Badge retrógrado */}
+                        {asteroid.retrograde && (
+                          <div className="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg animate-pulse z-10">
+                            ℞
+                          </div>
+                        )}
 
                       {/* Encabezado */}
                       <div className="flex items-start gap-3 mb-4">
@@ -1376,15 +1402,113 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                         </div>
                       </div>
 
-                      {/* Mitología y período orbital */}
-                      <div className="pt-3 border-t border-gray-300 dark:border-gray-600 space-y-1">
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
-                          <strong>Mitología:</strong> {data.mythology}
+                        {/* Mitología y período orbital */}
+                        <div className="pt-3 border-t border-gray-300 dark:border-gray-600 space-y-1">
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <strong>Mitología:</strong> {data.mythology}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <strong>Período orbital:</strong> {data.orbitalPeriod}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
-                          <strong>Período orbital:</strong> {data.orbitalPeriod}
+
+                        {/* Botón para ver más información */}
+                        <div className="mt-4 flex justify-center">
+                          <div className="px-4 py-2 bg-white/80 dark:bg-black/40 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            {isExpanded ? '👆 Click para ver menos' : '👇 Click para ver más información'}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Información expandida del glosario */}
+                      {isExpanded && asteroidInfo && (
+                        <div className="border-t-2 border-gray-300 dark:border-gray-600 p-5 space-y-4 bg-white/30 dark:bg-black/20">
+                          {/* Mitología completa */}
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+                              📜 Mitología y Arquetipo
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.mythology}
+                            </p>
+                          </div>
+
+                          {/* Función astrológica */}
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                              ✨ Función Astrológica
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.function}
+                            </p>
+                          </div>
+
+                          {/* Manifestación */}
+                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-green-900 dark:text-green-100 flex items-center gap-2">
+                              🌟 Manifestación
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.manifestation}
+                            </p>
+                          </div>
+
+                          {/* Sombras */}
+                          <div className="bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800/50 dark:to-slate-800/50 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                              🌑 Sombras
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.shadows}
+                            </p>
+                          </div>
+
+                          {/* Relaciones */}
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                              🔗 Relaciones
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.relations}
+                            </p>
+                          </div>
+
+                          {/* Propiedades holísticas */}
+                          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-violet-900 dark:text-violet-100 flex items-center gap-2">
+                              🎨 Propiedades Holísticas
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Color:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{asteroidInfo.color}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Chakra:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{asteroidInfo.chakra}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Piedra:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{asteroidInfo.stone}</p>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300">Frecuencia:</span>
+                              <span className="ml-2 px-2 py-1 bg-violet-200 dark:bg-violet-800 rounded-full text-xs">{asteroidInfo.frequency} Hz</span>
+                            </div>
+                          </div>
+
+                          {/* Ejercicio holístico */}
+                          <div className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-pink-900 dark:text-pink-100 flex items-center gap-2">
+                              🧘 Ejercicio Holístico
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {asteroidInfo.exercise}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -1479,30 +1603,51 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                     interpretation: 'Punto sensible en la carta natal'
                   };
 
+                  const isExpanded = expandedSensitivePoint === point.name;
+                  const celestialInfo = CELESTIAL_BODIES.find(cb => 
+                    cb.name.toLowerCase().includes(point.type.replace('-mean', '').replace('-true', ''))
+                  );
+
                   return (
                     <div
                       key={point.name}
+                      id={`sensitive-point-${point.type}`}
                       className={`
-                        p-6 rounded-2xl
+                        rounded-2xl
                         bg-gradient-to-br ${data.gradient}
                         border-2 ${data.border}
-                        hover:scale-[1.02] hover:shadow-2xl
                         transition-all duration-300
-                        cursor-pointer
                         relative overflow-hidden
+                        ${isExpanded ? 'shadow-2xl' : 'hover:scale-[1.02] hover:shadow-2xl'}
                       `}
                     >
-                      {/* Símbolo decorativo de fondo */}
-                      <div className="absolute top-2 right-2 text-8xl opacity-10">
-                        {data.symbol}
-                      </div>
-
-                      {/* Badge retrógrado */}
-                      {point.retrograde && point.type === 'chiron' && (
-                        <div className="absolute top-4 right-4 px-3 py-1 bg-orange-500 text-white rounded-full text-xs font-bold shadow-lg animate-pulse z-10">
-                          ℞ Retrógrado
+                      {/* Tarjeta clickeable */}
+                      <div
+                        onClick={(e) => {
+                          if (!isExpanded) {
+                            setExpandedSensitivePoint(point.name);
+                            // Hacer scroll suave hacia la tarjeta después de expandir
+                            setTimeout(() => {
+                              const element = e.currentTarget.closest(`#sensitive-point-${point.type}`);
+                              element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                            }, 150);
+                          } else {
+                            setExpandedSensitivePoint(null);
+                          }
+                        }}
+                        className="p-6 cursor-pointer"
+                      >
+                        {/* Símbolo decorativo de fondo */}
+                        <div className="absolute top-2 right-2 text-8xl opacity-10 pointer-events-none">
+                          {data.symbol}
                         </div>
-                      )}
+
+                        {/* Badge retrógrado */}
+                        {point.retrograde && point.type === 'chiron' && (
+                          <div className="absolute top-4 right-4 px-3 py-1 bg-orange-500 text-white rounded-full text-xs font-bold shadow-lg animate-pulse z-10">
+                            ℞ Retrógrado
+                          </div>
+                        )}
 
                       {/* Encabezado */}
                       <div className="relative flex items-start gap-4 mb-4">
@@ -1566,15 +1711,113 @@ Ubicación actual: ${location.countryCode || 'Sin país'} - ${location.region ||
                         </div>
                       </div>
 
-                      {/* Arquetipo e interpretación */}
-                      <div className="relative pt-3 border-t border-gray-300 dark:border-gray-600 space-y-2">
-                        <div className="text-xs text-gray-700 dark:text-gray-300">
-                          <strong className={data.textColor}>Arquetipo:</strong> {data.archetype}
+                        {/* Arquetipo e interpretación */}
+                        <div className="relative pt-3 border-t border-gray-300 dark:border-gray-600 space-y-2">
+                          <div className="text-xs text-gray-700 dark:text-gray-300">
+                            <strong className={data.textColor}>Arquetipo:</strong> {data.archetype}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            {data.interpretation}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {data.interpretation}
+
+                        {/* Botón para ver más información */}
+                        <div className="mt-4 flex justify-center">
+                          <div className="px-4 py-2 bg-white/80 dark:bg-black/40 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            {isExpanded ? '👆 Click para ver menos' : '👇 Click para ver más información'}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Información expandida del glosario */}
+                      {isExpanded && celestialInfo && (
+                        <div className="border-t-2 border-gray-300 dark:border-gray-600 p-6 space-y-4 bg-white/30 dark:bg-black/20">
+                          {/* Mitología */}
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-purple-900 dark:text-purple-100 flex items-center gap-2">
+                              📜 Mitología
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.mythology}
+                            </p>
+                          </div>
+
+                          {/* Significado astrológico */}
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                              ✨ Significado Astrológico
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.astrology}
+                            </p>
+                          </div>
+
+                          {/* Manifestación */}
+                          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-green-900 dark:text-green-100 flex items-center gap-2">
+                              🌟 Manifestación
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.manifestation}
+                            </p>
+                          </div>
+
+                          {/* Sombras */}
+                          <div className="bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800/50 dark:to-slate-800/50 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                              🌑 Sombras
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.shadows}
+                            </p>
+                          </div>
+
+                          {/* Relaciones */}
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                              🔗 Relaciones
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.relations}
+                            </p>
+                          </div>
+
+                          {/* Propiedades holísticas */}
+                          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-violet-900 dark:text-violet-100 flex items-center gap-2">
+                              🎨 Propiedades Holísticas
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Color:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{celestialInfo.color}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Chakra:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{celestialInfo.chakra}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Piedra:</span>
+                                <p className="text-gray-600 dark:text-gray-400">{celestialInfo.stone}</p>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300">Frecuencia:</span>
+                              <span className="ml-2 px-2 py-1 bg-violet-200 dark:bg-violet-800 rounded-full text-xs">{celestialInfo.frequency} Hz</span>
+                            </div>
+                          </div>
+
+                          {/* Ejercicio holístico */}
+                          <div className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 p-4 rounded-lg">
+                            <h5 className="text-sm font-bold mb-2 text-pink-900 dark:text-pink-100 flex items-center gap-2">
+                              🧘 Ejercicio Holístico
+                            </h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {celestialInfo.exercise}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
