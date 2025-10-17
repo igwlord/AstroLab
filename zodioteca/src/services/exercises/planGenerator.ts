@@ -700,6 +700,15 @@ function distributeIntoPhases(
   
   if (uniqueExercises.length < 6) {
     logger.warn(`   ⚠️ Solo ${uniqueExercises.length} ejercicios únicos disponibles (esperado: 6)`);
+    logger.warn(`   🔧 Completando con ejercicios de fallback...`);
+    
+    // Obtener ejercicios de fallback de la base de datos
+    const fallbackExercises = EXERCISE_DATABASE.filter(ex => 
+      !uniqueExercises.some(ue => ue.id === ex.id)
+    ).slice(0, 6 - uniqueExercises.length);
+    
+    uniqueExercises.push(...fallbackExercises);
+    logger.log(`   ✓ Ejercicios totales después de fallback: ${uniqueExercises.length}`);
   }
   
   logger.log(`   🔮 Calculando geometrías sagradas y chakras según carta...`);

@@ -48,35 +48,32 @@ export default function ExerciseCard({
   const completedCount = completedDays.length;
 
   return (
-    <div className="border border-purple-200 dark:border-purple-700 rounded-lg p-3 sm:p-4 bg-white dark:bg-gray-800 hover:shadow-md transition-all">
-      {/* Header del ejercicio */}
+    <div className="border-2 border-purple-200 dark:border-purple-700 rounded-xl p-4 md:p-5 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/10 hover:shadow-lg transition-all">
+      {/* Header del ejercicio - MÁS COMPACTO */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-base sm:text-lg text-purple-900 dark:text-white mb-1">
-            {exercise.title}
-          </h4>
-          
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${categoryColors[exercise.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
+          <div className="flex flex-wrap gap-2 mb-2">
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${categoryColors[exercise.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
               {exercise.category}
             </span>
             
             {exercise.duration && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 flex items-center gap-1">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 flex items-center gap-1 font-medium">
                 <Clock className="w-3 h-3" />
                 {exercise.duration} min/día
               </span>
             )}
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+          <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
             {exercise.description}
           </p>
         </div>
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex-shrink-0 p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+          className="flex-shrink-0 p-2 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          aria-label={isExpanded ? 'Cerrar detalles' : 'Ver detalles'}
         >
           {isExpanded ? (
             <ChevronUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -86,19 +83,19 @@ export default function ExerciseCard({
         </button>
       </div>
 
-      {/* Checkboxes de días - Versión compacta */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-700 dark:text-gray-300 font-medium">
-            Progreso esta semana:
+      {/* Checkboxes de días - Más grandes y claros */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm md:text-base text-gray-700 dark:text-gray-300 font-medium">
+            Marca los días completados:
           </span>
-          <span className="text-purple-600 dark:text-purple-400 font-bold">
+          <span className="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold">
             {completedCount}/7 días
           </span>
         </div>
 
-        {/* Grid de checkboxes */}
-        <div className="flex gap-1.5 sm:gap-2">
+        {/* Grid de checkboxes - MÁS GRANDE */}
+        <div className="grid grid-cols-7 gap-1.5 md:gap-2">
           {[1, 2, 3, 4, 5, 6, 7].map((day) => {
             const isCompleted = completedDays.includes(day);
             return (
@@ -106,14 +103,15 @@ export default function ExerciseCard({
                 key={day}
                 onClick={() => handleDayToggle(day)}
                 className={`
-                  flex-1 aspect-square rounded-lg border-2 transition-all
-                  flex items-center justify-center text-xs sm:text-sm font-bold
+                  aspect-square rounded-lg md:rounded-xl border-2 transition-all
+                  flex items-center justify-center text-sm md:text-base font-bold
                   ${isCompleted
-                    ? 'bg-green-500 border-green-600 text-white shadow-md scale-105'
-                    : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                    ? 'bg-green-500 border-green-600 text-white shadow-lg scale-105'
+                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:scale-105'
                   }
                 `}
-                title={isCompleted ? `Día ${day} completado` : `Marcar día ${day}`}
+                title={isCompleted ? `Día ${day} completado ✓` : `Marcar día ${day} como completado`}
+                aria-label={`Día ${day}`}
               >
                 {isCompleted ? '✓' : day}
               </button>
@@ -121,10 +119,10 @@ export default function ExerciseCard({
           })}
         </div>
 
-        {/* Barra de progreso visual */}
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+        {/* Barra de progreso - Más prominente */}
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 md:h-3 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-700 ease-out"
             style={{ width: `${(completedCount / 7) * 100}%` }}
           />
         </div>

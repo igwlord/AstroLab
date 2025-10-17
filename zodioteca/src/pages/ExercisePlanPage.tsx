@@ -377,7 +377,8 @@ export default function ExercisePlanPage() {
 
         {/* Navegación de Semanas */}
         <div className="mb-4">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          {/* Tabs de semanas - Optimizado para 360px */}
+          <div className="flex gap-1.5 sm:gap-2 md:gap-3 overflow-x-auto pb-2">
             {[1, 2, 3].map((week) => {
               const weekProgress = getWeekProgress(week);
               const unlocked = isWeekUnlocked(week);
@@ -389,32 +390,32 @@ export default function ExercisePlanPage() {
                   onClick={() => unlocked && setSelectedWeek(week)}
                   disabled={!unlocked}
                   className={`
-                    flex-shrink-0 px-4 py-3 rounded-lg border-2 transition-all
+                    flex-shrink-0 px-2 py-1.5 sm:px-3 sm:py-2 md:px-6 md:py-4 rounded-lg md:rounded-xl border-2 transition-all
                     ${isCurrent 
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' 
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md' 
                       : unlocked
                         ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-600'
                         : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 opacity-50 cursor-not-allowed'
                     }
                   `}
                 >
-                  <div className="text-left min-w-[140px]">
-                    <div className={`text-sm font-semibold mb-1 ${isCurrent ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                  <div className="text-left min-w-[90px] sm:min-w-[110px] md:min-w-[160px]">
+                    <div className={`text-[11px] sm:text-xs md:text-base font-semibold mb-0.5 sm:mb-1 ${isCurrent ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}`}>
                       {week === getCurrentWeek() && unlocked ? '🔥 ' : unlocked ? '✓ ' : '🔒 '}
                       Semana {week}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-600 dark:text-gray-400">
                       Días {(week - 1) * 7 + 1}-{week * 7}
                     </div>
                     {unlocked && (
-                      <div className="mt-1">
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                      <div className="mt-0.5 sm:mt-1 md:mt-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 md:h-2">
                           <div 
-                            className={`h-1.5 rounded-full ${isCurrent ? 'bg-purple-500' : 'bg-green-500'}`}
+                            className={`h-1 md:h-2 rounded-full transition-all duration-500 ${isCurrent ? 'bg-purple-500' : 'bg-green-500'}`}
                             style={{ width: `${weekProgress.percent}%` }}
                           />
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-gray-400 mt-0.5 md:mt-1">
                           {weekProgress.completed}/7 días
                         </div>
                       </div>
